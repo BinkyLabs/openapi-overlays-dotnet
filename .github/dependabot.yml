@@ -7,14 +7,6 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - generator
-    groups:
-      kiota-dependencies:
-        patterns:
-          - "*kiota*"
-      OpenTelemetry:
-        patterns:
-          - "OpenTelemetry.*"
-          - "Azure.Monitor.OpenTelemetry.Exporter"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
