@@ -1,0 +1,60 @@
+name: Build, test and publish dotnet
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+permissions:
+  contents: write
+jobs:
+  dotnet-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Check formatting
+        run: dotnet format --verify-no-changes
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Install report generator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      - name: Pack the project
+        run: dotnet pack --configuration Release
+      - name: Generate coverage report
+        run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:./reports/coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: reports/coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: src/bin/Release/*.*nupkg
+  publish-release-to-nuget:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: dotnet-build
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          name: packages
+      - name: Publish to NuGet
+        run: dotnet nuget push src/bin/Release/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+      - name: Publish to GitHub Packages
+        run: dotnet nuget push src/bin/Release/*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
