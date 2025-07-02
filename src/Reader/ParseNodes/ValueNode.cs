@@ -31,12 +31,6 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                 ?? throw new OpenApiReaderException($"Expected a value at {Context.GetLocation()}.");
         }
 
-        public override bool GetBooleanValue()
-        {
-            return _node.GetBooleanValue()
-                ?? throw new OpenApiReaderException($"Expected a value at {Context.GetLocation()}.");
-        }
-
         /// <summary>
         /// Create a <see cref="JsonNode"/>
         /// </summary>

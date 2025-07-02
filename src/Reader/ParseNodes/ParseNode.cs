@@ -82,11 +82,6 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             throw new OpenApiReaderException("Cannot create a scalar value from this type of node.", Context);
         }
 
-        public virtual bool GetBooleanValue()
-        {
-            throw new OpenApiReaderException("Cannot create a boolean value from this type of node.", Context);
-        }
-
         public virtual List<JsonNode> CreateListOfAny()
         {
             throw new OpenApiReaderException("Cannot create a list from this type of node.", Context);

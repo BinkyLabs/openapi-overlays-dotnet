@@ -200,20 +200,6 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             return null;
         }
 
-        public bool? GetBooleanValue(ValueNode key)
-        {
-            var keyValue = key.GetScalarValue();
-            if (keyValue is not null)
-            {
-                var scalarNode = _node[keyValue] is JsonValue jsonValue
-                        ? jsonValue
-                        : throw new OpenApiReaderException($"Expected scalar while parsing {key.GetScalarValue()}", Context);
-
-                return scalarNode?.GetBooleanValue();
-            }
-            return null;
-        }
-
         /// <summary>
         /// Create an <see cref="JsonNodeExtension"/>
         /// </summary>
