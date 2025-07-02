@@ -8,6 +8,8 @@
     <Copyright>BinkyLabs. All rights reserved.</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageIconUrl>https://avatars.githubusercontent.com/u/218837045?s=200</PackageIconUrl>
+    <PackageIcon>logo-binkylabs.png</PackageIcon>
+    <IncludePackageIcon>true</IncludePackageIcon>
     <RepositoryUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</RepositoryUrl>
     <PackageProjectUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</PackageProjectUrl>
     <PackageReleaseNotes>
@@ -26,12 +28,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.OpenApi" Version="2.0.0-preview.29" />
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>
-        README.md
-      </PackagePath>
-    </None>
+    <None Include="..\README.md" Pack="true" PackagePath="README.md" />
+    <None Include="Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png" />
+    <Resource Include="Assets\logo-binkylabs.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
-
 </Project>
