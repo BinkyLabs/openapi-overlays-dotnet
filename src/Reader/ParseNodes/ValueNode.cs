@@ -27,7 +27,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         public override string GetScalarValue()
         {
             var scalarValue = _node.GetValue<object>();
-            return Convert.ToString(scalarValue, CultureInfo.InvariantCulture) 
+            return Convert.ToString(scalarValue, CultureInfo.InvariantCulture)
                 ?? throw new OpenApiReaderException($"Expected a value at {Context.GetLocation()}.");
         }
 
