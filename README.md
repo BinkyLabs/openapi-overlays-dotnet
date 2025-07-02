@@ -13,6 +13,39 @@ The library enables developers to programmatically apply overlays, validate them
 | Library                                                              | NuGet Release                                                                                                                                                                              |
 |----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
+## Examples
+
+### Serializing an Overlay document
+
+The following example illustrates how you can serialize an Overlay document, built by the application or previously parsed, to JSON.
+
+```csharp
+var overlayDocument = new OverlayDocument
+{
+    Info = new OverlayInfo
+    {
+        Title = "Test Overlay",
+        Version = "1.0.0"
+    },
+    Extends = "foo/myDescription.json",
+    Actions = new List<OverlayAction>
+    {
+        new OverlayAction
+        {
+            Target = "$.paths['/bar']",
+            Description = "Updates bar path item",
+            Remove = true
+        }
+    }
+};
+
+using var textWriter = new StringWriter();
+var writer = new OpenApiJsonWriter(textWriter);
+using var textWriter = new StringWriter();
+var writer = new OpenApiJsonWriter(textWriter);
+var jsonResult = textWriter.ToString();
+// or use flush async if the underlying writer is a stream writer to a file or network stream
+```
 
 ## Release notes
 
