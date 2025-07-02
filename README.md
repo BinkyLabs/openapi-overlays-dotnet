@@ -7,13 +7,12 @@ The library enables developers to programmatically apply overlays, validate them
 
 ## Build Status
 
-[![Build, Test, CodeQl](https://github.com/microsoft/kiota-abstractions-dotnet/actions/workflows/build-and-test.yml/badge.svg?branch=main)](https://github.com/microsoft/kiota-abstractions-dotnet/actions/workflows/build-and-test.yml)
 
 ## Libraries
 
 | Library                                                              | NuGet Release                                                                                                                                                                              |
 |----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Abstractions](./src/abstractions/README.md)                         | [![NuGet Version](https://img.shields.io/nuget/vpre/Microsoft.Kiota.Abstractions?label=Latest&logo=nuget)](https://www.nuget.org/packages/Microsoft.Kiota.Abstractions/)                       |
+
 
 ## Release notes
 
@@ -21,7 +20,6 @@ The OpenAPI Overlay Libraries releases notes are available from the [CHANGELOG](
 
 ## Debugging
 
-If you are using Visual Studio Code as your IDE, the **launch.json** file already contains the configuration to build and test the library. Otherwise, you can open the **Microsoft.Kiota.sln** with Visual Studio.
 
 ## Contributing
 
@@ -39,8 +37,3 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 ## Trademarks
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
-trademarks or logos is subject to and must follow
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
