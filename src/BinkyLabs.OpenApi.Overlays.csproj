@@ -4,10 +4,34 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>BinkyLabs</Authors>
+    <Copyright>BinkyLabs. All rights reserved.</Copyright>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/218837045?s=200</PackageIconUrl>
+    <RepositoryUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</PackageProjectUrl>
+    <PackageReleaseNotes>
+      https://github.com/BinkyLabs/openapi-overlays-dotnet/releases
+    </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);NU5048;NU5104;NETSDK1138</NoWarn>
+    <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.OpenApi" Version="2.0.0-preview.29" />
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>
+        README.md
+      </PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
