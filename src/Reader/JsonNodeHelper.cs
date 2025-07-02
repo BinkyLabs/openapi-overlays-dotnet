@@ -18,5 +18,13 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
             return Convert.ToString(scalarNode?.GetValue<object>(), CultureInfo.InvariantCulture);
         }
+
+        public static bool? GetBooleanValue(this JsonNode node)
+        {
+
+            var scalarNode = node is JsonValue value ? value : throw new OpenApiException($"Expected scalar value.");
+
+            return Convert.ToBoolean(scalarNode?.GetValue<bool>());
+        }
     }
 }
