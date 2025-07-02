@@ -1,8 +1,9 @@
 using System.Text.Json.Nodes;
 
-using Microsoft.OpenApi;
-using BinkyLabs.OpenApi.Overlays.Reader.V1;
 using BinkyLabs.OpenApi.Overlays.Reader;
+using BinkyLabs.OpenApi.Overlays.Reader.V1;
+
+using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
@@ -64,6 +65,6 @@ public class OverlayActionTests
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
         Assert.Equal("Test Description", overlayAction.Description);
-        Assert.Equal("True",overlayAction.Remove);
+        Assert.Equal("True", overlayAction.Remove);
     }
 }
