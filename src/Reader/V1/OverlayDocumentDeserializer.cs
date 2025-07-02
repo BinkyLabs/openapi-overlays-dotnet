@@ -7,7 +7,7 @@ internal static partial class OverlayV1Deserializer
         { "overlay", (o, v, _) => o.Overlay = v.GetScalarValue() },
         { "extends", (o, v, _) => o.Extends = v.GetScalarValue() },
         { "info", (o, v, host) => o.Info = LoadInfo(v, host) },
-        { "actions", (o, v, host) => o.Actions = v.CreateList<OverlayAction>(LoadAction, host) }    
+        { "actions", (o, v, host) => o.Actions = v.CreateList<OverlayAction>(LoadAction, host) }
     };
     public static readonly PatternFieldMap<OverlayDocument> DocumentPatternFields = new()
     {
