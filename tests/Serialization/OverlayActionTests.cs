@@ -18,7 +18,7 @@ public class OverlayActionTests
         {
             Target = "Test Target",
             Description = "Test Description",
-            Remove = "true"
+            Remove = true
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -28,7 +28,7 @@ public class OverlayActionTests
 {
     "target": "Test Target",
     "description": "Test Description",
-    "remove": "true"
+    "remove": true
 }
 """;
 
@@ -65,6 +65,6 @@ public class OverlayActionTests
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
         Assert.Equal("Test Description", overlayAction.Description);
-        Assert.Equal("True", overlayAction.Remove);
+        Assert.True(overlayAction.Remove);
     }
 }

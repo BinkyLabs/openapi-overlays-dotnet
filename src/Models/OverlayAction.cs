@@ -23,7 +23,7 @@ public class OverlayAction
     /// A boolean value that indicates that the target object or array MUST be removed from the the map or array it is contained in.
     /// The default value is false.
     /// </summary>
-    public string? Remove { get; set; }
+    public bool? Remove { get; set; }
 
 
     // create serializer method like OverleyInfo.SerializeAsV1
@@ -31,8 +31,8 @@ public class OverlayAction
     {
         writer.WriteStartObject();
         writer.WriteRequiredProperty("target", Target);
-        writer.WriteRequiredProperty("description", Description);
-        writer.WriteRequiredProperty("remove", Remove);
+        writer.WriteProperty("description", Description);
+        writer.WriteProperty("remove", Remove, false);
         writer.WriteEndObject();
     }
 }

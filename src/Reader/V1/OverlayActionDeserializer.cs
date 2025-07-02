@@ -6,7 +6,14 @@ internal static partial class OverlayV1Deserializer
     {
         { "target", (o, v, _) => o.Target = v.GetScalarValue() },
         { "description", (o, v, _) => o.Description = v.GetScalarValue() },
-        { "remove", (o, v, _) => o.Remove = v.GetScalarValue() }
+        { "remove", (o, v, _) =>
+            {
+                if (v.GetScalarValue() is string removeValue && bool.TryParse(removeValue, out var removeBool))
+                {
+                    o.Remove = removeBool;
+                }
+            }
+        }
     };
     public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = new()
     {
