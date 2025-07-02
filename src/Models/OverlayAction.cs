@@ -6,7 +6,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// Represents an Action Object as defined in the OpenAPI Overlay specification v1.0.0.
 /// See: https://spec.openapis.org/overlay/v1.0.0.html#action-object
 /// </summary>
-public class OverlayAction
+public class OverlayAction : IOverlaySerializable, IOpenApiElement
 {
     /// <summary>
     /// REQUIRED. The target of the action (JSON Pointer or similar).
