@@ -16,7 +16,6 @@ public class OverlayDocumentTests
         // Arrange
         var overlayDocument = new OverlayDocument
         {
-            Overlay = "1.0.0",
             Info = new OverlayInfo
             {
                 Title = "Test Overlay",

@@ -4,7 +4,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 
 public class OverlayDocument : IOverlaySerializable
 {
-    public string? Overlay { get; set; }
+    public string? Overlay { get; internal set; } = "1.0.0";
     public OverlayInfo? Info { get; set; }
     public string? Extends { get; set; }
     public IList<OverlayAction>? Actions { get; set; }
