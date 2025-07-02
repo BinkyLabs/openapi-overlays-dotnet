@@ -29,7 +29,7 @@ jobs:
       - name: Pack the project
         run: dotnet pack --configuration Release
       - name: Generate coverage report
-        run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:./reports/coverage
+        run: reportgenerator -reporttypes:MarkdownSummary -reports:**/coverage.cobertura.xml -targetdir:./reports/coverage
       - uses: actions/upload-artifact@v4
         with:
           name: coverage
@@ -38,6 +38,10 @@ jobs:
         with:
           name: packages
           path: src/bin/Release/*.*nupkg
+      - name:  Publish coverage report to GitHub Step Summary
+        run: |
+           cat reports/coverage/Summary.md >>  $GITHUB_STEP_SUMMARY
+  
   publish-release-to-nuget:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
