@@ -7,7 +7,6 @@
     <Authors>BinkyLabs</Authors>
     <Copyright>BinkyLabs. All rights reserved.</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageIconUrl>https://avatars.githubusercontent.com/u/218837045?s=200</PackageIconUrl>
     <PackageIcon>logo-binkylabs.png</PackageIcon>
     <IncludePackageIcon>true</IncludePackageIcon>
     <RepositoryUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</RepositoryUrl>
@@ -23,6 +22,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);NU5048;NU5104;NETSDK1138</NoWarn>
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)','net5.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)','net8.0'))">true</IsAotCompatible>
     <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
@@ -30,8 +31,5 @@
     <PackageReference Include="Microsoft.OpenApi" Version="2.0.0-preview.29" />
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
     <None Include="Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png" />
-    <Resource Include="Assets\logo-binkylabs.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 </Project>
