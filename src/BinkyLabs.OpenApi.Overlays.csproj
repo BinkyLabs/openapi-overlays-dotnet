@@ -24,6 +24,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);NU5048;NU5104;NETSDK1138</NoWarn>
     <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>C:\WS\BinkyLabs\openapi-overlays-dotnet\keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
