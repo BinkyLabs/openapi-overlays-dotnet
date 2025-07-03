@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>C:\WS\BinkyLabs\openapi-overlays-dotnet\keyfile.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
