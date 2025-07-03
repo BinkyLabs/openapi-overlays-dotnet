@@ -63,7 +63,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                     }
                     catch (OverlayReaderException ex)
                     {
-                    //TODO we're loosing the callstack here, it might be worth implementing an implicit converter or a derived class for the error
+                        //TODO we're loosing the callstack here, it might be worth implementing an implicit converter or a derived class for the error
                         Context.Diagnostic.Errors.Add(new(ex.Pointer, ex.Message));
                     }
                     catch (OpenApiException ex)

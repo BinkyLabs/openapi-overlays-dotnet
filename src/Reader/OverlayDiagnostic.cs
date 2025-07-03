@@ -27,4 +27,3 @@ public class OverlayDiagnostic : IDiagnostic
     /// </summary>
     public OverlaySpecVersion SpecificationVersion { get; set; }
 }
-

@@ -26,7 +26,7 @@ public class ParsingContext
     /// <summary>
     /// Extension parsers
     /// </summary>
-    public Dictionary<string, Func<JsonNode, OverlaySpecVersion, IOverlayExtension>>? ExtensionParsers { get; set; } = 
+    public Dictionary<string, Func<JsonNode, OverlaySpecVersion, IOverlayExtension>>? ExtensionParsers { get; set; } =
         new();
 
     internal RootNode? RootNode { get; set; }
