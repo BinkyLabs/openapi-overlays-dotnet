@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
@@ -26,6 +28,11 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     /// </summary>
     public bool? Remove { get; set; }
 
+    /// <summary>
+    /// The update value to be applied to the target.
+    /// </summary>
+    public JsonNode? Update { get; set; }
+
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
@@ -36,6 +43,12 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         writer.WriteRequiredProperty("target", Target);
         writer.WriteProperty("description", Description);
         writer.WriteProperty("remove", Remove, false);
+        
+        if (Update != null)
+        {
+            writer.WriteOptionalObject("update", Update, (w, s) => w.WriteAny(s));
+        }
+        
         writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
     }
