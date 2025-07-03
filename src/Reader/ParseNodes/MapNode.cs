@@ -11,7 +11,6 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader
 {

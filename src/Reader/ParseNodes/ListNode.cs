@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text.Json.Nodes;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader
 {
