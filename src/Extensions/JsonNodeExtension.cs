@@ -4,6 +4,7 @@
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays;
+using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
 

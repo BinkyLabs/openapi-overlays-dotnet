@@ -1,3 +1,5 @@
+using BinkyLabs.OpenApi.Overlays.Writers;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays;
@@ -34,6 +36,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         writer.WriteRequiredProperty("target", Target);
         writer.WriteProperty("description", Description);
         writer.WriteProperty("remove", Remove, false);
+        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
     }
 }

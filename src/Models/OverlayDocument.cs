@@ -1,3 +1,5 @@
+using BinkyLabs.OpenApi.Overlays.Writers;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays;
@@ -25,6 +27,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             writer.WriteRequiredCollection<OverlayAction>("actions", Actions, (w, action) => action.SerializeAsV1(w));
         }
+        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
     }
 }

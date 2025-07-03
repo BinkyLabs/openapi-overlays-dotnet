@@ -32,9 +32,11 @@ public class OverlayDocumentTests
                     Description = "Test Description",
                     Remove = true
                 }
+            },
+            Extensions = new Dictionary<string, IOverlayExtension>
+            {
+                { "x-custom-extension", new JsonNodeExtension(new JsonObject { { "someProperty", "someValue" } }) }
             }
-
-
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -53,7 +55,10 @@ public class OverlayDocumentTests
                     "description": "Test Description",
                     "remove": true
                 }
-            ]
+            ],
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            }
         }
         """;
 
