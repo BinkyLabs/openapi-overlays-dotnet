@@ -90,7 +90,10 @@ public class OverlayDocumentTests
                     "description": "Test Description 2",
                     "remove": false
                 }
-            ]
+            ],
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            }
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -106,6 +109,12 @@ public class OverlayDocumentTests
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.NotNull(overlayDocument.Extensions);
+        Assert.True(overlayDocument.Extensions!.ContainsKey("x-custom-extension"));
+        var extensionNodeValue = Assert.IsType<JsonNodeExtension>(overlayDocument.Extensions["x-custom-extension"]);
+        var extensionValue = extensionNodeValue.Node;
+        var someProperty = Assert.IsType<JsonValue>(extensionValue["someProperty"], exactMatch: false);
+        Assert.Equal("someValue", someProperty.GetValue<string>());
 
         // Assert the 2 action
         Assert.NotNull(overlayDocument.Actions);
