@@ -2,7 +2,7 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays;
 
-public class OverlayDocument : IOverlaySerializable, IOpenApiExtensible
+public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 {
     public string? Overlay { get; internal set; } = "1.0.0";
     public OverlayInfo? Info { get; set; }
@@ -10,7 +10,7 @@ public class OverlayDocument : IOverlaySerializable, IOpenApiExtensible
     public IList<OverlayAction>? Actions { get; set; }
 
     /// <inheritdoc/>
-    public IDictionary<string, IOpenApiExtension>? Extensions { get; set; }
+    public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
     public void SerializeAsV1(IOpenApiWriter writer)
     {

@@ -28,7 +28,7 @@ internal static partial class OverlayV1Deserializer
     {
         return node.CreateAny();
     }
-    private static IOpenApiExtension LoadExtension(string name, ParseNode node)
+    private static IOverlayExtension LoadExtension(string name, ParseNode node)
     {
         if (node.Context.ExtensionParsers is not null && node.Context.ExtensionParsers.TryGetValue(name, out var parser) && parser(
             node.CreateAny(), OverlaySpecVersion.Overlay1_0) is { } result)
