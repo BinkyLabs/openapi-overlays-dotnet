@@ -240,7 +240,7 @@ public class OverlayDocumentTests
         // Assert the 2 actions
         Assert.NotNull(overlayDocument.Actions);
         Assert.Equal(2, overlayDocument.Actions.Count);
-        
+
         // First action with object update
         Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
         Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
@@ -249,7 +249,7 @@ public class OverlayDocumentTests
         var updateObject = updateProperty.AsObject();
         Assert.Equal("Updated summary", updateObject["summary"]?.GetValue<string>());
         Assert.Equal("Updated description", updateObject["description"]?.GetValue<string>());
-        
+
         // Second action with array update
         Assert.Equal("Test Target 2", overlayDocument.Actions[1].Target);
         Assert.Equal("Test Description 2", overlayDocument.Actions[1].Description);

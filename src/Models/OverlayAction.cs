@@ -43,12 +43,12 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         writer.WriteRequiredProperty("target", Target);
         writer.WriteProperty("description", Description);
         writer.WriteProperty("remove", Remove, false);
-        
+
         if (Update != null)
         {
             writer.WriteOptionalObject("update", Update, (w, s) => w.WriteAny(s));
         }
-        
+
         writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
     }

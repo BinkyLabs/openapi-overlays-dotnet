@@ -56,7 +56,7 @@ public class OverlayActionTests
             "operationId": "updateOperation"
         }
         """);
-        
+
         var overlayAction = new OverlayAction
         {
             Target = "Test Target",
@@ -97,7 +97,7 @@ public class OverlayActionTests
         var updateNode = JsonNode.Parse("""
         ["tag1", "tag2", "tag3"]
         """);
-        
+
         var overlayAction = new OverlayAction
         {
             Target = "Test Target",
@@ -179,7 +179,7 @@ public class OverlayActionTests
         Assert.Equal("Test Description", overlayAction.Description);
         Assert.False(overlayAction.Remove);
         Assert.NotNull(overlayAction.Update);
-        
+
         var updateObject = overlayAction.Update.AsObject();
         Assert.Equal("Updated summary", updateObject["summary"]?.GetValue<string>());
         Assert.Equal("Updated description", updateObject["description"]?.GetValue<string>());
@@ -208,7 +208,7 @@ public class OverlayActionTests
         Assert.Equal("Test Target", overlayAction.Target);
         Assert.Equal("Test Description", overlayAction.Description);
         Assert.NotNull(overlayAction.Update);
-        
+
         var updateArray = overlayAction.Update.AsArray();
         Assert.Equal(3, updateArray.Count);
         Assert.Equal("tag1", updateArray[0]?.GetValue<string>());
