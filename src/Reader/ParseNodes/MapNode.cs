@@ -27,7 +27,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         {
             if (node is not JsonObject mapNode)
             {
-                throw new OpenApiReaderException("Expected map.", Context);
+                throw new OverlayReaderException("Expected map.", Context);
             }
 
             _node = mapNode;
@@ -49,7 +49,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override Dictionary<string, T> CreateMap<T>(Func<MapNode, OverlayDocument, T> map, OverlayDocument hostDocument)
         {
-            var jsonMap = _node ?? throw new OpenApiReaderException($"Expected map while parsing {typeof(T).Name}", Context);
+            var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
             var nodes = jsonMap.Select(
                 n =>
                 {
@@ -79,7 +79,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override Dictionary<string, T> CreateSimpleMap<T>(Func<ValueNode, T> map)
         {
-            var jsonMap = _node ?? throw new OpenApiReaderException($"Expected map while parsing {typeof(T).Name}", Context);
+            var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
             var nodes = jsonMap.Select(
                 n =>
                 {
@@ -88,7 +88,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                     {
                         Context.StartObject(key);
                         JsonValue valueNode = n.Value is JsonValue value ? value
-                        : throw new OpenApiReaderException($"Expected scalar while parsing {typeof(T).Name}", Context);
+                        : throw new OverlayReaderException($"Expected scalar while parsing {typeof(T).Name}", Context);
 
                         return (key, value: map(new ValueNode(Context, valueNode)));
                     }
@@ -103,7 +103,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override Dictionary<string, HashSet<T>> CreateArrayMap<T>(Func<ValueNode, OverlayDocument?, T> map, OverlayDocument? openApiDocument)
         {
-            var jsonMap = _node ?? throw new OpenApiReaderException($"Expected map while parsing {typeof(T).Name}", Context);
+            var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
 
             var nodes = jsonMap.Select(n =>
             {
@@ -113,7 +113,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                     Context.StartObject(key);
                     JsonArray arrayNode = n.Value is JsonArray value
                         ? value
-                        : throw new OpenApiReaderException($"Expected array while parsing {typeof(T).Name}", Context);
+                        : throw new OverlayReaderException($"Expected array while parsing {typeof(T).Name}", Context);
 
                     HashSet<T> values = new HashSet<T>(arrayNode.OfType<JsonNode>().Select(item => map(new ValueNode(Context, item), openApiDocument)));
 
@@ -192,7 +192,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             {
                 var scalarNode = _node[keyValue] is JsonValue jsonValue
                         ? jsonValue
-                        : throw new OpenApiReaderException($"Expected scalar while parsing {key.GetScalarValue()}", Context);
+                        : throw new OverlayReaderException($"Expected scalar while parsing {key.GetScalarValue()}", Context);
 
                 return Convert.ToString(scalarNode?.GetValue<object>(), CultureInfo.InvariantCulture);
             }

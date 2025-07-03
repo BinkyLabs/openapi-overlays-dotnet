@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -21,6 +23,10 @@ internal static partial class OverlayV1Deserializer
             propertyNode.ParseField(domainObject, fixedFieldMap, patternFieldMap, doc);
         }
 
+    }
+    public static JsonNode LoadAny(ParseNode node)
+    {
+        return node.CreateAny();
     }
     private static IOpenApiExtension LoadExtension(string name, ParseNode node)
     {

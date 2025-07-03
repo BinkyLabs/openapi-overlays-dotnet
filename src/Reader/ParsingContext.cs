@@ -43,13 +43,13 @@ public class ParsingContext
     /// <summary>
     /// Diagnostic object that returns metadata about the parsing process.
     /// </summary>
-    public OpenApiDiagnostic Diagnostic { get; }
+    public OverlayDiagnostic Diagnostic { get; }
 
     /// <summary>
     /// Create Parsing Context
     /// </summary>
     /// <param name="diagnostic">Provide instance for diagnostic object for collecting and accessing information about the parsing.</param>
-    public ParsingContext(OpenApiDiagnostic diagnostic)
+    public ParsingContext(OverlayDiagnostic diagnostic)
     {
         Diagnostic = diagnostic;
     }

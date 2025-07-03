@@ -1,3 +1,5 @@
+using Microsoft.OpenApi;
+
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 internal static partial class OverlayV1Deserializer
@@ -9,8 +11,7 @@ internal static partial class OverlayV1Deserializer
     };
     public static readonly PatternFieldMap<OverlayInfo> InfoPatternFields = new()
     {
-        //TODO - handle extensions
-        // {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n, _) => o.AddExtension(k,LoadExtension(k, n))}
+        {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n, _) => o.AddExtension(k,LoadExtension(k, n))}
     };
     public static OverlayInfo LoadInfo(ParseNode node, OverlayDocument hostDocument)
     {

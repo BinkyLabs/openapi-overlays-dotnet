@@ -6,6 +6,8 @@ using BinkyLabs.OpenApi.Overlays.Reader.V1;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
 
+using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
+
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
 public class OverlayDocumentTests

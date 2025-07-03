@@ -18,7 +18,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         {
             if (node is not JsonValue scalarNode)
             {
-                throw new OpenApiReaderException($"Expected a value while parsing at {Context.GetLocation()}.");
+                throw new OverlayReaderException($"Expected a value while parsing at {Context.GetLocation()}.");
             }
             _node = scalarNode;
         }
@@ -27,7 +27,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         {
             var scalarValue = _node.GetValue<object>();
             return Convert.ToString(scalarValue, CultureInfo.InvariantCulture)
-                ?? throw new OpenApiReaderException($"Expected a value at {Context.GetLocation()}.");
+                ?? throw new OverlayReaderException($"Expected a value at {Context.GetLocation()}.");
         }
 
         /// <summary>

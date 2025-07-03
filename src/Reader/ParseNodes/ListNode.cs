@@ -25,7 +25,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         {
             if (_nodeList == null)
             {
-                throw new OpenApiReaderException($"Expected list while parsing {typeof(T).Name}");
+                throw new OverlayReaderException($"Expected list while parsing {typeof(T).Name}");
             }
 
             var list = _nodeList
@@ -50,7 +50,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         {
             if (_nodeList == null)
             {
-                throw new OpenApiReaderException($"Expected list while parsing {typeof(T).Name}");
+                throw new OverlayReaderException($"Expected list while parsing {typeof(T).Name}");
             }
 
             return _nodeList.OfType<JsonNode>().Select(n => map(new(Context, n), openApiDocument)).ToList();

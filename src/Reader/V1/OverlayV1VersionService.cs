@@ -19,13 +19,13 @@ internal class OverlayV1VersionService : IOverlayVersionService
     /// Create Parsing Context
     /// </summary>
     /// <param name="diagnostic">Provide instance for diagnostic object for collecting and accessing information about the parsing.</param>
-    public OverlayV1VersionService(OpenApiDiagnostic diagnostic)
+    public OverlayV1VersionService(OverlayDiagnostic diagnostic)
     {
     }
 
     private readonly Dictionary<Type, Func<ParseNode, OverlayDocument, object?>> _loaders = new Dictionary<Type, Func<ParseNode, OverlayDocument, object?>>
     {
-        [typeof(JsonNodeExtension)] = OpenApiV31Deserializer.LoadAny,
+        [typeof(JsonNodeExtension)] = (n, d) => OverlayV1Deserializer.LoadAny(n),
         [typeof(OverlayAction)] = OverlayV1Deserializer.LoadAction,
         [typeof(OverlayDocument)] = OverlayV1Deserializer.LoadDocument,
         [typeof(OverlayInfo)] = OverlayV1Deserializer.LoadInfo,
@@ -33,7 +33,7 @@ internal class OverlayV1VersionService : IOverlayVersionService
 
     public OverlayDocument LoadDocument(RootNode rootNode, Uri location)
     {
-        return OverlayV1Deserializer.LoadDocument(rootNode);
+        return OverlayV1Deserializer.LoadOverlayDocument(rootNode, location);
     }
 
     public T? LoadElement<T>(ParseNode node, OverlayDocument doc) where T : IOpenApiElement
