@@ -6,6 +6,8 @@ using BinkyLabs.OpenApi.Overlays.Reader.V1;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
 
+using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
+
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
 public class OverlayDocumentTests
@@ -30,9 +32,11 @@ public class OverlayDocumentTests
                     Description = "Test Description",
                     Remove = true
                 }
+            },
+            Extensions = new Dictionary<string, IOverlayExtension>
+            {
+                { "x-custom-extension", new JsonNodeExtension(new JsonObject { { "someProperty", "someValue" } }) }
             }
-
-
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -51,7 +55,10 @@ public class OverlayDocumentTests
                     "description": "Test Description",
                     "remove": true
                 }
-            ]
+            ],
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            }
         }
         """;
 
@@ -88,7 +95,10 @@ public class OverlayDocumentTests
                     "description": "Test Description 2",
                     "remove": false
                 }
-            ]
+            ],
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            }
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -104,6 +114,12 @@ public class OverlayDocumentTests
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.NotNull(overlayDocument.Extensions);
+        Assert.True(overlayDocument.Extensions!.ContainsKey("x-custom-extension"));
+        var extensionNodeValue = Assert.IsType<JsonNodeExtension>(overlayDocument.Extensions["x-custom-extension"]);
+        var extensionValue = extensionNodeValue.Node;
+        var someProperty = Assert.IsType<JsonValue>(extensionValue["someProperty"], exactMatch: false);
+        Assert.Equal("someValue", someProperty.GetValue<string>());
 
         // Assert the 2 action
         Assert.NotNull(overlayDocument.Actions);

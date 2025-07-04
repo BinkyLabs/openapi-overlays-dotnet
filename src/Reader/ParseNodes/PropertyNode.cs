@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.Json.Nodes;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader
 {
@@ -37,9 +36,10 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                     Context.StartObject(Name);
                     fixedFieldMap(parentInstance, Value, hostDocument);
                 }
-                catch (OpenApiReaderException ex)
+                catch (OverlayReaderException ex)
                 {
-                    Context.Diagnostic.Errors.Add(new(ex));
+                    //TODO we're loosing the callstack here, it might be worth implementing an implicit converter or a derived class for the error
+                    Context.Diagnostic.Errors.Add(new(ex.Pointer, ex.Message));
                 }
                 catch (OpenApiException ex)
                 {
@@ -61,9 +61,10 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                         Context.StartObject(Name);
                         map(parentInstance, Name, Value, hostDocument);
                     }
-                    catch (OpenApiReaderException ex)
+                    catch (OverlayReaderException ex)
                     {
-                        Context.Diagnostic.Errors.Add(new(ex));
+                        //TODO we're loosing the callstack here, it might be worth implementing an implicit converter or a derived class for the error
+                        Context.Diagnostic.Errors.Add(new(ex.Pointer, ex.Message));
                     }
                     catch (OpenApiException ex)
                     {

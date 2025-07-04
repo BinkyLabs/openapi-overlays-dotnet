@@ -1,3 +1,4 @@
+using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
 
@@ -6,7 +7,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// Represents an Action Object as defined in the OpenAPI Overlay specification v1.0.0.
 /// See: https://spec.openapis.org/overlay/v1.0.0.html#action-object
 /// </summary>
-public class OverlayAction : IOverlaySerializable, IOpenApiElement
+public class OverlayAction : IOverlaySerializable, IOverlayExtensible
 {
     /// <summary>
     /// REQUIRED. The target of the action (JSON Pointer or similar).
@@ -25,6 +26,8 @@ public class OverlayAction : IOverlaySerializable, IOpenApiElement
     /// </summary>
     public bool? Remove { get; set; }
 
+    /// <inheritdoc/>
+    public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
     // create serializer method like OverleyInfo.SerializeAsV1
     public void SerializeAsV1(IOpenApiWriter writer)
@@ -33,6 +36,7 @@ public class OverlayAction : IOverlaySerializable, IOpenApiElement
         writer.WriteRequiredProperty("target", Target);
         writer.WriteProperty("description", Description);
         writer.WriteProperty("remove", Remove, false);
+        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
     }
 }
