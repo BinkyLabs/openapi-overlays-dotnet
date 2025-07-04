@@ -1,0 +1,89 @@
+#nullable enable
+BinkyLabs.OpenApi.Overlays.IOverlayExtensible
+BinkyLabs.OpenApi.Overlays.IOverlayExtensible.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.IOverlayExtensible.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.IOverlayExtension
+BinkyLabs.OpenApi.Overlays.IOverlayExtension.Write(Microsoft.OpenApi.IOpenApiWriter! writer, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
+BinkyLabs.OpenApi.Overlays.IOverlaySerializable
+BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.JsonNodeExtension
+BinkyLabs.OpenApi.Overlays.JsonNodeExtension.JsonNodeExtension(System.Text.Json.Nodes.JsonNode! jsonNode) -> void
+BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Node.get -> System.Text.Json.Nodes.JsonNode!
+BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Write(Microsoft.OpenApi.IOpenApiWriter! writer, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction
+BinkyLabs.OpenApi.Overlays.OverlayAction.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Description.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.OverlayAction() -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.get -> bool?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.Target.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Target.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayConstants
+BinkyLabs.OpenApi.Overlays.OverlayDocument
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayAction!>?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Extends.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Extends.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Info.get -> BinkyLabs.OpenApi.Overlays.OverlayInfo?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Info.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Overlay.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.OverlayDocument() -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayException
+BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException() -> void
+BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException(string! message) -> void
+BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException(string! message, System.Exception? innerException) -> void
+BinkyLabs.OpenApi.Overlays.OverlayException.Pointer.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayException.Pointer.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayExtensibleExtensions
+BinkyLabs.OpenApi.Overlays.OverlayInfo
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.OverlayInfo() -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReaderException
+BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException() -> void
+BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message, BinkyLabs.OpenApi.Overlays.Reader.ParsingContext! context) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message, System.Exception! innerException) -> void
+BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_0 = 1 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.get -> System.Collections.Generic.IList<Microsoft.OpenApi.OpenApiError!>!
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.set -> void
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.OverlayDiagnostic() -> void
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.SpecificationVersion.get -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.SpecificationVersion.set -> void
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Warnings.get -> System.Collections.Generic.IList<Microsoft.OpenApi.OpenApiError!>!
+BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Warnings.set -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.BaseUrl.get -> System.Uri?
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.BaseUrl.set -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.DefaultContentType.get -> System.Collections.Generic.List<string!>?
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.DefaultContentType.set -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.Diagnostic.get -> BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic!
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.EndObject() -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ExtensionParsers.get -> System.Collections.Generic.Dictionary<string!, System.Func<System.Text.Json.Nodes.JsonNode!, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>!>?
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ExtensionParsers.set -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.GetFromTempStorage<T>(string! key, object? scope = null) -> T?
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.GetLocation() -> string!
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.Parse(System.Text.Json.Nodes.JsonNode! jsonNode, System.Uri! location) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ParseFragment<T>(System.Text.Json.Nodes.JsonNode! jsonNode, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion version, BinkyLabs.OpenApi.Overlays.OverlayDocument! overlayDocument) -> T?
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ParsingContext(BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic! diagnostic) -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.PopLoop(string! loopid) -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.PushLoop(string! loopId, string! key) -> bool
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.SetTempStorage(string! key, object? value, object? scope = null) -> void
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.StartObject(string! objectName) -> void
+BinkyLabs.OpenApi.Overlays.Writers.OpenApiWriterAnyExtensions
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ExtensionFieldNamePrefix = "x-" -> string!
+static BinkyLabs.OpenApi.Overlays.OverlayExtensibleExtensions.AddExtension<T>(this T element, string! name, BinkyLabs.OpenApi.Overlays.IOverlayExtension! any) -> void
+static BinkyLabs.OpenApi.Overlays.Writers.OpenApiWriterAnyExtensions.WriteOverlayExtensions(this Microsoft.OpenApi.IOpenApiWriter! writer, System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>? extensions, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
