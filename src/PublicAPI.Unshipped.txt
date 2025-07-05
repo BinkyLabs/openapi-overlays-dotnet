@@ -21,6 +21,8 @@ BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Update.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayConstants
 BinkyLabs.OpenApi.Overlays.OverlayDocument
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayAction!>?
