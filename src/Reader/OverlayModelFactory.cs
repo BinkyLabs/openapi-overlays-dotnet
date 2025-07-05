@@ -20,24 +20,57 @@ public static class OverlayModelFactory
     /// <param name="settings"> The OpenApi reader settings.</param>
     /// <param name="format">The OpenAPI format.</param>
     /// <returns>An OpenAPI document instance.</returns>
-    public static ReadResult Load(MemoryStream stream,
-                                  string? format = null,
-                                  OverlayReaderSettings? settings = null)
+    public static ReadResult Load(MemoryStream stream, string? format, OverlayReaderSettings? settings)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
-        settings ??= new OverlayReaderSettings();
-
-        // Get the format of the stream if not provided
         format ??= InspectStreamFormat(stream);
+        settings ??= DefaultReaderSettings.Value;
+
         var result = InternalLoad(stream, format, settings);
 
         if (!settings.OpenApiSettings.LeaveStreamOpen)
-        {
             stream.Dispose();
-        }
 
         return result;
+    }
+
+    /// <summary>
+    /// Reads the stream input and parses the fragment of an OpenAPI description into an Open API Element.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="url">The path to the OpenAPI file</param>
+    /// <param name="version">Version of the OpenAPI specification that the fragment conforms to.</param>
+    /// <param name="settings">The OpenApiReader settings.</param>
+    /// <param name="openApiDocument">The OpenApiDocument object to which the fragment belongs, used to lookup references.</param>
+    /// <param name="token"></param>
+    /// <returns>Instance of newly created IOpenApiElement.</returns>
+    /// <returns>The OpenAPI element.</returns>
+    public static async Task<T?> LoadAsync<T>(string url,
+                                              OpenApiSpecVersion version,
+                                              OpenApiDocument openApiDocument,
+                                              OverlayReaderSettings? settings,
+                                              CancellationToken token = default) where T : IOpenApiElement
+    {
+        settings ??= DefaultReaderSettings.Value;
+        var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
+        return await LoadAsync<T>(stream, version, openApiDocument, format, settings, token);
+    }
+
+    /// <summary>
+    /// Loads the input URL and parses it into an Open API document.
+    /// </summary>
+    /// <param name="url">The path to the OpenAPI file</param>
+    /// <param name="settings"> The OpenApi reader settings.</param>
+    /// <param name="token">The cancellation token</param>
+    /// <returns></returns>
+    public static async Task<ReadResult> LoadAsync(string url,
+                                                   OverlayReaderSettings? settings,
+                                                   CancellationToken token = default)
+    {
+        settings ??= DefaultReaderSettings.Value;
+        var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
+        return await LoadAsync(stream, format, settings, token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -52,43 +85,16 @@ public static class OverlayModelFactory
     /// <param name="settings">The OpenApiReader settings.</param>
     /// <returns>Instance of newly created IOpenApiElement.</returns>
     /// <returns>The OpenAPI element.</returns>
-    public static T? Load<T>(MemoryStream input, OpenApiSpecVersion version, string? format, OpenApiDocument openApiDocument, out OpenApiDiagnostic diagnostic, OverlayReaderSettings? settings = null) where T : IOpenApiElement
+    public static T? Load<T>(MemoryStream input,
+                             OpenApiSpecVersion version,
+                             string? format,
+                             OpenApiDocument openApiDocument,
+                             out OpenApiDiagnostic diagnostic,
+                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
     {
         format ??= InspectStreamFormat(input);
         settings ??= DefaultReaderSettings.Value;
         return settings.GetReader(format).ReadFragment<T>(input, version, openApiDocument, out diagnostic, settings.OpenApiSettings);
-    }
-
-    /// <summary>
-    /// Loads the input URL and parses it into an Open API document.
-    /// </summary>
-    /// <param name="url">The path to the OpenAPI file</param>
-    /// <param name="settings"> The OpenApi reader settings.</param>
-    /// <param name="token">The cancellation token</param>
-    /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(string url, OverlayReaderSettings? settings = null, CancellationToken token = default)
-    {
-        settings ??= DefaultReaderSettings.Value;
-        var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
-        return await LoadAsync(stream, format, settings, token).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Reads the stream input and parses the fragment of an OpenAPI description into an Open API Element.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="url">The path to the OpenAPI file</param>
-    /// <param name="version">Version of the OpenAPI specification that the fragment conforms to.</param>
-    /// <param name="settings">The OpenApiReader settings.</param>
-    /// <param name="openApiDocument">The OpenApiDocument object to which the fragment belongs, used to lookup references.</param>
-    /// <param name="token"></param>
-    /// <returns>Instance of newly created IOpenApiElement.</returns>
-    /// <returns>The OpenAPI element.</returns>
-    public static async Task<T?> LoadAsync<T>(string url, OpenApiSpecVersion version, OpenApiDocument openApiDocument, OverlayReaderSettings? settings = null, CancellationToken token = default) where T : IOpenApiElement
-    {
-        settings ??= DefaultReaderSettings.Value;
-        var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
-        return await LoadAsync<T>(stream, version, openApiDocument, format, settings, token);
     }
 
     /// <summary>
@@ -99,7 +105,7 @@ public static class OverlayModelFactory
     /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <param name="format">The Open API format</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(Stream input, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    public static async Task<ReadResult> LoadAsync(Stream input, string? format, OverlayReaderSettings? settings, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
 
@@ -123,6 +129,7 @@ public static class OverlayModelFactory
         return result;
     }
 
+
     /// <summary>
     /// Reads the stream input and ensures it is buffered before passing it to the Load method.
     /// </summary>
@@ -137,8 +144,8 @@ public static class OverlayModelFactory
     public static async Task<T?> LoadAsync<T>(Stream input,
                                              OpenApiSpecVersion version,
                                              OpenApiDocument openApiDocument,
-                                             string? format = null,
-                                             OverlayReaderSettings? settings = null,
+                                             string? format,
+                                             OverlayReaderSettings? settings,
                                              CancellationToken token = default) where T : IOpenApiElement
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -165,8 +172,8 @@ public static class OverlayModelFactory
     /// <param name="settings">The OpenApi reader settings.</param>
     /// <returns>An OpenAPI document instance.</returns>
     public static ReadResult Parse(string input,
-                                   string? format = null,
-                                   OverlayReaderSettings? settings = null)
+                                   string? format,
+                                   OverlayReaderSettings? settings)
     {
         ArgumentException.ThrowIfNullOrEmpty(input);
 
@@ -193,8 +200,8 @@ public static class OverlayModelFactory
                              OpenApiSpecVersion version,
                              OpenApiDocument openApiDocument,
                              out OpenApiDiagnostic diagnostic,
-                             string? format = null,
-                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
+                             string? format,
+                             OverlayReaderSettings? settings) where T : IOpenApiElement
     {
         ArgumentException.ThrowIfNullOrEmpty(input);
 
