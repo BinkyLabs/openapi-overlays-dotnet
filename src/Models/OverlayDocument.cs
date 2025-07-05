@@ -1,3 +1,4 @@
+using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
@@ -63,9 +64,9 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns></returns>
     public static ReadResult Load(MemoryStream stream,
                                   string? format = null,
-                                  OpenApiReaderSettings? settings = null)
+                                  OverlayReaderSettings? settings = null)
     {
-        return OpenApiModelFactory.Load(stream, format, settings);
+        return OverlayModelFactory.Load(stream, format, settings);
     }
 
     /// <summary>
@@ -75,9 +76,9 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="settings">The OpenApi reader settings.</param>
     /// <param name="token">The cancellation token</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(string url, OpenApiReaderSettings? settings = null, CancellationToken token = default)
+    public static async Task<ReadResult> LoadAsync(string url, OverlayReaderSettings? settings = null, CancellationToken token = default)
     {
-        return await OpenApiModelFactory.LoadAsync(url, settings, token).ConfigureAwait(false);
+        return await OverlayModelFactory.LoadAsync(url, settings, token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -88,9 +89,9 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="settings">The OpenApi reader settings.</param>
     /// <param name="cancellationToken">Propagates information about operation cancelling.</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(Stream stream, string? format = null, OpenApiReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    public static async Task<ReadResult> LoadAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
     {
-        return await OpenApiModelFactory.LoadAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
+        return await OverlayModelFactory.LoadAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
     }
 
 
@@ -103,8 +104,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns></returns>
     public static ReadResult Parse(string input,
                                    string? format = null,
-                                   OpenApiReaderSettings? settings = null)
+                                   OverlayReaderSettings? settings = null)
     {
-        return OpenApiModelFactory.Parse(input, format, settings);
+        return OverlayModelFactory.Parse(input, format, settings);
     }
 }
