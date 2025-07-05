@@ -20,7 +20,7 @@ public static class OverlayModelFactory
     /// <param name="settings"> The OpenApi reader settings.</param>
     /// <param name="format">The OpenAPI format.</param>
     /// <returns>An OpenAPI document instance.</returns>
-    public static ReadResult Load(MemoryStream stream, string? format, OverlayReaderSettings? settings)
+    public static ReadResult Load(MemoryStream stream, string? format = null, OverlayReaderSettings? settings = null)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
@@ -49,7 +49,7 @@ public static class OverlayModelFactory
     public static async Task<T?> LoadAsync<T>(string url,
                                               OpenApiSpecVersion version,
                                               OpenApiDocument openApiDocument,
-                                              OverlayReaderSettings? settings,
+                                              OverlayReaderSettings? settings = null,
                                               CancellationToken token = default) where T : IOpenApiElement
     {
         settings ??= DefaultReaderSettings.Value;
@@ -65,7 +65,7 @@ public static class OverlayModelFactory
     /// <param name="token">The cancellation token</param>
     /// <returns></returns>
     public static async Task<ReadResult> LoadAsync(string url,
-                                                   OverlayReaderSettings? settings,
+                                                   OverlayReaderSettings? settings = null,
                                                    CancellationToken token = default)
     {
         settings ??= DefaultReaderSettings.Value;
@@ -105,7 +105,7 @@ public static class OverlayModelFactory
     /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <param name="format">The Open API format</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(Stream input, string? format, OverlayReaderSettings? settings, CancellationToken cancellationToken = default)
+    public static async Task<ReadResult> LoadAsync(Stream input, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
 
@@ -144,8 +144,8 @@ public static class OverlayModelFactory
     public static async Task<T?> LoadAsync<T>(Stream input,
                                              OpenApiSpecVersion version,
                                              OpenApiDocument openApiDocument,
-                                             string? format,
-                                             OverlayReaderSettings? settings,
+                                             string? format = null,
+                                             OverlayReaderSettings? settings = null,
                                              CancellationToken token = default) where T : IOpenApiElement
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -172,8 +172,8 @@ public static class OverlayModelFactory
     /// <param name="settings">The OpenApi reader settings.</param>
     /// <returns>An OpenAPI document instance.</returns>
     public static ReadResult Parse(string input,
-                                   string? format,
-                                   OverlayReaderSettings? settings)
+                                   string? format = null,
+                                   OverlayReaderSettings? settings = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(input);
 
@@ -200,8 +200,8 @@ public static class OverlayModelFactory
                              OpenApiSpecVersion version,
                              OpenApiDocument openApiDocument,
                              out OpenApiDiagnostic diagnostic,
-                             string? format,
-                             OverlayReaderSettings? settings) where T : IOpenApiElement
+                             string? format = null,
+                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
     {
         ArgumentException.ThrowIfNullOrEmpty(input);
 
@@ -321,7 +321,7 @@ public static class OverlayModelFactory
         };
     }
 
-    private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, string? format, CancellationToken token = default)
+    private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, string? format = null, CancellationToken token = default)
     {
         Stream preparedStream = input;
 

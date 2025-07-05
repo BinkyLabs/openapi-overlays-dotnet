@@ -1,6 +1,7 @@
 using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays;
 
@@ -51,5 +52,59 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
+    }
+
+    /// <summary>
+    /// Reads the stream input and parses it into an Open API document.
+    /// </summary>
+    /// <param name="stream">Stream containing OpenAPI description to parse.</param>
+    /// <param name="format">The OpenAPI format to use during parsing.</param>
+    /// <param name="settings">The OpenApi reader settings.</param>
+    /// <returns></returns>
+    public static ReadResult Load(MemoryStream stream,
+                                  string? format = null,
+                                  OpenApiReaderSettings? settings = null)
+    {
+        return OpenApiModelFactory.Load(stream, format, settings);
+    }
+
+    /// <summary>
+    /// Parses a local file path or Url into an Open API document.
+    /// </summary>
+    /// <param name="url"> The path to the OpenAPI file.</param>
+    /// <param name="settings">The OpenApi reader settings.</param>
+    /// <param name="token">The cancellation token</param>
+    /// <returns></returns>
+    public static async Task<ReadResult> LoadAsync(string url, OpenApiReaderSettings? settings = null, CancellationToken token = default)
+    {
+        return await OpenApiModelFactory.LoadAsync(url, settings, token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Reads the stream input and parses it into an Open API document.
+    /// </summary>
+    /// <param name="stream">Stream containing OpenAPI description to parse.</param>
+    /// <param name="format">The OpenAPI format to use during parsing.</param>
+    /// <param name="settings">The OpenApi reader settings.</param>
+    /// <param name="cancellationToken">Propagates information about operation cancelling.</param>
+    /// <returns></returns>
+    public static async Task<ReadResult> LoadAsync(Stream stream, string? format = null, OpenApiReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    {
+        return await OpenApiModelFactory.LoadAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
+    }
+
+
+    /// <summary>
+    /// Parses a string into a <see cref="OpenApiDocument"/> object.
+    /// </summary>
+    /// <param name="input"> The string input.</param>
+    /// <param name="format"></param>
+    /// <param name="settings"></param>
+    /// <returns></returns>
+    public static ReadResult Parse(string input,
+                                   string? format = null,
+                                   OpenApiReaderSettings? settings = null)
+    {
+        return OpenApiModelFactory.Parse(input, format, settings);
     }
 }

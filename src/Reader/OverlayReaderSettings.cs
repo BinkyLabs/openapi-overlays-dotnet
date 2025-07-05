@@ -39,6 +39,21 @@ public class OverlayReaderSettings
         }
     }
 
+    /// <summary>
+    /// Readers to use to parse the OpenAPI document
+    /// </summary>
+    public Dictionary<string, IOpenApiReader> Readers
+    {
+        get => _readers;
+        init
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _readers = value.Comparer is StringComparer stringComparer && stringComparer == StringComparer.OrdinalIgnoreCase ?
+                value :
+                new Dictionary<string, IOpenApiReader>(value, StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
     /// <summary>  
     /// Gets or sets the settings for the OpenAPI reader.  
     /// </summary>  
@@ -56,17 +71,25 @@ public class OverlayReaderSettings
     }
 
     /// <summary>
-    /// Readers to use to parse the OpenAPI document
+    /// Adds a reader for the specified format
     /// </summary>
-    public Dictionary<string, IOpenApiReader> Readers
+    public void AddJsonReader()
     {
-        get => _readers;
-        init
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            _readers = value.Comparer is StringComparer stringComparer && stringComparer == StringComparer.OrdinalIgnoreCase ?
-                value :
-                new Dictionary<string, IOpenApiReader>(value, StringComparer.OrdinalIgnoreCase);
-        }
+        TryAddReader(OpenApiConstants.Json, new OpenApiJsonReader());
+    }
+
+    /// <summary>
+    /// Adds a reader for the specified format.
+    /// This method is a no-op if the reader already exists.
+    /// This method is equivalent to TryAdd, is provided for compatibility reasons and TryAdd should be used instead when available.
+    /// </summary>
+    /// <param name="format">Format to add a reader for</param>
+    /// <param name="reader">Reader to add</param>
+    /// <returns>True if the reader was added, false if it already existed</returns>
+    public bool TryAddReader(string format, IOpenApiReader reader)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(format);
+        ArgumentNullException.ThrowIfNull(reader);
+        return Readers.TryAdd(format, reader);
     }
 }
