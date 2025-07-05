@@ -1,5 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT license.
+﻿// Licensed under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -19,10 +18,24 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             Value = Create(context, node);
         }
 
+        /// <summary>
+        /// Gets or sets the property name.
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the value of the property node.
+        /// </summary>
         public ParseNode Value { get; set; }
 
+        /// <summary>
+        /// Parses the field and applies the appropriate mapping or error handling.
+        /// </summary>
+        /// <typeparam name="T">The type of the parent instance.</typeparam>
+        /// <param name="parentInstance">The parent instance.</param>
+        /// <param name="fixedFields">Dictionary of fixed field mappings.</param>
+        /// <param name="patternFields">Dictionary of pattern field mappings.</param>
+        /// <param name="hostDocument">The overlay document.</param>
         public void ParseField<T>(
             T parentInstance,
             Dictionary<string, Action<T, ParseNode, OverlayDocument>> fixedFields,
@@ -91,6 +104,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             }
         }
 
+        /// <inheritdoc/>
         public override JsonNode CreateAny()
         {
             throw new NotImplementedException();

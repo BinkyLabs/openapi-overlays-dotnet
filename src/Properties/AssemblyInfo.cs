@@ -1,5 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly:
-    InternalsVisibleTo(
-        "BinkyLabs.OpenApi.Overlays.Tests")]
+[assembly: InternalsVisibleTo("BinkyLabs.OpenApi.Overlays.Tests, PublicKey = 002400000480000094000000060200000024000052534131000400000100010015369a51dd72c545f34b7c81e20ebc77ae73efe6a4b795df2b7d646c93aefc11bc1ae59bd6b5aca1691c29de1e13c310ff601681b1279614bcda259a663422fe634f371d9dde7d3691993505da8d0ef2eea506f875fa8fbd6e36fb68e62f7799c0f5705bfe9d3968f13fdbf3f8d6a39a1d8a1f2d7acdf424bfb82285408dddb4")]

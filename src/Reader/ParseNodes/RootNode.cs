@@ -1,5 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT license.
+﻿// Licensed under the MIT license.
 
 using System.Text.Json.Nodes;
 
@@ -22,6 +21,11 @@ internal class RootNode : ParseNode
         _jsonNode = jsonNode;
     }
 
+    /// <summary>
+    /// Finds a node in the JSON document by reference pointer.
+    /// </summary>
+    /// <param name="referencePointer">The JSON pointer to search for.</param>
+    /// <returns>The found <see cref="ParseNode"/> or null.</returns>
     public ParseNode? Find(JsonPointer referencePointer)
     {
         if (referencePointer.Find(_jsonNode) is not JsonNode jsonNode)
@@ -32,6 +36,10 @@ internal class RootNode : ParseNode
         return Create(Context, jsonNode);
     }
 
+    /// <summary>
+    /// Gets the root map node.
+    /// </summary>
+    /// <returns>The <see cref="MapNode"/> representing the root object.</returns>
     public MapNode GetMap()
     {
         return new MapNode(Context, _jsonNode);

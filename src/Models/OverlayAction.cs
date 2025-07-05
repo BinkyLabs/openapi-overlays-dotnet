@@ -36,7 +36,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
-    // create serializer method like OverleyInfo.SerializeAsV1
+    /// <summary>
+    /// Serializes the action object as an OpenAPI Overlay v1.0.0 JSON object.
+    /// </summary>
+    /// <param name="writer">The OpenAPI writer to use for serialization.</param>
     public void SerializeAsV1(IOpenApiWriter writer)
     {
         writer.WriteStartObject();

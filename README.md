@@ -13,6 +13,14 @@ The library enables developers to programmatically apply overlays, validate them
 | Library                                                              | NuGet Release                                                                                                                                                                              |
 |----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
+## Installing
+
+You can install this library via the package explorer or using the following command.
+
+```bash
+dotnet add <pathToCsProj> package BinkyLabs.OpenApi.Overlays
+```
+
 ## Examples
 
 ### Serializing an Overlay document
