@@ -260,4 +260,71 @@ public class OverlayDocumentTests
         Assert.Equal("tag1", updateArray[0]?.GetValue<string>());
         Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
     }
+    [Fact]
+    public void ApplyToDocument_ShouldFailNoNode()
+    {
+        var overlayDocument = new OverlayDocument
+        {
+            Actions = new List<OverlayAction>
+            {
+                new OverlayAction
+                {
+                    Target = "Test Target",
+                    Description = "Test Description",
+                    Remove = true
+                }
+            }
+        };
+        JsonNode? jsonNode = null;
+        var overlayDiagnostic = new OverlayDiagnostic();
+        Assert.Throws<ArgumentNullException>(() => overlayDocument.ApplyToDocument(jsonNode!, overlayDiagnostic));
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldFailNoDiagnostic()
+    {
+        var overlayDocument = new OverlayDocument
+        {
+            Actions = new List<OverlayAction>
+            {
+                new OverlayAction
+                {
+                    Target = "Test Target",
+                    Description = "Test Description",
+                    Remove = true
+                }
+            }
+        };
+        var jsonNode = new JsonObject();
+        OverlayDiagnostic? overlayDiagnostic = null;
+        Assert.Throws<ArgumentNullException>(() => overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic!));
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldApplyTheActions()
+    {
+        var overlayDocument = new OverlayDocument
+        {
+            Actions = new List<OverlayAction>
+            {
+                new OverlayAction
+                {
+                    Target = "$.info.title",
+                    Description = "Test Description",
+                    Remove = true
+                }
+            }
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+        Assert.True(result, "ApplyToDocument should return true when actions are applied successfully.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Null(jsonNode["info"]?["title"]);
+    }
 }

@@ -1,3 +1,6 @@
+using System.Text.Json.Nodes;
+
+using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
@@ -51,5 +54,25 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
+    }
+
+    internal bool ApplyToDocument(JsonNode jsonNode, OverlayDiagnostic overlayDiagnostic)
+    {
+        ArgumentNullException.ThrowIfNull(jsonNode);
+        ArgumentNullException.ThrowIfNull(overlayDiagnostic);
+        if (Actions is not { Count: > 0 })
+        {
+            return true; // No actions to apply, nothing to do
+        }
+        var i = 0;
+        foreach (var action in Actions)
+        {
+            if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i))
+            {
+                return false; // If any action fails, the entire application fails
+            }
+            i++;
+        }
+        return true;
     }
 }

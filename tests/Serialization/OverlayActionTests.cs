@@ -240,4 +240,153 @@ public class OverlayActionTests
         Assert.NotNull(overlayAction.Update);
         Assert.Equal("simple string value", overlayAction.Update.GetValue<string>());
     }
+    [Fact]
+    public void ApplyToDocument_ShouldFailNoNullJsonNode()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "Test Target",
+            Remove = true
+        };
+        JsonNode? jsonNode = null;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        Assert.Throws<ArgumentNullException>(() => overlayAction.ApplyToDocument(jsonNode!, overlayDiagnostic, 0));
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldFailNoDiagnostics()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "Test Target",
+            Remove = true
+        };
+        var jsonNode = JsonNode.Parse("{}")!;
+        OverlayDiagnostic? overlayDiagnostic = null;
+
+        Assert.Throws<ArgumentNullException>(() => overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic!, 0));
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldFailNoTarget()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Remove = true
+        };
+        var jsonNode = JsonNode.Parse("{}")!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.False(result);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("Target is required", overlayDiagnostic.Errors[0].Message);
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldFailNoRemoveOrUpdate()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "Test Target"
+        };
+        var jsonNode = JsonNode.Parse("{}")!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.False(result);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("Either 'remove' or 'update' must be specified", overlayDiagnostic.Errors[0].Message);
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldFailBothRemoveAndUpdate()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "Test Target",
+            Remove = true,
+            Update = JsonNode.Parse("{}")
+        };
+        var jsonNode = JsonNode.Parse("{}")!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.False(result);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("'remove' and 'update' cannot be used together", overlayDiagnostic.Errors[0].Message);
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldFailInvalidJsonPath()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "Test Target",
+            Remove = true
+        };
+        var jsonNode = JsonNode.Parse("{}")!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.False(result);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("Invalid JSON Path: 'Test Target'", overlayDiagnostic.Errors[0].Message);
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldRemoveANode()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.info.title",
+            Remove = true
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.True(result);
+        Assert.Null(jsonNode["info"]?["title"]);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+    [Fact]
+    public void ApplyToDocument_ShouldUpdateANode()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.info",
+            Update = JsonNode.Parse("""
+            {
+                "title": "Updated API"
+            }
+            """)
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.True(result);
+        Assert.Equal("Updated API", jsonNode["info"]?["title"]?.GetValue<string>());
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
 }
