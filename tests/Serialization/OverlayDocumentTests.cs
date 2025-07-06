@@ -327,4 +327,65 @@ public class OverlayDocumentTests
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Null(jsonNode["info"]?["title"]);
     }
+    [Fact]
+    public async Task ShouldApplyTheOverlayToAnOpenApiDocument()
+    {
+        var yamlDocument =
+"""
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+  randomProperty: randomValue
+paths:
+  /test:
+    get:
+      summary: Test endpoint
+      responses:
+        '200':
+          description: OK
+""";
+        var documentStream = new MemoryStream();
+        using var writer = new StreamWriter(documentStream, leaveOpen: true);
+        await writer.WriteAsync(yamlDocument);
+        await writer.FlushAsync();
+        documentStream.Seek(0, SeekOrigin.Begin);
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Actions = new List<OverlayAction>
+            {
+                new OverlayAction
+                {
+                    Target = "$.info.randomProperty",
+                    Description = "Remove randomProperty",
+                    Remove = true
+                },
+                new OverlayAction
+                {
+                    Target = "$.paths['/test'].get",
+                    Description = "Update summary",
+                    Update = new JsonObject
+                    {
+                        ["summary"] = "Updated summary"
+                    }
+                }
+            }
+        };
+
+        var tempUri = new Uri("http://example.com/overlay.yaml");
+        var (document, overlayDiagnostic, openApiDiagnostic) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri, OpenApiConstants.Yaml);
+        Assert.NotNull(document);
+        Assert.NotNull(overlayDiagnostic);
+        Assert.NotNull(openApiDiagnostic);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(openApiDiagnostic.Errors);
+        Assert.Null(document.Info.Extensions); // Title should be removed
+        Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?[HttpMethod.Get].Summary); // Summary should be updated
+
+    }
 }
