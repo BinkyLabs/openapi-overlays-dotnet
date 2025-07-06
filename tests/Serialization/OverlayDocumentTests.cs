@@ -393,7 +393,7 @@ public class OverlayDocumentTests
     [Fact]
     public async Task ShouldApplyTheOverlayToAnOpenApiDocumentFromJson()
     {
-        var yamlDocument =
+        var json =
         """
         {
             "openapi": "3.1.0",
@@ -418,7 +418,7 @@ public class OverlayDocumentTests
         """;
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
-        await writer.WriteAsync(yamlDocument);
+        await writer.WriteAsync(json);
         await writer.FlushAsync();
         documentStream.Seek(0, SeekOrigin.Begin);
         var overlayDocument = new OverlayDocument
