@@ -147,7 +147,7 @@ public class OverlayJsonReader : IOverlayReader
     }
 
     /// <inheritdoc/>
-    public T? ReadFragment<T>(MemoryStream input,
+    public T? ReadFragmentFromStream<T>(MemoryStream input,
                              OverlaySpecVersion version,
                              out OverlayDiagnostic diagnostic,
                              OverlayReaderSettings? settings = null) where T : IOpenApiElement
@@ -168,11 +168,11 @@ public class OverlayJsonReader : IOverlayReader
             return default;
         }
 
-        return ReadFragment<T>(jsonNode, version, out diagnostic);
+        return ReadFragmentFromJsonNode<T>(jsonNode, version, out diagnostic);
     }
 
     /// <inheritdoc/>
-    public T? ReadFragment<T>(JsonNode input,
+    public T? ReadFragmentFromJsonNode<T>(JsonNode input,
      OverlaySpecVersion version,
      out OverlayDiagnostic diagnostic,
      OverlayReaderSettings? settings = null) where T : IOpenApiElement

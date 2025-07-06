@@ -575,7 +575,7 @@ public class OverlayDocumentTests
         try
         {
             // Act
-            var (overlayDocument, dignostic) = await OverlayDocument.LoadAsync(tempFile);
+            var (overlayDocument, dignostic) = await OverlayDocument.LoadFromUrlAsync(tempFile);
 
             // Assert
             Assert.NotNull(overlayDocument);
