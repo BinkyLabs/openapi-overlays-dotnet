@@ -39,5 +39,5 @@ public interface IOverlayReader
     /// <param name="diagnostic">Returns diagnostic object containing errors detected during parsing.</param>  
     /// <param name="settings">The OpenApiReader settings.</param>  
     /// <returns>Instance of the newly created OpenAPI element.</returns>  
-    T? ReadFragment<T>(MemoryStream input, OverlaySpecVersion version, out OverlayDiagnostic diagnostic, OverlayReaderSettings? settings = null) where T : IOpenApiElement;
+    T? ReadFragmentFromStream<T>(MemoryStream input, OverlaySpecVersion version, out OverlayDiagnostic diagnostic, OverlayReaderSettings? settings = null) where T : IOpenApiElement;
 }

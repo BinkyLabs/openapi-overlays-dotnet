@@ -93,7 +93,7 @@ public static class OverlayModelFactory
     {
         format ??= InspectStreamFormat(input);
         settings ??= DefaultReaderSettings.Value;
-        return settings.GetReader(format).ReadFragment<T>(input, version, out diagnostic, settings);
+        return settings.GetReader(format).ReadFragmentFromStream<T>(input, version, out diagnostic, settings);
     }
 
     /// <summary>
@@ -180,29 +180,6 @@ public static class OverlayModelFactory
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
 
         return InternalLoad(stream, format, settings);
-    }
-
-    /// <summary>
-    /// Reads the input string and parses it into an Open API document.
-    /// </summary>
-    /// <param name="input">The input string.</param>
-    /// <param name="version"></param>
-    /// <param name="diagnostic">The diagnostic entity containing information from the reading process.</param>
-    /// <param name="format">The Open API format</param>
-    /// <param name="settings">The Overlay reader settings.</param>
-    /// <returns>An Overlay document instance.</returns>
-    public static T? Parse<T>(string input,
-                             OverlaySpecVersion version,
-                             out OverlayDiagnostic diagnostic,
-                             string? format = null,
-                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
-    {
-        ArgumentException.ThrowIfNullOrEmpty(input);
-
-        format ??= InspectInputFormat(input);
-        settings ??= new OverlayReaderSettings();
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
-        return LoadFromStream<T>(stream, version, format, out diagnostic, settings);
     }
 
     private static readonly Lazy<OverlayReaderSettings> DefaultReaderSettings = new(() => new OverlayReaderSettings());

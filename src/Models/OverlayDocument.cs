@@ -82,7 +82,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="settings">The OpenApi reader settings.</param>
     /// <param name="token">The cancellation token</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(string url, OverlayReaderSettings? settings = null, CancellationToken token = default)
+    public static async Task<ReadResult> LoadFromUrlAsync(string url, OverlayReaderSettings? settings = null, CancellationToken token = default)
     {
         return await OverlayModelFactory.LoadFormUrlAsync(url, settings, token).ConfigureAwait(false);
     }
@@ -95,7 +95,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="settings">The OpenApi reader settings.</param>
     /// <param name="cancellationToken">Propagates information about operation cancelling.</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    public static async Task<ReadResult> LoadFromStreamAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
     {
         return await OverlayModelFactory.LoadFromStreamAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
     }

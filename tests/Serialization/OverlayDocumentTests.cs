@@ -557,10 +557,10 @@ public class OverlayDocumentTests
                 {
                     "target": "Test Target",
                     "description": "Test Description",
-                    //"update": {
-                    //    "summary": "Updated summary",
-                    //    "description": "Updated description"
-                    //}
+                    "update": {
+                        "summary": "Updated summary",
+                        "description": "Updated description"
+                    }
                 },{
                     "target": "Test Target 2",
                     "description": "Test Description 2",
@@ -573,9 +573,8 @@ public class OverlayDocumentTests
         var tempFile = @"./ValidFile.json";
         await File.WriteAllTextAsync(tempFile, json);
 
-
-        // Act
-        var (overlayDocument, dignostic) = await OverlayDocument.LoadAsync(tempFile);
+            // Act
+            var (overlayDocument, dignostic) = await OverlayDocument.LoadFromUrlAsync(tempFile);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -614,6 +613,5 @@ public class OverlayDocumentTests
         Assert.Equal("tag1", updateArray[0]?.GetValue<string>());
         Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
     }
-
 
 }
