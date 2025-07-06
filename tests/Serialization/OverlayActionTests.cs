@@ -143,7 +143,7 @@ public class OverlayActionTests
 
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode, new OverlayDocument());
+        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -172,7 +172,7 @@ public class OverlayActionTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode, new OverlayDocument());
+        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -202,7 +202,7 @@ public class OverlayActionTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode, new OverlayDocument());
+        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -232,7 +232,7 @@ public class OverlayActionTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode, new OverlayDocument());
+        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);

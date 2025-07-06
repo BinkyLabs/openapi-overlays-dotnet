@@ -35,19 +35,17 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         /// <param name="parentInstance">The parent instance.</param>
         /// <param name="fixedFields">Dictionary of fixed field mappings.</param>
         /// <param name="patternFields">Dictionary of pattern field mappings.</param>
-        /// <param name="hostDocument">The overlay document.</param>
         public void ParseField<T>(
             T parentInstance,
-            Dictionary<string, Action<T, ParseNode, OverlayDocument>> fixedFields,
-            Dictionary<Func<string, bool>, Action<T, string, ParseNode, OverlayDocument>> patternFields,
-            OverlayDocument hostDocument)
+            Dictionary<string, Action<T, ParseNode>> fixedFields,
+            Dictionary<Func<string, bool>, Action<T, string, ParseNode>> patternFields)
         {
             if (fixedFields.TryGetValue(Name, out var fixedFieldMap))
             {
                 try
                 {
                     Context.StartObject(Name);
-                    fixedFieldMap(parentInstance, Value, hostDocument);
+                    fixedFieldMap(parentInstance, Value);
                 }
                 catch (OverlayReaderException ex)
                 {
@@ -72,7 +70,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                     try
                     {
                         Context.StartObject(Name);
-                        map(parentInstance, Name, Value, hostDocument);
+                        map(parentInstance, Name, Value);
                     }
                     catch (OverlayReaderException ex)
                     {

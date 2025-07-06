@@ -46,17 +46,17 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             return new ValueNode(context, node);
         }
 
-        public virtual List<T> CreateList<T>(Func<MapNode, OverlayDocument, T> map, OverlayDocument hostDocument)
+        public virtual List<T> CreateList<T>(Func<MapNode, T> map)
         {
             throw new OverlayReaderException("Cannot create list from this type of node.", Context);
         }
 
-        public virtual Dictionary<string, T> CreateMap<T>(Func<MapNode, OverlayDocument, T> map, OverlayDocument hostDocument)
+        public virtual Dictionary<string, T> CreateMap<T>(Func<MapNode, T> map)
         {
             throw new OverlayReaderException("Cannot create map from this type of node.", Context);
         }
 
-        public virtual List<T> CreateSimpleList<T>(Func<ValueNode, OverlayDocument?, T> map, OverlayDocument openApiDocument)
+        public virtual List<T> CreateSimpleList<T>(Func<ValueNode, T> map)
         {
             throw new OverlayReaderException("Cannot create simple list from this type of node.", Context);
         }
@@ -86,7 +86,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             throw new OverlayReaderException("Cannot create a list from this type of node.", Context);
         }
 
-        public virtual Dictionary<string, HashSet<T>> CreateArrayMap<T>(Func<ValueNode, OverlayDocument?, T> map, OverlayDocument? openApiDocument)
+        public virtual Dictionary<string, HashSet<T>> CreateArrayMap<T>(Func<ValueNode, T> map)
         {
             throw new OverlayReaderException("Cannot create array map from this type of node.", Context);
         }
