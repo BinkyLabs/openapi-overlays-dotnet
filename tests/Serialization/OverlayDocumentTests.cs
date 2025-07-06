@@ -397,7 +397,8 @@ paths:
     "openapi": "3.1.0",
     "info": {
         "title": "Test API",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "randomProperty": "randomValue"
     },
     "paths": {
         "/test": {
