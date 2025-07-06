@@ -17,9 +17,8 @@ internal interface IOverlayVersionService
     /// </summary>
     /// <typeparam name="T">Type of element to load</typeparam>
     /// <param name="node">document fragment node</param>
-    /// <param name="doc">A host document instance.</param>
     /// <returns>Instance of OpenAPIElement</returns>
-    T? LoadElement<T>(ParseNode node, OverlayDocument doc) where T : IOpenApiElement;
+    T? LoadElement<T>(ParseNode node) where T : IOpenApiElement;
 
     /// <summary>
     /// Converts a generic RootNode instance into a strongly typed OverlayDocument

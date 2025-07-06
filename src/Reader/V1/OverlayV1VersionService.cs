@@ -23,9 +23,9 @@ internal class OverlayV1VersionService : IOverlayVersionService
     {
     }
 
-    private readonly Dictionary<Type, Func<ParseNode, OverlayDocument, object?>> _loaders = new Dictionary<Type, Func<ParseNode, OverlayDocument, object?>>
+    private readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new Dictionary<Type, Func<ParseNode, object?>>
     {
-        [typeof(JsonNodeExtension)] = (n, d) => OverlayV1Deserializer.LoadAny(n),
+        [typeof(JsonNodeExtension)] = OverlayV1Deserializer.LoadAny,
         [typeof(OverlayAction)] = OverlayV1Deserializer.LoadAction,
         [typeof(OverlayDocument)] = OverlayV1Deserializer.LoadDocument,
         [typeof(OverlayInfo)] = OverlayV1Deserializer.LoadInfo,
@@ -36,14 +36,14 @@ internal class OverlayV1VersionService : IOverlayVersionService
         return OverlayV1Deserializer.LoadOverlayDocument(rootNode, location);
     }
 
-    public T? LoadElement<T>(ParseNode node, OverlayDocument doc) where T : IOpenApiElement
+    public T? LoadElement<T>(ParseNode node) where T : IOpenApiElement
     {
-        if (Loaders.TryGetValue(typeof(T), out var loader) && loader(node, doc) is T result)
+        if (Loaders.TryGetValue(typeof(T), out var loader) && loader(node) is T result)
         {
             return result;
         }
         return default;
     }
 
-    internal Dictionary<Type, Func<ParseNode, OverlayDocument, object?>> Loaders => _loaders;
+    internal Dictionary<Type, Func<ParseNode, object?>> Loaders => _loaders;
 }

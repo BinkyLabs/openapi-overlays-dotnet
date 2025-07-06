@@ -106,7 +106,7 @@ public class OverlayDocumentTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode, new OverlayDocument());
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -229,7 +229,7 @@ public class OverlayDocumentTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode, new OverlayDocument());
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
 
         // Assert
         Assert.NotNull(overlayDocument);

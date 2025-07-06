@@ -59,7 +59,7 @@ public class OverlayInfoTests
 
 
         // Act
-        var overlayInfo = OverlayV1Deserializer.LoadInfo(parseNode, new OverlayDocument());
+        var overlayInfo = OverlayV1Deserializer.LoadInfo(parseNode);
 
         // Assert
         Assert.Equal("Test Overlay", overlayInfo.Title);

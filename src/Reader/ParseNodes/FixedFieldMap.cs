@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader
 {
-    internal class FixedFieldMap<T> : Dictionary<string, Action<T, ParseNode, OverlayDocument>>
+    internal class FixedFieldMap<T> : Dictionary<string, Action<T, ParseNode>>
     {
     }
 }
