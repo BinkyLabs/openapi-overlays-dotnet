@@ -49,7 +49,7 @@ public static class OverlayModelFactory
     /// <param name="token"></param>
     /// <returns>Instance of newly created IOpenApiElement.</returns>
     /// <returns>The Overlay element.</returns>
-    public static async Task<T?> LoadAsync<T>(string url,
+    public static async Task<T?> LoadFromUrlAsync<T>(string url,
                                               OverlaySpecVersion version,
                                               OverlayDocument openApiDocument,
                                               OverlayReaderSettings? settings = null,
@@ -67,13 +67,13 @@ public static class OverlayModelFactory
     /// <param name="settings"> The Overlay reader settings.</param>
     /// <param name="token">The cancellation token</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(string url,
+    public static async Task<ReadResult> LoadFormUrlAsync(string url,
                                                    OverlayReaderSettings? settings = null,
                                                    CancellationToken token = default)
     {
         settings ??= DefaultReaderSettings.Value;
         var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
-        return await LoadAsync(stream, format, settings, token).ConfigureAwait(false);
+        return await LoadFromStreamAsync(stream, format, settings, token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ public static class OverlayModelFactory
     /// <param name="settings">The OpenApiReader settings.</param>
     /// <returns>Instance of newly created IOpenApiElement.</returns>
     /// <returns>The Overlay element.</returns>
-    public static T? Load<T>(MemoryStream input,
+    public static T? LoadFromStream<T>(MemoryStream input,
                              OverlaySpecVersion version,
                              string? format,
                              OverlayDocument overlayDocument,
@@ -108,7 +108,7 @@ public static class OverlayModelFactory
     /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <param name="format">The Open API format</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadAsync(Stream input, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    public static async Task<ReadResult> LoadFromStreamAsync(Stream input, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
 
@@ -156,14 +156,14 @@ public static class OverlayModelFactory
 
         if (input is MemoryStream memoryStream)
         {
-            return Load<T>(memoryStream, version, format, OverlayDocument, out var _, settings);
+            return LoadFromStream<T>(memoryStream, version, format, OverlayDocument, out var _, settings);
         }
         else
         {
             memoryStream = new MemoryStream();
             await input.CopyToAsync(memoryStream, 81920, token).ConfigureAwait(false);
             memoryStream.Position = 0;
-            return Load<T>(memoryStream, version, format, OverlayDocument, out var _, settings);
+            return LoadFromStream<T>(memoryStream, version, format, OverlayDocument, out var _, settings);
         }
     }
 
@@ -194,14 +194,14 @@ public static class OverlayModelFactory
     /// </summary>
     /// <param name="input">The input string.</param>
     /// <param name="version"></param>
-    /// <param name="OverlayDocument">The OverlayDocument object to which the fragment belongs, used to lookup references.</param>
+    /// <param name="overlayDocument">The OverlayDocument object to which the fragment belongs, used to lookup references.</param>
     /// <param name="diagnostic">The diagnostic entity containing information from the reading process.</param>
     /// <param name="format">The Open API format</param>
     /// <param name="settings">The Overlay reader settings.</param>
     /// <returns>An Overlay document instance.</returns>
     public static T? Parse<T>(string input,
                              OverlaySpecVersion version,
-                             OverlayDocument OverlayDocument,
+                             OverlayDocument overlayDocument,
                              out OverlayDiagnostic diagnostic,
                              string? format = null,
                              OverlayReaderSettings? settings = null) where T : IOpenApiElement
@@ -211,7 +211,7 @@ public static class OverlayModelFactory
         format ??= InspectInputFormat(input);
         settings ??= new OverlayReaderSettings();
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
-        return Load<T>(stream, version, format, OverlayDocument, out diagnostic, settings);
+        return LoadFromStream<T>(stream, version, format, overlayDocument, out diagnostic, settings);
     }
 
     private static readonly Lazy<OverlayReaderSettings> DefaultReaderSettings = new(() => new OverlayReaderSettings());

@@ -149,12 +149,12 @@ public class OverlayJsonReader : IOverlayReader
     /// <inheritdoc/>
     public T? ReadFragment<T>(MemoryStream input,
                              OverlaySpecVersion version,
-                             OverlayDocument OverlayDocument,
+                             OverlayDocument overlayDocument,
                              out OverlayDiagnostic diagnostic,
                              OverlayReaderSettings? settings = null) where T : IOpenApiElement
     {
         ArgumentNullException.ThrowIfNull(input);
-        ArgumentNullException.ThrowIfNull(OverlayDocument);
+        ArgumentNullException.ThrowIfNull(overlayDocument);
 
         JsonNode jsonNode;
 
@@ -170,13 +170,13 @@ public class OverlayJsonReader : IOverlayReader
             return default;
         }
 
-        return ReadFragment<T>(jsonNode, version, OverlayDocument, out diagnostic);
+        return ReadFragment<T>(jsonNode, version, overlayDocument, out diagnostic);
     }
 
     /// <inheritdoc/>
     public T? ReadFragment<T>(JsonNode input,
      OverlaySpecVersion version,
-     OverlayDocument OverlayDocument,
+     OverlayDocument overlayDocument,
      out OverlayDiagnostic diagnostic,
      OverlayReaderSettings? settings = null) where T : IOpenApiElement
     {
@@ -191,7 +191,7 @@ public class OverlayJsonReader : IOverlayReader
         try
         {
             // Parse the OpenAPI element
-            element = context.ParseFragment<T>(input, version, OverlayDocument);
+            element = context.ParseFragment<T>(input, version, overlayDocument);
         }
         catch (OpenApiException ex)
         {

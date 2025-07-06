@@ -84,7 +84,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns></returns>
     public static async Task<ReadResult> LoadAsync(string url, OverlayReaderSettings? settings = null, CancellationToken token = default)
     {
-        return await OverlayModelFactory.LoadAsync(url, settings, token).ConfigureAwait(false);
+        return await OverlayModelFactory.LoadFormUrlAsync(url, settings, token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns></returns>
     public static async Task<ReadResult> LoadAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
     {
-        return await OverlayModelFactory.LoadAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
+        return await OverlayModelFactory.LoadFromStreamAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
     }
 
 
