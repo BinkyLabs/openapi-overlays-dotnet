@@ -573,8 +573,8 @@ public class OverlayDocumentTests
         var tempFile = @"./ValidFile.json";
         await File.WriteAllTextAsync(tempFile, json);
 
-            // Act
-            var (overlayDocument, dignostic) = await OverlayDocument.LoadFromUrlAsync(tempFile);
+        // Act
+        var (overlayDocument, dignostic) = await OverlayDocument.LoadFromUrlAsync(tempFile);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -614,4 +614,39 @@ public class OverlayDocumentTests
         Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
     }
 
+    [Fact]
+    public void Parse_WithValidJson_ReturnsReadResult()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "target": "Test Target",
+                    "description": "Test Description",
+                    "remove": true
+                }
+            ]
+        }
+        """;
+
+        // Act
+        var (overlayDocument, dignostic) = OverlayDocument.Parse(json);
+
+        // Assert
+        Assert.NotNull(overlayDocument);
+        Assert.Equal("1.0.0", overlayDocument.Overlay);
+        Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
+        Assert.Equal("1.0.0", overlayDocument.Info?.Version);
+        Assert.NotNull(overlayDocument.Actions);
+        Assert.Single(overlayDocument.Actions);
+        Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
+        Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
+        Assert.True(overlayDocument.Actions[0].Remove);
+    }
 }
