@@ -1,0 +1,216 @@
+﻿
+
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+using BinkyLabs.OpenApi.Overlays.Reader;
+
+using Microsoft.OpenApi;
+
+namespace BinkyLabs.OpenApi.Overlays;
+
+/// <summary>
+/// Reader for OpenAPI overlay documents in JSON format.
+/// </summary>
+/// <returns></returns>
+public class OverlayJsonReader : IOverlayReader
+{
+    /// <summary>
+    /// Reads the memory stream input and parses it into an Open API document.
+    /// </summary>
+    /// <param name="input">Memory stream containing OpenAPI description to parse.</param>
+    /// <param name="location">Location of where the document that is getting loaded is saved</param>
+    /// <param name="settings">The Reader settings to be used during parsing.</param>
+    /// <returns></returns>
+    public ReadResult Read(MemoryStream input,
+                           Uri location,
+                           OverlayReaderSettings settings)
+    {
+        if (input is null) throw new ArgumentNullException(nameof(input));
+        if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+        JsonNode? jsonNode;
+        var diagnostic = new OverlayDiagnostic();
+        settings ??= new OverlayReaderSettings();
+
+        // Parse the JSON text in the stream into JsonNodes
+        try
+        {
+            jsonNode = JsonNode.Parse(input) ?? throw new InvalidOperationException($"Cannot parse input stream, {nameof(input)}.");
+        }
+        catch (JsonException ex)
+        {
+            diagnostic.Errors.Add(new OpenApiError($"#line={ex.LineNumber}", $"Please provide the correct format, {ex.Message}"));
+            return new ReadResult
+            {
+                Document = null,
+                Diagnostic = diagnostic
+            };
+        }
+
+        return Read(jsonNode, location, settings);
+    }
+
+    /// <summary>
+    /// Parses the JsonNode input into an Open API document.
+    /// </summary>
+    /// <param name="jsonNode">The JsonNode input.</param>
+    /// <param name="location">Location of where the document that is getting loaded is saved</param>
+    /// <param name="settings">The Reader settings to be used during parsing.</param>
+    /// <returns></returns>
+    public ReadResult Read(JsonNode jsonNode,
+                           Uri location,
+                           OverlayReaderSettings settings)
+    {
+        if (jsonNode is null) throw new ArgumentNullException(nameof(jsonNode));
+        if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+        var diagnostic = new OverlayDiagnostic();
+        var context = new ParsingContext(diagnostic)
+        {
+            ExtensionParsers = settings.ExtensionParsers,
+            BaseUrl = settings.OpenApiSettings.BaseUrl,
+            DefaultContentType = settings.OpenApiSettings.DefaultContentType
+        };
+
+        OverlayDocument? document = null;
+        try
+        {
+            // Parse the OpenAPI Document
+            document = context.Parse(jsonNode, location);
+        }
+        catch (OpenApiException ex)
+        {
+            diagnostic.Errors.Add(new(ex));
+        }
+
+        // Validate the document
+        if (document is not null && settings.OpenApiSettings.RuleSet is not null && settings.OpenApiSettings.RuleSet.Rules.Any())
+        {
+            var openApiErrors = document.Validate(settings.OpenApiSettings.RuleSet);
+            if (openApiErrors is not null)
+            {
+                foreach (var item in openApiErrors.OfType<OpenApiValidatorError>())
+                {
+                    diagnostic.Errors.Add(item);
+                }
+                foreach (var item in openApiErrors.OfType<OpenApiValidatorWarning>())
+                {
+                    diagnostic.Warnings.Add(item);
+                }
+            }
+        }
+
+        return new()
+        {
+            Document = document,
+            Diagnostic = diagnostic
+        };
+    }
+
+    /// <summary>
+    /// Reads the stream input asynchronously and parses it into an Open API document.
+    /// </summary>
+    /// <param name="input">Memory stream containing OpenAPI description to parse.</param>
+    /// <param name="location">Location of where the document that is getting loaded is saved</param>
+    /// <param name="settings">The Reader settings to be used during parsing.</param>
+    /// <param name="cancellationToken">Propagates notifications that operations should be cancelled.</param>
+    /// <returns></returns>
+    public async Task<ReadResult> ReadAsync(Stream input,
+                                            Uri location,
+                                            OverlayReaderSettings settings,
+                                            CancellationToken cancellationToken = default)
+    {
+        if (input is null) throw new ArgumentNullException(nameof(input));
+        if (settings is null) throw new ArgumentNullException(nameof(settings));
+
+        JsonNode? jsonNode;
+        var diagnostic = new OverlayDiagnostic();
+
+        // Parse the JSON text in the stream into JsonNodes
+        try
+        {
+            jsonNode = await JsonNode.ParseAsync(input, cancellationToken: cancellationToken).ConfigureAwait(false) ??
+                throw new InvalidOperationException($"failed to parse input stream, {nameof(input)}");
+        }
+        catch (JsonException ex)
+        {
+            diagnostic.Errors.Add(new OpenApiError($"#line={ex.LineNumber}", $"Please provide the correct format, {ex.Message}"));
+            return new ReadResult
+            {
+                Document = null,
+                Diagnostic = diagnostic
+            };
+        }
+
+        return Read(jsonNode, location, settings);
+    }
+
+    /// <inheritdoc/>
+    public T? ReadFragment<T>(MemoryStream input,
+                             OverlaySpecVersion version,
+                             OverlayDocument OverlayDocument,
+                             out OverlayDiagnostic diagnostic,
+                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        ArgumentNullException.ThrowIfNull(OverlayDocument);
+
+        JsonNode jsonNode;
+
+        // Parse the JSON
+        try
+        {
+            jsonNode = JsonNode.Parse(input) ?? throw new InvalidOperationException($"Failed to parse stream, {nameof(input)}");
+        }
+        catch (JsonException ex)
+        {
+            diagnostic = new();
+            diagnostic.Errors.Add(new($"#line={ex.LineNumber}", ex.Message));
+            return default;
+        }
+
+        return ReadFragment<T>(jsonNode, version, OverlayDocument, out diagnostic);
+    }
+
+    /// <inheritdoc/>
+    public T? ReadFragment<T>(JsonNode input,
+     OverlaySpecVersion version,
+     OverlayDocument OverlayDocument,
+     out OverlayDiagnostic diagnostic,
+     OverlayReaderSettings? settings = null) where T : IOpenApiElement
+    {
+        diagnostic = new();
+        settings ??= new OverlayReaderSettings();
+        var context = new ParsingContext(diagnostic)
+        {
+            ExtensionParsers = settings.ExtensionParsers
+        };
+
+        IOpenApiElement? element = null;
+        try
+        {
+            // Parse the OpenAPI element
+            element = context.ParseFragment<T>(input, version, OverlayDocument);
+        }
+        catch (OpenApiException ex)
+        {
+            diagnostic.Errors.Add(new(ex));
+        }
+
+        // Validate the element
+        if (element is not null && settings.OpenApiSettings.RuleSet is not null && settings.OpenApiSettings.RuleSet.Rules.Any())
+        {
+            var errors = element.Validate(settings.OpenApiSettings.RuleSet);
+            if (errors is not null)
+            {
+                foreach (var item in errors)
+                {
+                    diagnostic.Errors.Add(item);
+                }
+            }
+        }
+
+        return (T?)element;
+    }
+}

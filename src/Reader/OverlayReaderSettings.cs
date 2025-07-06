@@ -1,10 +1,12 @@
 ﻿
 using System.Net.Http;
+using System.Text.Json.Nodes;
 
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.MicrosoftExtensions;
 using Microsoft.OpenApi.Reader;
 
-namespace BinkyLabs.OpenApi.Overlays.Reader;
+namespace BinkyLabs.OpenApi.Overlays;
 /// <summary>  
 /// Represents settings for reading OpenAPI overlays.  
 /// </summary>  
@@ -14,9 +16,9 @@ public class OverlayReaderSettings
 
     private HttpClient? _httpClient;
 
-    private Dictionary<string, IOpenApiReader> _readers = new(StringComparer.OrdinalIgnoreCase)
+    private Dictionary<string, IOverlayReader> _readers = new(StringComparer.OrdinalIgnoreCase)
         {
-            { OpenApiConstants.Json, new OpenApiJsonReader() }
+            { OpenApiConstants.Json, new OverlayJsonReader() }
         };
 
     /// <summary>  
@@ -42,7 +44,7 @@ public class OverlayReaderSettings
     /// <summary>
     /// Readers to use to parse the OpenAPI document
     /// </summary>
-    public Dictionary<string, IOpenApiReader> Readers
+    public Dictionary<string, IOverlayReader> Readers
     {
         get => _readers;
         init
@@ -50,16 +52,22 @@ public class OverlayReaderSettings
             ArgumentNullException.ThrowIfNull(value);
             _readers = value.Comparer is StringComparer stringComparer && stringComparer == StringComparer.OrdinalIgnoreCase ?
                 value :
-                new Dictionary<string, IOpenApiReader>(value, StringComparer.OrdinalIgnoreCase);
+                new Dictionary<string, IOverlayReader>(value, StringComparer.OrdinalIgnoreCase);
         }
     }
 
     /// <summary>  
     /// Gets or sets the settings for the OpenAPI reader.  
     /// </summary>  
-    public OpenApiReaderSettings OpenApiSettings { get; set; } = default!;
+    public OpenApiReaderSettings OpenApiSettings { get; set; } = new OpenApiReaderSettings()!;
 
-    internal IOpenApiReader GetReader(string format)
+    /// <summary>
+    /// Dictionary of parsers for converting extensions into strongly typed classes
+    /// </summary>
+    public Dictionary<string, Func<JsonNode, OverlaySpecVersion, IOverlayExtension>>? ExtensionParsers { get; set; } = new();
+
+
+    internal IOverlayReader GetReader(string format)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(format);
         if (Readers.TryGetValue(format, out var reader))
@@ -75,7 +83,7 @@ public class OverlayReaderSettings
     /// </summary>
     public void AddJsonReader()
     {
-        TryAddReader(OpenApiConstants.Json, new OpenApiJsonReader());
+        TryAddReader(OpenApiConstants.Json, new OverlayJsonReader());
     }
 
     /// <summary>
@@ -86,10 +94,17 @@ public class OverlayReaderSettings
     /// <param name="format">Format to add a reader for</param>
     /// <param name="reader">Reader to add</param>
     /// <returns>True if the reader was added, false if it already existed</returns>
-    public bool TryAddReader(string format, IOpenApiReader reader)
+    public bool TryAddReader(string format, IOverlayReader reader)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(format);
         ArgumentNullException.ThrowIfNull(reader);
         return Readers.TryAdd(format, reader);
+    }
+
+
+    private void TryAddExtensionParser(string name, Func<JsonNode, OverlaySpecVersion, IOverlayExtension> parser)
+    {
+        ExtensionParsers?.TryAdd(name, parser);
+
     }
 }

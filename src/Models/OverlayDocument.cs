@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
+using BinkyLabs.Overlay.Overlays;
 
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
@@ -113,6 +114,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     {
         return OverlayModelFactory.Parse(input, format, settings);
     }
+
     internal bool ApplyToDocument(JsonNode jsonNode, OverlayDiagnostic overlayDiagnostic)
     {
         ArgumentNullException.ThrowIfNull(jsonNode);

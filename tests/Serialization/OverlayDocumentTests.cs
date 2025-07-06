@@ -5,7 +5,6 @@ using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
@@ -164,6 +163,7 @@ public class OverlayDocumentTests
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
+
 
         var expectedJson = """
         {
@@ -332,20 +332,20 @@ public class OverlayDocumentTests
     public async Task ShouldApplyTheOverlayToAnOpenApiDocumentFromYaml()
     {
         var yamlDocument =
-"""
-openapi: 3.1.0
-info:
-  title: Test API
-  version: 1.0.0
-  randomProperty: randomValue
-paths:
-  /test:
-    get:
-      summary: Test endpoint
-      responses:
-        '200':
-          description: OK
-""";
+        """
+        openapi: 3.1.0
+        info:
+          title: Test API
+          version: 1.0.0
+          randomProperty: randomValue
+        paths:
+          /test:
+            get:
+              summary: Test endpoint
+              responses:
+                '200':
+                  description: OK
+        """;
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
         await writer.WriteAsync(yamlDocument);
@@ -393,27 +393,27 @@ paths:
     public async Task ShouldApplyTheOverlayToAnOpenApiDocumentFromJson()
     {
         var yamlDocument =
-"""
-{
-    "openapi": "3.1.0",
-    "info": {
-        "title": "Test API",
-        "version": "1.0.0"
-    },
-    "paths": {
-        "/test": {
-            "get": {
-                "summary": "Test endpoint",
-                "responses": {
-                    "200": {
-                        "description": "OK"
+        """
+        {
+            "openapi": "3.1.0",
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            },
+            "paths": {
+                "/test": {
+                    "get": {
+                        "summary": "Test endpoint",
+                        "responses": {
+                            "200": {
+                                "description": "OK"
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
-""";
+        """;
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
         await writer.WriteAsync(yamlDocument);
@@ -455,6 +455,82 @@ paths:
         Assert.Empty(openApiDiagnostic.Errors);
         Assert.Null(document.Info.Extensions); // Title should be removed
         Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?[HttpMethod.Get].Summary); // Summary should be updated
+
+    }
+
+    [Fact]
+    public void Load_WithValidMemoryStream_ReturnsReadResult()
+    {
+        // Arrange
+        var json = """
+        {
+            "openapi": "3.0.0",
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "extends": "x-extends",
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            },
+         "actions": [
+                {
+                    "target": "Test Target",
+                    "description": "Test Description",
+                    "update": {
+                        "summary": "Updated summary",
+                        "description": "Updated description"
+                    }
+                },{
+                    "target": "Test Target 2",
+                    "description": "Test Description 2",
+                    "update": ["tag1", "tag2"]
+                }
+            ]
+        }
+        """;
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+
+        // Act
+        var (overlayDocument, dignostic) = OverlayDocument.Load(stream);
+
+        // Assert
+        Assert.NotNull(overlayDocument);
+        Assert.Equal("2.0.0", overlayDocument.Info?.Version);
+        Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
+        Assert.Equal("1.0.0", overlayDocument.Overlay);
+        Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.NotNull(overlayDocument.Extensions);
+        Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
+        var extension = overlayDocument.Extensions["x-custom-extension"];
+        var jsonNodeExtension = Assert.IsType<JsonNodeExtension>(extension);
+        var node = jsonNodeExtension.Node;
+        Assert.NotNull(node);
+        Assert.Equal("someValue", node["someProperty"]?.GetValue<string>());
+        
+        // Assert the 2 actions
+        Assert.NotNull(overlayDocument.Actions);
+        Assert.Equal(2, overlayDocument.Actions.Count);
+
+        // First action with object update
+        Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
+        Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
+        var updateProperty = overlayDocument.Actions[0].Update;
+        Assert.NotNull(updateProperty);
+        var updateObject = updateProperty.AsObject();
+        Assert.Equal("Updated summary", updateObject["summary"]?.GetValue<string>());
+        Assert.Equal("Updated description", updateObject["description"]?.GetValue<string>());
+
+        // Second action with array update
+        Assert.Equal("Test Target 2", overlayDocument.Actions[1].Target);
+        Assert.Equal("Test Description 2", overlayDocument.Actions[1].Description);
+        var updatePropertyArray = overlayDocument.Actions[1].Update;
+        Assert.NotNull(updatePropertyArray);
+        var updateArray = updatePropertyArray.AsArray();
+        Assert.Equal(2, updateArray.Count);
+        Assert.Equal("tag1", updateArray[0]?.GetValue<string>());
+        Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
 
     }
 }
