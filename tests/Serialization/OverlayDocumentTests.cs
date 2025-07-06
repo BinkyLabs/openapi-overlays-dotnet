@@ -509,7 +509,7 @@ public class OverlayDocumentTests
         var node = jsonNodeExtension.Node;
         Assert.NotNull(node);
         Assert.Equal("someValue", node["someProperty"]?.GetValue<string>());
-        
+
         // Assert the 2 actions
         Assert.NotNull(overlayDocument.Actions);
         Assert.Equal(2, overlayDocument.Actions.Count);
