@@ -17,26 +17,6 @@ namespace BinkyLabs.Overlay.Overlays;
 public static class OverlayModelFactory
 {
     /// <summary>
-    /// Reads the stream input and parses the fragment of an Overlay description into an Open API Element.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="url">The path to the Overlay file</param>
-    /// <param name="version">Version of the Overlay specification that the fragment conforms to.</param>
-    /// <param name="settings">The OpenApiReader settings.</param>
-    /// <param name="token"></param>
-    /// <returns>Instance of newly created IOpenApiElement.</returns>
-    /// <returns>The Overlay element.</returns>
-    public static async Task<T?> LoadFromUrlAsync<T>(string url,
-                                              OverlaySpecVersion version,
-                                              OverlayReaderSettings? settings = null,
-                                              CancellationToken token = default) where T : IOpenApiElement
-    {
-        settings ??= DefaultReaderSettings.Value;
-        var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
-        return await LoadAsync<T>(stream, version, format, settings, token);
-    }
-
-    /// <summary>
     /// Loads the input URL and parses it into an Open API document.
     /// </summary>
     /// <param name="url">The path to the Overlay file</param>
@@ -50,28 +30,6 @@ public static class OverlayModelFactory
         settings ??= DefaultReaderSettings.Value;
         var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
         return await LoadFromStreamAsync(stream, format, settings, token).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Reads the stream input and parses the fragment of an Overlay description into an Open API Element.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="input">Stream containing Overlay description to parse.</param>
-    /// <param name="version">Version of the Overlay specification that the fragment conforms to.</param>
-    /// <param name="format"></param>
-    /// <param name="diagnostic">Returns diagnostic object containing errors detected during parsing.</param>
-    /// <param name="settings">The OpenApiReader settings.</param>
-    /// <returns>Instance of newly created IOpenApiElement.</returns>
-    /// <returns>The Overlay element.</returns>
-    public static T? LoadFromStream<T>(MemoryStream input,
-                             OverlaySpecVersion version,
-                             string? format,
-                             out OverlayDiagnostic diagnostic,
-                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
-    {
-        format ??= InspectStreamFormat(input);
-        settings ??= DefaultReaderSettings.Value;
-        return settings.GetReader(format).ReadFragmentFromStream<T>(input, version, out diagnostic, settings);
     }
 
     /// <summary>
@@ -104,38 +62,6 @@ public static class OverlayModelFactory
         }
 
         return result;
-    }
-
-
-    /// <summary>
-    /// Reads the stream input and ensures it is buffered before passing it to the Load method.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="input"></param>
-    /// <param name="version"></param>
-    /// <param name="format"></param>
-    /// <param name="settings"></param>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    public static async Task<T?> LoadAsync<T>(Stream input,
-                                             OverlaySpecVersion version,
-                                             string? format = null,
-                                             OverlayReaderSettings? settings = null,
-                                             CancellationToken token = default) where T : IOpenApiElement
-    {
-        ArgumentNullException.ThrowIfNull(input);
-
-        if (input is MemoryStream memoryStream)
-        {
-            return LoadFromStream<T>(memoryStream, version, format, out var _, settings);
-        }
-        else
-        {
-            memoryStream = new MemoryStream();
-            await input.CopyToAsync(memoryStream, 81920, token).ConfigureAwait(false);
-            memoryStream.Position = 0;
-            return LoadFromStream<T>(memoryStream, version, format, out var _, settings);
-        }
     }
 
     /// <summary>

@@ -22,12 +22,12 @@ public class OverlayJsonReader : IOverlayReader
     /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <param name="settings">The Reader settings to be used during parsing.</param>
     /// <returns></returns>
-    public ReadResult Read(JsonNode jsonNode,
+    internal ReadResult Read(JsonNode jsonNode,
                            Uri location,
                            OverlayReaderSettings settings)
     {
-        if (jsonNode is null) throw new ArgumentNullException(nameof(jsonNode));
-        if (settings is null) throw new ArgumentNullException(nameof(settings));
+        ArgumentNullException.ThrowIfNull(jsonNode);
+        ArgumentNullException.ThrowIfNull(settings);
 
         var diagnostic = new OverlayDiagnostic();
         var context = new ParsingContext(diagnostic)
@@ -85,8 +85,8 @@ public class OverlayJsonReader : IOverlayReader
                                             OverlayReaderSettings settings,
                                             CancellationToken cancellationToken = default)
     {
-        if (input is null) throw new ArgumentNullException(nameof(input));
-        if (settings is null) throw new ArgumentNullException(nameof(settings));
+        ArgumentNullException.ThrowIfNull(input);
+        ArgumentNullException.ThrowIfNull(settings);
 
         JsonNode? jsonNode;
         var diagnostic = new OverlayDiagnostic();
@@ -108,71 +108,6 @@ public class OverlayJsonReader : IOverlayReader
         }
 
         return Read(jsonNode, location, settings);
-    }
-
-    /// <inheritdoc/>
-    public T? ReadFragmentFromStream<T>(MemoryStream input,
-                             OverlaySpecVersion version,
-                             out OverlayDiagnostic diagnostic,
-                             OverlayReaderSettings? settings = null) where T : IOpenApiElement
-    {
-        ArgumentNullException.ThrowIfNull(input);
-
-        JsonNode jsonNode;
-
-        // Parse the JSON
-        try
-        {
-            jsonNode = JsonNode.Parse(input) ?? throw new InvalidOperationException($"Failed to parse stream, {nameof(input)}");
-        }
-        catch (JsonException ex)
-        {
-            diagnostic = new();
-            diagnostic.Errors.Add(new($"#line={ex.LineNumber}", ex.Message));
-            return default;
-        }
-
-        return ReadFragmentFromJsonNode<T>(jsonNode, version, out diagnostic);
-    }
-
-    /// <inheritdoc/>
-    public T? ReadFragmentFromJsonNode<T>(JsonNode input,
-     OverlaySpecVersion version,
-     out OverlayDiagnostic diagnostic,
-     OverlayReaderSettings? settings = null) where T : IOpenApiElement
-    {
-        diagnostic = new();
-        settings ??= new OverlayReaderSettings();
-        var context = new ParsingContext(diagnostic)
-        {
-            ExtensionParsers = settings.ExtensionParsers
-        };
-
-        IOpenApiElement? element = null;
-        try
-        {
-            // Parse the OpenAPI element
-            element = context.ParseFragment<T>(input, version);
-        }
-        catch (OpenApiException ex)
-        {
-            diagnostic.Errors.Add(new(ex));
-        }
-
-        // Validate the element
-        if (element is not null && settings.OpenApiSettings.RuleSet is not null && settings.OpenApiSettings.RuleSet.Rules.Any())
-        {
-            var errors = element.Validate(settings.OpenApiSettings.RuleSet);
-            if (errors is not null)
-            {
-                foreach (var item in errors)
-                {
-                    diagnostic.Errors.Add(item);
-                }
-            }
-        }
-
-        return (T?)element;
     }
 
     /// <inheritdoc/>

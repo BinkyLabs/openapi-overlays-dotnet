@@ -23,17 +23,6 @@ public interface IOverlayReader
     Task<ReadResult> ReadAsync(Stream input, Uri location, OverlayReaderSettings settings, CancellationToken cancellationToken = default);
 
     /// <summary>  
-    /// Reads the MemoryStream and parses the fragment of an OpenAPI description into an OpenAPI element.  
-    /// </summary>  
-    /// <typeparam name="T">The type of OpenAPI element to parse.</typeparam>  
-    /// <param name="input">Memory stream containing OpenAPI description to parse.</param>  
-    /// <param name="version">Version of the OpenAPI specification that the fragment conforms to.</param>  
-    /// <param name="diagnostic">Returns diagnostic object containing errors detected during parsing.</param>  
-    /// <param name="settings">The OpenApiReader settings.</param>  
-    /// <returns>Instance of the newly created OpenAPI element.</returns>  
-    T? ReadFragmentFromStream<T>(MemoryStream input, OverlaySpecVersion version, out OverlayDiagnostic diagnostic, OverlayReaderSettings? settings = null) where T : IOpenApiElement;
-
-    /// <summary>  
     /// Reads the stream and returns a JsonNode representation of the input.
     /// </summary>  
     /// <param name="input">The stream input.</param>
