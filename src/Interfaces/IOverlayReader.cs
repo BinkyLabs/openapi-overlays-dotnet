@@ -23,15 +23,6 @@ public interface IOverlayReader
     Task<ReadResult> ReadAsync(Stream input, Uri location, OverlayReaderSettings settings, CancellationToken cancellationToken = default);
 
     /// <summary>  
-    /// Provides a synchronous method to read the input memory stream and parse it into an OpenAPI document.  
-    /// </summary>  
-    /// <param name="input">The memory stream input.</param>  
-    /// <param name="location">Location of where the document that is getting loaded is saved.</param>  
-    /// <param name="settings">The OpenApi reader settings.</param>  
-    /// <returns>The result of reading the OpenAPI document.</returns>  
-    ReadResult Read(MemoryStream input, Uri location, OverlayReaderSettings settings);
-
-    /// <summary>  
     /// Reads the MemoryStream and parses the fragment of an OpenAPI description into an OpenAPI element.  
     /// </summary>  
     /// <typeparam name="T">The type of OpenAPI element to parse.</typeparam>  

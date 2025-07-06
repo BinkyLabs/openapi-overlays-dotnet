@@ -59,20 +59,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     }
 
     /// <summary>
-    /// Reads the stream input and parses it into an Open API document.
-    /// </summary>
-    /// <param name="stream">Stream containing OpenAPI description to parse.</param>
-    /// <param name="format">The OpenAPI format to use during parsing.</param>
-    /// <param name="settings">The OpenApi reader settings.</param>
-    /// <returns></returns>
-    public static ReadResult Load(MemoryStream stream,
-                                  string? format = null,
-                                  OverlayReaderSettings? settings = null)
-    {
-        return OverlayModelFactory.Load(stream, format, settings);
-    }
-
-    /// <summary>
     /// Parses a local file path or Url into an Open API document.
     /// </summary>
     /// <param name="url"> The path to the OpenAPI file.</param>
@@ -105,11 +91,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="format"></param>
     /// <param name="settings"></param>
     /// <returns></returns>
-    public static ReadResult Parse(string input,
+    public static Task<ReadResult> ParseAsync(string input,
                                    string? format = null,
                                    OverlayReaderSettings? settings = null)
     {
-        return OverlayModelFactory.Parse(input, format, settings);
+        return OverlayModelFactory.ParseAsync(input, format, settings);
     }
 
     internal bool ApplyToDocument(JsonNode jsonNode, OverlayDiagnostic overlayDiagnostic)

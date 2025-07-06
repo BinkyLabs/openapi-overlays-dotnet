@@ -16,42 +16,6 @@ namespace BinkyLabs.OpenApi.Overlays;
 public class OverlayJsonReader : IOverlayReader
 {
     /// <summary>
-    /// Reads the memory stream input and parses it into an Open API document.
-    /// </summary>
-    /// <param name="input">Memory stream containing OpenAPI description to parse.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
-    /// <param name="settings">The Reader settings to be used during parsing.</param>
-    /// <returns></returns>
-    public ReadResult Read(MemoryStream input,
-                           Uri location,
-                           OverlayReaderSettings settings)
-    {
-        if (input is null) throw new ArgumentNullException(nameof(input));
-        if (settings is null) throw new ArgumentNullException(nameof(settings));
-
-        JsonNode? jsonNode;
-        var diagnostic = new OverlayDiagnostic();
-        settings ??= new OverlayReaderSettings();
-
-        // Parse the JSON text in the stream into JsonNodes
-        try
-        {
-            jsonNode = JsonNode.Parse(input) ?? throw new InvalidOperationException($"Cannot parse input stream, {nameof(input)}.");
-        }
-        catch (JsonException ex)
-        {
-            diagnostic.Errors.Add(new OpenApiError($"#line={ex.LineNumber}", $"Please provide the correct format, {ex.Message}"));
-            return new ReadResult
-            {
-                Document = null,
-                Diagnostic = diagnostic
-            };
-        }
-
-        return Read(jsonNode, location, settings);
-    }
-
-    /// <summary>
     /// Parses the JsonNode input into an Open API document.
     /// </summary>
     /// <param name="jsonNode">The JsonNode input.</param>

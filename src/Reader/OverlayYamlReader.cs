@@ -18,14 +18,7 @@ public class OverlayYamlReader : IOverlayReader
 {
     private const int copyBufferSize = 4096;
     private static readonly OverlayJsonReader _jsonReader = new();
-    /// <summary>
-    /// Reads the memory stream input and parses it into an Open API document.
-    /// </summary>
-    /// <param name="input">Memory stream containing OpenAPI description to parse.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
-    /// <param name="settings">The Reader settings to be used during parsing.</param>
-    /// <returns></returns>
-    public ReadResult Read(MemoryStream input,
+    private ReadResult Read(MemoryStream input,
                            Uri location,
                            OverlayReaderSettings settings)
     {

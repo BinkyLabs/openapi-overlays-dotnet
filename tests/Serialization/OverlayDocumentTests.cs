@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -461,7 +462,7 @@ public class OverlayDocumentTests
     }
 
     [Fact]
-    public void Load_WithValidMemoryStream_ReturnsReadResult()
+    public async Task Load_WithValidMemoryStream_ReturnsReadResultAsync()
     {
         // Arrange
         var json = """
@@ -495,7 +496,7 @@ public class OverlayDocumentTests
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
-        var (overlayDocument, dignostic) = OverlayDocument.Load(stream);
+        var (overlayDocument, _) = await OverlayDocument.LoadFromStreamAsync(stream);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -615,7 +616,7 @@ public class OverlayDocumentTests
     }
 
     [Fact]
-    public void Parse_WithValidJson_ReturnsReadResultJson()
+    public async Task Parse_WithValidJson_ReturnsReadResultJson()
     {
         // Arrange
         var json = """
@@ -636,7 +637,7 @@ public class OverlayDocumentTests
         """;
 
         // Act
-        var (overlayDocument, _) = OverlayDocument.Parse(json);
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -651,7 +652,7 @@ public class OverlayDocumentTests
     }
 
     [Fact]
-    public void Parse_WithValidJson_ReturnsReadResultYaml()
+    public async Task Parse_WithValidJson_ReturnsReadResultYamlAsync()
     {
         // Arrange
         var json = """
@@ -666,7 +667,7 @@ public class OverlayDocumentTests
         """;
 
         // Act
-        var (overlayDocument, _) = OverlayDocument.Parse(json);
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
 
         // Assert
         Assert.NotNull(overlayDocument);

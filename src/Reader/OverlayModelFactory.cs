@@ -17,28 +17,6 @@ namespace BinkyLabs.Overlay.Overlays;
 public static class OverlayModelFactory
 {
     /// <summary>
-    /// Loads the input stream and parses it into an Open API document.
-    /// </summary>
-    /// <param name="stream"> The input stream.</param>
-    /// <param name="settings"> The Overlay reader settings.</param>
-    /// <param name="format">The Overlay format.</param>
-    /// <returns>An Overlay document instance.</returns>
-    public static ReadResult Load(MemoryStream stream, string? format = null, OverlayReaderSettings? settings = null)
-    {
-        ArgumentNullException.ThrowIfNull(stream);
-
-        format ??= InspectStreamFormat(stream);
-        settings ??= DefaultReaderSettings.Value;
-
-        var result = InternalLoad(stream, format, settings);
-
-        if (!settings.OpenApiSettings.LeaveStreamOpen)
-            stream.Dispose();
-
-        return result;
-    }
-
-    /// <summary>
     /// Reads the stream input and parses the fragment of an Overlay description into an Open API Element.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -167,7 +145,7 @@ public static class OverlayModelFactory
     /// <param name="format">The Open API format</param>
     /// <param name="settings">The Overlay reader settings.</param>
     /// <returns>An Overlay document instance.</returns>
-    public static ReadResult Parse(string input,
+    public static async Task<ReadResult> ParseAsync(string input,
                                    string? format = null,
                                    OverlayReaderSettings? settings = null)
     {
@@ -179,7 +157,7 @@ public static class OverlayModelFactory
         // Copy string into MemoryStream
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
 
-        return InternalLoad(stream, format, settings);
+        return await InternalLoadAsync(stream, format, settings);
     }
 
     private static readonly Lazy<OverlayReaderSettings> DefaultReaderSettings = new(() => new OverlayReaderSettings());
@@ -194,21 +172,6 @@ public static class OverlayModelFactory
 
         var readResult = await reader.ReadAsync(input, location, settings, cancellationToken).ConfigureAwait(false);
 
-        return readResult;
-    }
-
-    private static ReadResult InternalLoad(MemoryStream input, string format, OverlayReaderSettings settings)
-    {
-        settings ??= DefaultReaderSettings.Value;
-
-        if (input.Length == 0 || input.Position == input.Length)
-        {
-            throw new ArgumentException($"Cannot parse the stream: {nameof(input)} is empty or contains no elements.");
-        }
-
-        var location = new Uri(OpenApiConstants.BaseRegistryUri);
-        var reader = settings.GetReader(format);
-        var readResult = reader.Read(input, location, settings);
         return readResult;
     }
 
