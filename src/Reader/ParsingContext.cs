@@ -90,9 +90,8 @@ public class ParsingContext
     /// </summary>
     /// <param name="jsonNode"></param>
     /// <param name="version">OpenAPI version of the fragment</param>
-    /// <param name="overlayDocument">The OverlayDocument object to which the fragment belongs, used to lookup references.</param>
     /// <returns>An OverlayDocument populated based on the passed yamlDocument </returns>
-    public T? ParseFragment<T>(JsonNode jsonNode, OverlaySpecVersion version, OverlayDocument overlayDocument) where T : IOpenApiElement
+    public T? ParseFragment<T>(JsonNode jsonNode, OverlaySpecVersion version) where T : IOpenApiElement
     {
         var node = ParseNode.Create(this, jsonNode);
 
@@ -102,7 +101,7 @@ public class ParsingContext
         {
             case OverlaySpecVersion.Overlay1_0:
                 VersionService = new OverlayV1VersionService(Diagnostic);
-                element = this.VersionService.LoadElement<T>(node, overlayDocument);
+                element = this.VersionService.LoadElement<T>(node);
                 break;
             default:
                 throw new OpenApiUnsupportedSpecVersionException(version.ToString());

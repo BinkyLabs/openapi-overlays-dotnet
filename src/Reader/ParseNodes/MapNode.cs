@@ -47,7 +47,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             }
         }
 
-        public override Dictionary<string, T> CreateMap<T>(Func<MapNode, OverlayDocument, T> map, OverlayDocument hostDocument)
+        public override Dictionary<string, T> CreateMap<T>(Func<MapNode, T> map)
         {
             var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
             var nodes = jsonMap.Select(
@@ -60,7 +60,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                     {
                         Context.StartObject(key);
                         value = n.Value is JsonObject jsonObject
-                          ? map(new MapNode(Context, jsonObject), hostDocument)
+                          ? map(new MapNode(Context, jsonObject))
                           : default!;
                     }
                     finally
@@ -101,7 +101,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             return nodes.ToDictionary(k => k.key, v => v.value);
         }
 
-        public override Dictionary<string, HashSet<T>> CreateArrayMap<T>(Func<ValueNode, OverlayDocument?, T> map, OverlayDocument? openApiDocument)
+        public override Dictionary<string, HashSet<T>> CreateArrayMap<T>(Func<ValueNode, T> map)
         {
             var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
 
@@ -115,7 +115,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                         ? value
                         : throw new OverlayReaderException($"Expected array while parsing {typeof(T).Name}", Context);
 
-                    HashSet<T> values = new HashSet<T>(arrayNode.OfType<JsonNode>().Select(item => map(new ValueNode(Context, item), openApiDocument)));
+                    HashSet<T> values = new HashSet<T>(arrayNode.OfType<JsonNode>().Select(item => map(new ValueNode(Context, item))));
 
                     return (key, values);
 

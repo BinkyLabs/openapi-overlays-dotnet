@@ -21,7 +21,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             _nodeList = jsonArray;
         }
 
-        public override List<T> CreateList<T>(Func<MapNode, OverlayDocument, T> map, OverlayDocument hostDocument)
+        public override List<T> CreateList<T>(Func<MapNode, T> map)
         {
             if (_nodeList == null)
             {
@@ -30,7 +30,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
             var list = _nodeList
                 .OfType<JsonObject>()
-                .Select(n => map(new MapNode(Context, n), hostDocument))
+                .Select(n => map(new MapNode(Context, n)))
                 .Where(i => i != null)
                 .ToList();
             return list;
@@ -46,14 +46,14 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             return list;
         }
 
-        public override List<T> CreateSimpleList<T>(Func<ValueNode, OverlayDocument?, T> map, OverlayDocument openApiDocument)
+        public override List<T> CreateSimpleList<T>(Func<ValueNode, T> map)
         {
             if (_nodeList == null)
             {
                 throw new OverlayReaderException($"Expected list while parsing {typeof(T).Name}");
             }
 
-            return _nodeList.OfType<JsonNode>().Select(n => map(new(Context, n), openApiDocument)).ToList();
+            return _nodeList.OfType<JsonNode>().Select(n => map(new(Context, n))).ToList();
         }
 
         public IEnumerator<ParseNode> GetEnumerator()

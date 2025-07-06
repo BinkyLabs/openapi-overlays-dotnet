@@ -10,8 +10,7 @@ internal static partial class OverlayV1Deserializer
         MapNode? mapNode,
         T domainObject,
         FixedFieldMap<T> fixedFieldMap,
-        PatternFieldMap<T> patternFieldMap,
-        OverlayDocument doc)
+        PatternFieldMap<T> patternFieldMap)
     {
         if (mapNode == null)
         {
@@ -20,7 +19,7 @@ internal static partial class OverlayV1Deserializer
 
         foreach (var propertyNode in mapNode)
         {
-            propertyNode.ParseField(domainObject, fixedFieldMap, patternFieldMap, doc);
+            propertyNode.ParseField(domainObject, fixedFieldMap, patternFieldMap);
         }
 
     }
