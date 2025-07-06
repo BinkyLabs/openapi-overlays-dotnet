@@ -15,7 +15,8 @@ internal static partial class OverlayV1Deserializer
                     o.Remove = removeBool;
                 }
             }
-        }
+        },
+        { "update", (o, v, _) => o.Update = v.CreateAny() }
     };
     public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = new()
     {
