@@ -87,7 +87,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToExtendedDocumentAsync(string format, OpenApiReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToExtendedDocumentAsync(string? format = default, OpenApiReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(Extends))
         {
@@ -105,14 +105,13 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToDocumentAsync(string documentPathOrUri, string format, OpenApiReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OpenApiReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     { // TODO switch to the overlay reader settings when we have them
         ArgumentException.ThrowIfNullOrEmpty(documentPathOrUri);
-        ArgumentNullException.ThrowIfNull(format);
         readerSettings ??= new OpenApiReaderSettings();
 
         // Load the document from the specified path or URI
-        using var input = new MemoryStream();
+        Stream input;
         if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
@@ -120,15 +119,18 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             using var httpClient = new HttpClient();
             using var response = await httpClient.GetAsync(documentPathOrUri, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            await response.Content.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+            input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         }
         else
         {
+            input = new MemoryStream();
             using var fileStream = new FileStream(documentPathOrUri, FileMode.Open, FileAccess.Read);
             await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
         }
         var uri = new Uri(documentPathOrUri, UriKind.RelativeOrAbsolute);
-        return await ApplyToDocumentStreamAsync(input, uri, format, readerSettings, cancellationToken).ConfigureAwait(false);
+        var result = await ApplyToDocumentStreamAsync(input, uri, format, readerSettings, cancellationToken).ConfigureAwait(false);
+        await input.DisposeAsync().ConfigureAwait(false);
+        return result;
     }
 
     /// <summary>
@@ -141,15 +143,19 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToDocumentStreamAsync(MemoryStream input, Uri location, string format, OpenApiReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToDocumentStreamAsync(Stream input, Uri location, string? format = default, OpenApiReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     { // TODO switch to the overlay reader settings when we have them
         ArgumentNullException.ThrowIfNull(input);
-        ArgumentNullException.ThrowIfNull(format);
         readerSettings ??= new OpenApiReaderSettings();
 
         JsonNode? jsonNode;
 
-        //TODO make the format optional and implement a format detection mechanism when not provided
+        if (string.IsNullOrEmpty(format))
+        {
+            var (bufferedStream, detectedFormat) = await PrepareStreamForReadingAsync(input, cancellationToken).ConfigureAwait(false);
+            format = detectedFormat;
+            input = bufferedStream;
+        }
         // TODO maybe this should be a registry on the overlay reader settings?
         if (OpenApiConstants.Json.Equals(format, StringComparison.OrdinalIgnoreCase))
         {
@@ -183,5 +189,72 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var openAPIJsonReader = new OpenApiJsonReader();
         var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonNode, location, readerSettings);
         return (openAPIDocument, overlayDiagnostic, openApiDiagnostic);
+    }
+    private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, CancellationToken token = default)
+    {
+        Stream preparedStream = input;
+        string format;
+
+        if (!input.CanSeek)
+        {
+            // Use a temporary buffer to read a small portion for format detection
+            using var bufferStream = new MemoryStream();
+            await input.CopyToAsync(bufferStream, 1024, token).ConfigureAwait(false);
+            bufferStream.Position = 0;
+
+            // Inspect the format from the buffered portion
+            format = InspectStreamFormat(bufferStream);
+
+            // If format is JSON, no need to buffer further — use the original stream.
+            if (format.Equals(OpenApiConstants.Json, StringComparison.OrdinalIgnoreCase))
+            {
+                preparedStream = input;
+            }
+            else
+            {
+                // YAML or other non-JSON format; copy remaining input to a new stream.
+                preparedStream = new MemoryStream();
+                bufferStream.Position = 0;
+                await bufferStream.CopyToAsync(preparedStream, 81920, token).ConfigureAwait(false); // Copy buffered portion
+                await input.CopyToAsync(preparedStream, 81920, token).ConfigureAwait(false); // Copy remaining data
+                preparedStream.Position = 0;
+            }
+        }
+        else
+        {
+            format = InspectStreamFormat(input);
+
+            if (!format.Equals(OpenApiConstants.Json, StringComparison.OrdinalIgnoreCase))
+            {
+                // Buffer stream for non-JSON formats (e.g., YAML) since they require synchronous reading
+                preparedStream = new MemoryStream();
+                await input.CopyToAsync(preparedStream, 81920, token).ConfigureAwait(false);
+                preparedStream.Position = 0;
+            }
+        }
+
+        return (preparedStream, format);
+    }
+    private static string InspectStreamFormat(Stream stream)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+
+        long initialPosition = stream.Position;
+        int firstByte = stream.ReadByte();
+
+        // Skip whitespace if present and read the next non-whitespace byte
+        if (char.IsWhiteSpace((char)firstByte))
+        {
+            firstByte = stream.ReadByte();
+        }
+
+        stream.Position = initialPosition; // Reset the stream position to the beginning
+
+        char firstChar = (char)firstByte;
+        return firstChar switch
+        {
+            '{' or '[' => OpenApiConstants.Json,  // If the first character is '{' or '[', assume JSON
+            _ => OpenApiConstants.Yaml             // Otherwise assume YAML
+        };
     }
 }
