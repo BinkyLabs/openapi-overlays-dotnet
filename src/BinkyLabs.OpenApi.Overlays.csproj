@@ -29,6 +29,8 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>../keyfile.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
