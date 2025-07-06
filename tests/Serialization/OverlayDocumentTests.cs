@@ -615,7 +615,7 @@ public class OverlayDocumentTests
     }
 
     [Fact]
-    public void Parse_WithValidJson_ReturnsReadResult()
+    public void Parse_WithValidJson_ReturnsReadResultJson()
     {
         // Arrange
         var json = """
@@ -636,7 +636,37 @@ public class OverlayDocumentTests
         """;
 
         // Act
-        var (overlayDocument, dignostic) = OverlayDocument.Parse(json);
+        var (overlayDocument, _) = OverlayDocument.Parse(json);
+
+        // Assert
+        Assert.NotNull(overlayDocument);
+        Assert.Equal("1.0.0", overlayDocument.Overlay);
+        Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
+        Assert.Equal("1.0.0", overlayDocument.Info?.Version);
+        Assert.NotNull(overlayDocument.Actions);
+        Assert.Single(overlayDocument.Actions);
+        Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
+        Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
+        Assert.True(overlayDocument.Actions[0].Remove);
+    }
+
+    [Fact]
+    public void Parse_WithValidJson_ReturnsReadResultYaml()
+    {
+        // Arrange
+        var json = """
+        overlay: 1.0.0
+        info:
+          title: Test Overlay
+          version: 1.0.0
+        actions:
+          - target: Test Target
+            description: Test Description
+            remove: true
+        """;
+
+        // Act
+        var (overlayDocument, _) = OverlayDocument.Parse(json);
 
         // Assert
         Assert.NotNull(overlayDocument);
