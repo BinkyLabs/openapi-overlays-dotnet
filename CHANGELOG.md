@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.4](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.3...v1.0.0-preview.4) (2025-07-06)
+
+
+### Bug Fixes
+
+* downgrades target to net8 for broader compatibility ([902293c](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/902293c59f2592365c087ba312ec290ed765cf5f))
+* downgrades target to net8 for broader compatibility ([cc2a61a](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/cc2a61a9a0d74686e8795f0433a5c865d6bb4809))
+
 ## [1.0.0-preview.3](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.2...v1.0.0-preview.3) (2025-07-06)
 
 
