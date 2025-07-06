@@ -1,7 +1,8 @@
-﻿using BinkyLabs.OpenApi.Overlays.Reader;
+﻿using System.Text.Json.Nodes;
+
+using BinkyLabs.OpenApi.Overlays.Reader;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays;
 
@@ -40,4 +41,12 @@ public interface IOverlayReader
     /// <param name="settings">The OpenApiReader settings.</param>  
     /// <returns>Instance of the newly created OpenAPI element.</returns>  
     T? ReadFragmentFromStream<T>(MemoryStream input, OverlaySpecVersion version, out OverlayDiagnostic diagnostic, OverlayReaderSettings? settings = null) where T : IOpenApiElement;
+
+    /// <summary>  
+    /// Reads the stream and returns a JsonNode representation of the input.
+    /// </summary>  
+    /// <param name="input">The stream input.</param>
+    /// <param name="cancellationToken">Propagates notification that an operation should be canceled.</param>  
+    /// <returns>A task that represents the asynchronous operation, containing the JsonNode.</returns>
+    Task<JsonNode?> GetJsonNodeFromStreamAsync(Stream input, CancellationToken cancellationToken = default);
 }

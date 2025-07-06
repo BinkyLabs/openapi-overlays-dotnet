@@ -5,6 +5,7 @@ BinkyLabs.OpenApi.Overlays.IOverlayExtensible.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.IOverlayExtension
 BinkyLabs.OpenApi.Overlays.IOverlayExtension.Write(Microsoft.OpenApi.IOpenApiWriter! writer, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
 BinkyLabs.OpenApi.Overlays.IOverlayReader
+BinkyLabs.OpenApi.Overlays.IOverlayReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.IOverlayReader.Read(System.IO.MemoryStream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings) -> BinkyLabs.OpenApi.Overlays.ReadResult!
 BinkyLabs.OpenApi.Overlays.IOverlayReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 BinkyLabs.OpenApi.Overlays.IOverlayReader.ReadFragmentFromStream<T>(System.IO.MemoryStream! input, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion version, out BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic! diagnostic, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null) -> T?
@@ -60,6 +61,7 @@ BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader
+BinkyLabs.OpenApi.Overlays.OverlayJsonReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.OverlayJsonReader() -> void
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.Read(System.IO.MemoryStream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings) -> BinkyLabs.OpenApi.Overlays.ReadResult!
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.Read(System.Text.Json.Nodes.JsonNode! jsonNode, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings) -> BinkyLabs.OpenApi.Overlays.ReadResult!
@@ -84,6 +86,14 @@ BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.Readers.init -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.TryAddReader(string! format, BinkyLabs.OpenApi.Overlays.IOverlayReader! reader) -> bool
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_0 = 1 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.OverlayYamlReader() -> void
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.Read(System.IO.MemoryStream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings) -> BinkyLabs.OpenApi.Overlays.ReadResult!
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.Read(System.Text.Json.Nodes.JsonNode! jsonNode, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings) -> BinkyLabs.OpenApi.Overlays.ReadResult!
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadFragmentFromJsonNode<T>(System.Text.Json.Nodes.JsonNode! input, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion version, out BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic! diagnostic, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null) -> T?
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadFragmentFromStream<T>(System.IO.MemoryStream! input, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion version, out BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic! diagnostic, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null) -> T?
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.get -> System.Collections.Generic.IList<Microsoft.OpenApi.OpenApiError!>!
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.set -> void

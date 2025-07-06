@@ -6,9 +6,6 @@ using BinkyLabs.Overlay.Overlays;
 
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
-using Microsoft.OpenApi.YamlReader;
-
-using SharpYaml.Serialization;
 
 namespace BinkyLabs.OpenApi.Overlays;
 
@@ -201,38 +198,19 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         ArgumentNullException.ThrowIfNull(input);
         readerSettings ??= new OverlayReaderSettings();
 
-        JsonNode? jsonNode;
-
         if (string.IsNullOrEmpty(format))
         {
             var (bufferedStream, detectedFormat) = await PrepareStreamForReadingAsync(input, cancellationToken).ConfigureAwait(false);
             format = detectedFormat;
             input = bufferedStream;
         }
-        // TODO maybe this should be a registry on the overlay reader settings?
-        if (OpenApiConstants.Json.Equals(format, StringComparison.OrdinalIgnoreCase))
+        var reader = readerSettings.GetReader(format);
+        if (reader is null)
         {
-            jsonNode = await JsonNode.ParseAsync(input, cancellationToken: cancellationToken).ConfigureAwait(false);
+            throw new NotSupportedException($"No reader found for format '{format}'.");
         }
-        else if (OpenApiConstants.Yaml.Equals(format, StringComparison.OrdinalIgnoreCase))
-        {
-            using var textReader = new StreamReader(input, System.Text.Encoding.UTF8);
-            var yamlStream = new YamlStream();
-            yamlStream.Load(textReader);
-            jsonNode = yamlStream is { Documents.Count: > 0 }
-                ? yamlStream.Documents[0].ToJsonNode()
-                : throw new InvalidOperationException("No documents found in the YAML stream.");
-
-        }
-        else
-        {
-            throw new ArgumentException($"Unsupported format: {format}", nameof(format));
-        }
-
-        if (jsonNode is null)
-        {
+        var jsonNode = await reader.GetJsonNodeFromStreamAsync(input, cancellationToken).ConfigureAwait(false) ??
             throw new InvalidOperationException("Failed to parse the OpenAPI document.");
-        }
         var overlayDiagnostic = new OverlayDiagnostic();
         var result = ApplyToDocument(jsonNode, overlayDiagnostic);
         if (!result)

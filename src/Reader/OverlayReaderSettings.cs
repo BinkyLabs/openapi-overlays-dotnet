@@ -18,7 +18,8 @@ public class OverlayReaderSettings
 
     private Dictionary<string, IOverlayReader> _readers = new(StringComparer.OrdinalIgnoreCase)
         {
-            { OpenApiConstants.Json, new OverlayJsonReader() }
+            { OpenApiConstants.Json, new OverlayJsonReader() },
+            { OpenApiConstants.Yaml, new OverlayYamlReader() }
         };
 
     /// <summary>  

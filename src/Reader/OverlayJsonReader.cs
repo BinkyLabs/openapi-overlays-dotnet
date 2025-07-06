@@ -210,4 +210,10 @@ public class OverlayJsonReader : IOverlayReader
 
         return (T?)element;
     }
+
+    /// <inheritdoc/>
+    public async Task<JsonNode?> GetJsonNodeFromStreamAsync(Stream input, CancellationToken cancellationToken = default)
+    {
+        return await JsonNode.ParseAsync(input, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
 }
