@@ -58,7 +58,6 @@ jobs:
       - name: Publish to NuGet
         run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
       - name: Publish to GitHub Packages
-        run: dotnet nuget push *.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} *.*nupkg --repo ${{ github.repository }} --clobber
         env:
-          NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
