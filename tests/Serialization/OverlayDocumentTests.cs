@@ -534,4 +534,91 @@ public class OverlayDocumentTests
         Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
 
     }
+
+
+    [Fact]
+    public async Task LoadAsync_WithValidFilePath_ReturnsReadResult()
+    {
+        // Arrange
+        var json = """
+        {
+            "openapi": "3.0.0",
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "extends": "x-extends",
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            },
+         "actions": [
+                {
+                    "target": "Test Target",
+                    "description": "Test Description",
+                    "update": {
+                        "summary": "Updated summary",
+                        "description": "Updated description"
+                    }
+                },{
+                    "target": "Test Target 2",
+                    "description": "Test Description 2",
+                    "update": ["tag1", "tag2"]
+                }
+            ]
+        }
+        """;
+
+        var tempFile = @"./ValidFile.json";
+        await File.WriteAllTextAsync(tempFile, json);
+
+        try
+        {
+            // Act
+            var (overlayDocument, dignostic) = await OverlayDocument.LoadAsync(tempFile);
+
+            // Assert
+            Assert.NotNull(overlayDocument);
+            Assert.Equal("2.0.0", overlayDocument.Info?.Version);
+            Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
+            Assert.Equal("1.0.0", overlayDocument.Overlay);
+            Assert.Equal("x-extends", overlayDocument.Extends);
+            Assert.NotNull(overlayDocument.Extensions);
+            Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
+            var extension = overlayDocument.Extensions["x-custom-extension"];
+            var jsonNodeExtension = Assert.IsType<JsonNodeExtension>(extension);
+            var node = jsonNodeExtension.Node;
+            Assert.NotNull(node);
+            Assert.Equal("someValue", node["someProperty"]?.GetValue<string>());
+
+            // Assert the 2 actions
+            Assert.NotNull(overlayDocument.Actions);
+            Assert.Equal(2, overlayDocument.Actions.Count);
+
+            // First action with object update
+            Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
+            Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
+            var updateProperty = overlayDocument.Actions[0].Update;
+            Assert.NotNull(updateProperty);
+            var updateObject = updateProperty.AsObject();
+            Assert.Equal("Updated summary", updateObject["summary"]?.GetValue<string>());
+            Assert.Equal("Updated description", updateObject["description"]?.GetValue<string>());
+
+            // Second action with array update
+            Assert.Equal("Test Target 2", overlayDocument.Actions[1].Target);
+            Assert.Equal("Test Description 2", overlayDocument.Actions[1].Description);
+            var updatePropertyArray = overlayDocument.Actions[1].Update;
+            Assert.NotNull(updatePropertyArray);
+            var updateArray = updatePropertyArray.AsArray();
+            Assert.Equal(2, updateArray.Count);
+            Assert.Equal("tag1", updateArray[0]?.GetValue<string>());
+            Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
+        }
+        finally
+        {
+            //File.Delete(tempFile);
+        }
+    }
+
+
 }
