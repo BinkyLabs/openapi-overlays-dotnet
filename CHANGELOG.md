@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.3](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.2...v1.0.0-preview.3) (2025-07-06)
+
+
+### Bug Fixes
+
+* adds symbols package ([f4a6d3f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f4a6d3fdbe9257e94e5a594d92833009f746b27b))
+
 ## [1.0.0-preview.2](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.1...v1.0.0-preview.2) (2025-07-06)
 
 
