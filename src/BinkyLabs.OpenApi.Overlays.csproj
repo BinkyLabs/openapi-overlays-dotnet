@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <Version>1.0.0-preview.3</Version>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Authors>BinkyLabs</Authors>
     <Copyright>BinkyLabs. All rights reserved.</Copyright>
