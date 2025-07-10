@@ -10,7 +10,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader;
 /// <summary>
 /// Object containing all diagnostic information related to Open API parsing.
 /// </summary>
-public class OverlayDiagnostic : IDiagnostic
+public class OverlayDiagnostic
 {
     /// <summary>
     /// List of all errors.
