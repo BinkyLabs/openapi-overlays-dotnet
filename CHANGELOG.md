@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.5](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.4...v1.0.0-preview.5) (2025-08-04)
+
+
+### Features
+
+* upgrades to oai.net GA ([3361d32](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3361d32e69408e2b7ced571aa755558a57acde30))
+* upgrades to oai.net GA ([56afe5b](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/56afe5b493e082d385307c84918a7e7551f36693))
+
 ## [1.0.0-preview.4](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.3...v1.0.0-preview.4) (2025-07-06)
 
 
