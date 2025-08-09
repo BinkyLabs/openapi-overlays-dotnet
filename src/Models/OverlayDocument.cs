@@ -207,6 +207,38 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonNode, location, readerSettings.OpenApiSettings);
         return (openAPIDocument, overlayDiagnostic, openApiDiagnostic);
     }
+    /// <summary>
+    /// Combines this overlay document with another overlay document.
+    /// The returned document will be a new document, and its metadata (info, etc.) will be the one from the other document.
+    /// The actions from both documents will be merged. The current document actions will be first, and the ones from the other document will be next.
+    /// </summary>
+    /// <param name="others"></param>
+    /// <returns>The merged overlay document.</returns>
+    public OverlayDocument CombineWith(params OverlayDocument[] others)
+    {
+        if (others is not { Length: > 0 })
+        {
+            throw new ArgumentException("At least one other document must be provided.", nameof(others));
+        }
+
+        var lastDocument = others[^1];
+        var actions = new List<OverlayAction>(Actions ?? []);
+        var mergedDocument = new OverlayDocument
+        {
+            Info = lastDocument.Info,
+            Extensions = lastDocument.Extensions is not null
+                ? new Dictionary<string, IOverlayExtension>(lastDocument.Extensions)
+                : null,
+            Extends = lastDocument.Extends,
+            Actions = actions,
+        };
+
+        // Merge actions from all documents
+        actions.AddRange(others.Where(static x => x.Actions is not null)
+            .SelectMany(static x => x.Actions!));
+
+        return mergedDocument;
+    }
     private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, CancellationToken token = default)
     {
         Stream preparedStream = input;

@@ -33,6 +33,16 @@ The following example illustrates how you can apply an Overlay document to an Op
 var resultOpenApiDocument = await overlayDocument.ApplyToDocumentAsync("https://source/openapi.json");
 ```
 
+### Applying multiple Overlay documents to an OpenAPI document
+
+The following example illustrates how you can apply multiple Overlay documents to an OpenAPI document.
+
+```csharp
+var combinedOverlay = overlayDocument1.CombineWith(overlayDocument2);
+// order matters during the combination, the actions will be appended
+var resultOpenApiDocument = await combinedOverlay.ApplyToDocumentAsync("https://source/openapi.json");
+```
+
 ### Serializing an Overlay document
 
 The following example illustrates how you can serialize an Overlay document, built by the application or previously parsed, to JSON.
