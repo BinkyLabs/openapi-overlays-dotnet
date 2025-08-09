@@ -216,7 +216,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The merged overlay document.</returns>
     public OverlayDocument CombineWith(params OverlayDocument[] others)
     {
-        if (others is not { Length : > 0 })
+        if (others is not { Length: > 0 })
         {
             throw new ArgumentException("At least one other document must be provided.", nameof(others));
         }
