@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.6](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.5...v1.0.0-preview.6) (2025-08-09)
+
+
+### Features
+
+* adds the ability to apply multiple overlay documents to a single OpenAPI document ([50d6bc9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/50d6bc96c1887825ebaa270f1a599a7b4f9706a7))
+* adds the ability to apply multiple overlay documents to a single OpenAPI document ([d192033](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d1920331349c756c5e3cf11010b07bf1b25ffa0f))
+
 ## [1.0.0-preview.5](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.4...v1.0.0-preview.5) (2025-08-04)
 
 
