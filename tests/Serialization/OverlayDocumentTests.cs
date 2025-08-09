@@ -26,15 +26,15 @@ public class OverlayDocumentTests
                 Version = "1.0.0"
             },
             Extends = "x-extends",
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "Test Target",
                     Description = "Test Description",
                     Remove = true
                 }
-            },
+            ],
             Extensions = new Dictionary<string, IOverlayExtension>
             {
                 { "x-custom-extension", new JsonNodeExtension(new JsonObject { { "someProperty", "someValue" } }) }
@@ -153,15 +153,15 @@ public class OverlayDocumentTests
                 Version = "1.0.0"
             },
             Extends = "x-extends",
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "Test Target",
                     Description = "Test Description",
                     Update = updateNode
                 }
-            }
+            ]
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -268,15 +268,15 @@ public class OverlayDocumentTests
     {
         var overlayDocument = new OverlayDocument
         {
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "Test Target",
                     Description = "Test Description",
                     Remove = true
                 }
-            }
+            ]
         };
         JsonNode? jsonNode = null;
         var overlayDiagnostic = new OverlayDiagnostic();
@@ -287,15 +287,15 @@ public class OverlayDocumentTests
     {
         var overlayDocument = new OverlayDocument
         {
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "Test Target",
                     Description = "Test Description",
                     Remove = true
                 }
-            }
+            ]
         };
         var jsonNode = new JsonObject();
         OverlayDiagnostic? overlayDiagnostic = null;
@@ -306,15 +306,15 @@ public class OverlayDocumentTests
     {
         var overlayDocument = new OverlayDocument
         {
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "$.info.title",
                     Description = "Test Description",
                     Remove = true
                 }
-            }
+            ]
         };
         var jsonNode = new JsonObject
         {
@@ -360,8 +360,8 @@ public class OverlayDocumentTests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "$.info.randomProperty",
@@ -377,7 +377,7 @@ public class OverlayDocumentTests
                         ["summary"] = "Updated summary"
                     }
                 }
-            }
+            ]
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
@@ -429,8 +429,8 @@ public class OverlayDocumentTests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Actions = new List<OverlayAction>
-            {
+            Actions =
+            [
                 new OverlayAction
                 {
                     Target = "$.info.randomProperty",
@@ -446,7 +446,7 @@ public class OverlayDocumentTests
                         ["summary"] = "Updated summary"
                     }
                 }
-            }
+            ]
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
@@ -575,7 +575,7 @@ public class OverlayDocumentTests
         await File.WriteAllTextAsync(tempFile, json);
 
         // Act
-        var (overlayDocument, dignostic) = await OverlayDocument.LoadFromUrlAsync(tempFile);
+        var (overlayDocument, _) = await OverlayDocument.LoadFromUrlAsync(tempFile);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -679,5 +679,81 @@ public class OverlayDocumentTests
         Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
         Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
         Assert.True(overlayDocument.Actions[0].Remove);
+    }
+    [Fact]
+    public void CombineWithThrowsOnEmptyInput()
+    {
+        var overlayDocument = new OverlayDocument();
+
+        Assert.Throws<ArgumentException>(() => overlayDocument.CombineWith(null!));
+    }
+    [Fact]
+    public void UsesMetadataFromLastDocumentWhenCombiningOverlays()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Overlay 1",
+                Version = "1.0.0"
+            },
+            Extends = "base.yaml"
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Overlay 2",
+                Version = "1.0.1"
+            },
+            Extends = "base2.yaml"
+        };
+
+        // When
+        var result = overlayDocument1.CombineWith(overlayDocument2);
+
+        // Then
+        Assert.Equal("Overlay 2", result.Info?.Title);
+        Assert.Equal("1.0.1", result.Info?.Version);
+        Assert.Equal("base2.yaml", result.Extends);
+        Assert.NotNull(result.Actions);
+        Assert.Empty(result.Actions);
+    }
+    [Fact]
+    public void CombinesActionsInTheRightOrder()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction { Target = "Target1", Description = "Description1", Remove = false },
+                new OverlayAction { Target = "Target2", Description = "Description2", Remove = true }
+            ]
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction { Target = "Target3", Description = "Description3", Remove = false }
+            ]
+        };
+
+        // When
+        var result = overlayDocument1.CombineWith(overlayDocument2);
+
+        // Then
+        Assert.NotNull(result.Actions);
+        Assert.Equal(3, result.Actions.Count);
+        Assert.Equal("Target1", result.Actions[0].Target);
+        Assert.Equal("Description1", result.Actions[0].Description);
+        Assert.False(result.Actions[0].Remove);
+        Assert.Equal("Target2", result.Actions[1].Target);
+        Assert.Equal("Description2", result.Actions[1].Description);
+        Assert.True(result.Actions[1].Remove);
+        Assert.Equal("Target3", result.Actions[2].Target);
+        Assert.Equal("Description3", result.Actions[2].Description);
+        Assert.False(result.Actions[2].Remove);
     }
 }
