@@ -29,7 +29,10 @@ public static class OverlayModelFactory
     {
         settings ??= DefaultReaderSettings.Value;
         var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
-        return await LoadFromStreamAsync(stream, format, settings, token).ConfigureAwait(false);
+        using (stream)
+        {
+            return await LoadFromStreamAsync(stream, format, settings, token).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
