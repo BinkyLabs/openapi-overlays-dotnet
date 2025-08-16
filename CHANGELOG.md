@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.7](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.6...v1.0.0-preview.7) (2025-08-16)
+
+
+### Bug Fixes
+
+* adds missing using for the stream ([69549e0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/69549e0e0330dab64140d5a8011f7d9dccf722ab))
+
 ## [1.0.0-preview.6](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.5...v1.0.0-preview.6) (2025-08-09)
 
 
