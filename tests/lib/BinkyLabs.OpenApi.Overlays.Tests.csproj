@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>../keyfile.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\BinkyLabs.OpenApi.Overlays.csproj" />
+    <ProjectReference Include="..\..\src\lib\BinkyLabs.OpenApi.Overlays.csproj" />
   </ItemGroup>
 
 </Project>

@@ -28,7 +28,7 @@
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)','net8.0'))">true</IsAotCompatible>
     <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>../keyfile.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../keyfile.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -45,7 +45,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.OpenApi" Version="2.2.0"/>
-    <None Include="..\README.md" Pack="true" PackagePath="README.md"/>
+    <None Include="..\..\README.md" Pack="true" PackagePath="README.md"/>
     <None Include="Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png"/>
     <PackageReference Include="Microsoft.OpenApi.YamlReader" Version="2.2.0"/>
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">

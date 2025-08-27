@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: packages
-          path: src/bin/Release/*.*nupkg
+          path: src/*/bin/Release/*.*nupkg
       - name:  Publish coverage report to GitHub Step Summary
         run: |
            cat reports/coverage/Summary.md >>  $GITHUB_STEP_SUMMARY
