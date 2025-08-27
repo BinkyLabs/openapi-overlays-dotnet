@@ -14,12 +14,12 @@ namespace BinkyLabs.OpenApi.Overlays.Cli;
 
 public class OverlayCliApp
 {
-    public async Task<int> RunAsync(string[] args)
+    public async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
         var rootCommand = new RootCommand("BinkyLabs OpenAPI Overlays CLI - Apply overlays to OpenAPI documents");
         var applyCommand = CreateApplyCommand();
         rootCommand.Add(applyCommand);
-        return await rootCommand.Parse(args).InvokeAsync();
+        return await rootCommand.Parse(args).InvokeAsync(cancellationToken: cancellationToken);
     }
 
     private Command CreateApplyCommand()
