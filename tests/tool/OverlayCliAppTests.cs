@@ -31,7 +31,7 @@ public sealed class OverlayCliAppTests : IDisposable
     public async Task RunAsync_WithArguments_ReturnsOK()
     {
         var app = new OverlayCliApp();
-        var result = await app.RunAsync([_tempInputFile, "--overlay", _tempOverlayFile, "-out", _tempOutputFile]);
+        var result = await app.RunAsync(["apply", _tempInputFile, "--overlay", _tempOverlayFile, "-out", _tempOutputFile]);
         Assert.Equal(0, result);
     }
 
