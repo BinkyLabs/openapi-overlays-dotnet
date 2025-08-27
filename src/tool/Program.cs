@@ -15,19 +15,11 @@ internal static class Program
     private static async Task<int> Main(string[] args)
     {
         // Create the root command
-        var rootCommand = new RootCommand("OpenAPI Overlays CLI - Apply overlays to OpenAPI documents");
+        var rootCommand = new RootCommand("BinkyLabs OpenAPI Overlays CLI - Apply overlays to OpenAPI documents");
 
         // Create the apply command
         var applyCommand = CreateApplyCommand();
         rootCommand.Add(applyCommand);
-
-        // Set up cancellation token for Ctrl+C
-        using var cancellationTokenSource = new CancellationTokenSource();
-        Console.CancelKeyPress += (sender, e) =>
-        {
-            e.Cancel = true;
-            cancellationTokenSource.Cancel();
-        };
 
         // Parse and invoke the command
         return await rootCommand.InvokeAsync(args);
@@ -55,17 +47,29 @@ internal static class Program
         applyCommand.Add(outputOption);
 
         // Set the handler for the apply command
-        applyCommand.SetHandler(async (input, overlays, output) =>
+        applyCommand.SetHandler(async (context) =>
         {
-            using var cancellationTokenSource = new CancellationTokenSource();
-            Console.CancelKeyPress += (sender, e) =>
-            {
-                e.Cancel = true;
-                cancellationTokenSource.Cancel();
-            };
+            var input = context.ParseResult.GetValueForArgument(inputArgument);
+            var overlays = context.ParseResult.GetValueForOption(overlayOption);
+            var output = context.ParseResult.GetValueForOption(outputOption);
+            var cancellationToken = context.GetCancellationToken();
 
-            await HandleApplyCommand(input, overlays ?? Array.Empty<string>(), output, cancellationTokenSource.Token);
-        }, inputArgument, overlayOption, outputOption);
+            if (string.IsNullOrEmpty(input))
+            {
+                await Console.Error.WriteLineAsync("Error: Input argument is required.");
+                context.ExitCode = 1;
+                return;
+            }
+
+            if (string.IsNullOrEmpty(output))
+            {
+                await Console.Error.WriteLineAsync("Error: Output option is required.");
+                context.ExitCode = 1;
+                return;
+            }
+
+            await HandleApplyCommand(input, overlays ?? [], output, cancellationToken);
+        });
 
         return applyCommand;
     }
