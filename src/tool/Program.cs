@@ -180,11 +180,13 @@ internal static class Program
                 }
             }
 
-            var combinedOverlay = overlayDocuments.Count == 1
-                ? overlayDocuments[0]
-                : overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]);
+            var combinedOverlay = overlayDocuments.Count switch {
+                0 => throw new InvalidOperationException("No overlays to apply."),
+                1 => overlayDocuments[0],
+                _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
+            };
 
-            var (openApiDocument, applyOverlayDiagnostic, openApiDiagnostic) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
+            var (openApiDocument, applyOverlayDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
             // Write final result to output file
