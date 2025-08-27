@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using BinkyLabs.OpenApi.Overlays;
 using BinkyLabs.OpenApi.Overlays.Reader;
 
+using Microsoft.OpenApi;
+
 namespace BinkyLabs.OpenApi.Overlays.Cli;
 
 internal static class Program
@@ -35,6 +37,8 @@ internal static class Program
         // Overlay option (can accept multiple values)
         var overlayOption = new Option<string[]>("--overlay", "Path to overlay file(s). Can be specified multiple times.");
         overlayOption.AddAlias("-o");
+        overlayOption.Arity = ArgumentArity.ZeroOrMore;
+        overlayOption.IsRequired = true;
 
         // Output path option
         var outputOption = new Option<string>("--output", "Path for the output file");
@@ -149,73 +153,52 @@ internal static class Program
             readerSettings.AddJsonReader();
 
             // Apply overlays sequentially
-            var currentResult = inputPath;
             var allDiagnostics = new List<OverlayDiagnostic>();
-            
+            var overlayDocuments = new List<OverlayDocument>();
+
             foreach (var overlayPath in overlayPaths)
             {
-                Console.WriteLine($"🔄 Applying overlay: {Path.GetFileName(overlayPath)}...");
-                
+                Console.WriteLine($"🔄 Loading overlay: {Path.GetFileName(overlayPath)}...");
+
                 // Check for cancellation
                 cancellationToken.ThrowIfCancellationRequested();
 
                 // Load the overlay document from file
                 using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
-                var overlayResult = await OverlayDocument.LoadFromStreamAsync(overlayStream, null, readerSettings, cancellationToken);
-                
-                if (overlayResult.Document == null)
+                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, null, readerSettings, cancellationToken);
+
+                if (overlayDocument == null)
                 {
-                    throw new InvalidOperationException($"Failed to load overlay: {overlayPath}. Errors: {string.Join(", ", overlayResult.Diagnostic?.Errors.Select(e => e.Message) ?? Array.Empty<string>())}");
+                    throw new InvalidOperationException($"Failed to load overlay: {overlayPath}. Errors: {string.Join(", ", overlayDiagnostic?.Errors.Select(e => e.Message) ?? Array.Empty<string>())}");
                 }
 
-                // Apply the overlay to the current document
-                var (resultDocument, overlayDiagnostic, _) = await overlayResult.Document.ApplyToDocumentAsync(
-                    currentResult, 
-                    null, // Let it auto-detect format
-                    readerSettings, 
-                    cancellationToken);
+                overlayDocuments.Add(overlayDocument);
 
-                // Collect diagnostics
                 if (overlayDiagnostic != null)
+                {
                     allDiagnostics.Add(overlayDiagnostic);
-
-                if (resultDocument is null)
-                {
-                    throw new InvalidOperationException($"Failed to apply overlay: {overlayPath}. Errors: {string.Join(", ", overlayDiagnostic?.Errors.Select(e => e.Message) ?? Array.Empty<string>())}");
                 }
-
-                // For now, we'll save the intermediate result and use it as input for the next overlay
-                // This is a simplified approach - ideally we'd keep it in memory
-                var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                
-                // Write the result to temp file using the library's serialization
-                // For now, we'll create a simple placeholder until we can access the proper serialization
-                await File.WriteAllTextAsync(tempPath, 
-                    $"# OpenAPI document after applying {Path.GetFileName(overlayPath)}\n# This is a placeholder - actual implementation needs proper serialization",
-                    cancellationToken);
-                
-                // Update currentResult for next iteration
-                if (currentResult != inputPath)
-                {
-                    File.Delete(currentResult); // Clean up previous temp file
-                }
-                currentResult = tempPath;
             }
+
+            var combinedOverlay = overlayDocuments.Count == 1
+                ? overlayDocuments[0]
+                : overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]);
+
+            var (openApiDocument, applyOverlayDiagnostic, openApiDiagnostic) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
+            allDiagnostics.Add(applyOverlayDiagnostic);
 
             // Write final result to output file
             Console.WriteLine("🔄 Writing output document...");
+
+            using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+            using var textWriter = new StreamWriter(outputStream);
+            using var writer = format switch
+            {
+                "yaml" => new OpenApiYamlWriter(textWriter),
+                _ => new OpenApiJsonWriter(textWriter),
+            };
             
-            if (currentResult == inputPath)
-            {
-                // No overlays were applied, just copy the input
-                await File.WriteAllTextAsync(outputPath, await File.ReadAllTextAsync(inputPath, cancellationToken), cancellationToken);
-            }
-            else
-            {
-                // Move the final result to the output path
-                await File.WriteAllTextAsync(outputPath, await File.ReadAllTextAsync(currentResult, cancellationToken), cancellationToken);
-                File.Delete(currentResult); // Clean up temp file
-            }
+            await openApiDocument.SerializeAsync(writer, cancellationToken);
 
             // Report any warnings
             var allWarnings = allDiagnostics.SelectMany(d => d.Warnings).ToList();
