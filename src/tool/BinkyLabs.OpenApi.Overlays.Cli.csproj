@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -13,6 +13,14 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- Tool packaging properties -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>clio</ToolCommandName>
+    <PackageId>BinkyLabs.OpenApi.Overlays.Tool</PackageId>
+    <Version>1.0.0-preview.7</Version>
+    <Authors>BinkyLabs</Authors>
+    <Description>OpenAPI Overlays CLI - Apply overlays to OpenAPI documents</Description>
   </PropertyGroup>
 
 </Project>
