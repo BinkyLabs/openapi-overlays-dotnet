@@ -77,10 +77,10 @@ public class OverlayCliApp
     {
         try
         {
-            Console.WriteLine($"Applying overlays to OpenAPI document...");
-            Console.WriteLine($"Input: {input}");
-            Console.WriteLine($"Overlays: {string.Join(", ", overlays)}");
-            Console.WriteLine($"Output: {output}");
+            await Console.Out.WriteLineAsync($"Applying overlays to OpenAPI document...");
+            await Console.Out.WriteLineAsync($"Input: {input}");
+            await Console.Out.WriteLineAsync($"Overlays: {string.Join(", ", overlays)}");
+            await Console.Out.WriteLineAsync($"Output: {output}");
 
             if (!File.Exists(input))
             {
