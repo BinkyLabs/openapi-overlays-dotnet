@@ -175,23 +175,11 @@ public class OverlayCliApp
 
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
             var format = InspectStreamFormat(outputStream);
-            using var textWriter = new StreamWriter(outputStream);
-            OpenApiWriterBase writer = format switch
-            {
-                "yaml" => new OpenApiYamlWriter(textWriter),
-                _ => new OpenApiJsonWriter(textWriter),
-            };
 
             if (openApiDocument is null)
                 throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
 
-            await openApiDocument.SerializeAsync(
-                outputStream,
-                OpenApiSpecVersion.OpenApi2_0,
-                format,
-                cancellationToken
-            );
-            await openApiDocument.SerializeAsync(outputStream, OpenApiSpecVersion.OpenApi2_0, format, cancellationToken);
+            await openApiDocument.SerializeAsync(outputStream, OpenApiSpecVersion.OpenApi3_1, format, cancellationToken);
 
             var allWarnings = allDiagnostics.SelectMany(d => d.Warnings).ToList();
             if (allWarnings.Count > 0)
@@ -211,7 +199,7 @@ public class OverlayCliApp
 
     private string InspectStreamFormat(Stream stream)
     {
-        if (stream is null) throw new ArgumentNullException(nameof(stream));
+        ArgumentNullException.ThrowIfNull(stream);
 
         long initialPosition = stream.Position;
         int firstByte = stream.ReadByte();
