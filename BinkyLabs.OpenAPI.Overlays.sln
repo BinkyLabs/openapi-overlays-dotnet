@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Cli", "src\tool\BinkyLabs.OpenApi.Overlays.Cli.csproj", "{6B7C4DDD-350A-4951-9313-D949DE6A6B60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Cli.Tests", "tests\BinkyLabs.OpenApi.Overlays.Cli.Tests\BinkyLabs.OpenApi.Overlays.Cli.Tests.csproj", "{055FB10E-5108-4EBD-A779-2992478BF5F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Cli.Tests", "tests\tool\BinkyLabs.OpenApi.Overlays.Cli.Tests.csproj", "{055FB10E-5108-4EBD-A779-2992478BF5F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
