@@ -1,4 +1,3 @@
-using System.IO;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
@@ -184,7 +183,10 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     {
         ArgumentNullException.ThrowIfNull(input);
         readerSettings ??= new OverlayReaderSettings();
-        input.Position = 0;
+        if (input.CanSeek)
+        {
+            input.Seek(0, SeekOrigin.Begin);
+        }
 
         if (string.IsNullOrEmpty(format))
         {
