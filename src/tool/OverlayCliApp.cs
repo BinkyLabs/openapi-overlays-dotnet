@@ -146,7 +146,9 @@ public class OverlayCliApp
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
-                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, null, readerSettings, cancellationToken);
+                var formatOverlay = InspectStreamFormat(overlayStream);
+
+                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, formatOverlay, readerSettings, cancellationToken);
 
                 if (overlayDocument == null)
                 {
@@ -168,18 +170,17 @@ public class OverlayCliApp
                 _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
             };
 
-            var (openApiDocument, applyOverlayDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
+            var (openApiDocument, applyOverlayDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, null, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
             Console.WriteLine("🔄 Writing output document...");
 
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
-            var format = InspectStreamFormat(outputStream);
 
             if (openApiDocument is null)
                 throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
 
-            await openApiDocument.SerializeAsync(outputStream, OpenApiSpecVersion.OpenApi3_1, format, cancellationToken);
+            await openApiDocument.SerializeAsync(outputStream, OpenApiSpecVersion.OpenApi3_1, OpenApiConstants.Json, cancellationToken);
 
             var allWarnings = allDiagnostics.SelectMany(d => d.Warnings).ToList();
             if (allWarnings.Count > 0)
@@ -202,16 +203,25 @@ public class OverlayCliApp
         ArgumentNullException.ThrowIfNull(stream);
 
         long initialPosition = stream.Position;
-        int firstByte = stream.ReadByte();
+        int currentByte;
+        char firstChar = '\0';
 
-        if (char.IsWhiteSpace((char)firstByte))
+        // Read until we find a non-whitespace character or reach end of stream
+        do
         {
-            firstByte = stream.ReadByte();
+            currentByte = stream.ReadByte();
+            if (currentByte == -1)
+            {
+                // End of stream, treat as YAML by default
+                stream.Position = initialPosition;
+                return OpenApiConstants.Yaml;
+            }
+            firstChar = (char)currentByte;
         }
+        while (char.IsWhiteSpace(firstChar));
 
         stream.Position = initialPosition;
 
-        char firstChar = (char)firstByte;
         return firstChar switch
         {
             '{' or '[' => OpenApiConstants.Json,

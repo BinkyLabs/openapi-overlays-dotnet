@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
@@ -183,6 +184,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     {
         ArgumentNullException.ThrowIfNull(input);
         readerSettings ??= new OverlayReaderSettings();
+        input.Position = 0;
 
         if (string.IsNullOrEmpty(format))
         {
@@ -195,6 +197,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             throw new NotSupportedException($"No reader found for format '{format}'.");
         }
+
+
         var jsonNode = await reader.GetJsonNodeFromStreamAsync(input, cancellationToken).ConfigureAwait(false) ??
             throw new InvalidOperationException("Failed to parse the OpenAPI document.");
         var overlayDiagnostic = new OverlayDiagnostic();
