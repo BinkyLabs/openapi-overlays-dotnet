@@ -12,7 +12,7 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Cli;
 
-public static class OverlayCliApp
+internal static class OverlayCliApp
 {
     public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
@@ -62,14 +62,14 @@ public static class OverlayCliApp
                 return 1;
             }
 
-            await HandleApplyCommand(input, overlays ?? [], output, cancellationToken);
+            await HandleApplyCommandAsync(input, overlays ?? [], output, cancellationToken);
             return 0;
         });
 
         return applyCommand;
     }
 
-    private static async Task HandleApplyCommand(
+    private static async Task HandleApplyCommandAsync(
         string input,
         string[] overlays,
         string output,
