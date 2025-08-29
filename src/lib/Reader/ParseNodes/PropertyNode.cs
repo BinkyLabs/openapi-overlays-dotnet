@@ -87,17 +87,9 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                         Context.EndObject();
                     }
                 }
-                else
+                else if (!"$schema".Equals(Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    var error = new OpenApiError("", $"{Name} is not a valid property at {Context.GetLocation()}");
-                    if ("$schema".Equals(Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Context.Diagnostic.Warnings.Add(error);
-                    }
-                    else
-                    {
-                        Context.Diagnostic.Errors.Add(error);
-                    }
+                    Context.Diagnostic.Errors.Add(new OpenApiError("", $"{Name} is not a valid property at {Context.GetLocation()}"));
                 }
             }
         }
