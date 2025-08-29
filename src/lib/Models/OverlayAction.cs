@@ -126,6 +126,8 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(), $"Invalid last segment JSON Path: '{lastSegmentPath}'"));
                 return false;
             }
+            var parentPathEndsWithWildcard = parentPath.Segments[^1].Selectors.FirstOrDefault() is WildcardSelector;
+            var itemRemoved = false;
             foreach (var parentMatch in parentParseResult.Matches)
             {
                 if (parentMatch.Value is not JsonNode parentJsonNode)
@@ -140,6 +142,12 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
                 }
                 if (lastSegmentParseResult.Matches.Count < 1)
                 {
+                    if (parentPathEndsWithWildcard && itemRemoved)
+                    {
+                        // If the parent path ends with a wildcard and we've already removed an item,
+                        // it's acceptable for some segments to have no matches.
+                        continue;
+                    }
                     overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(), $"Last segment target '{lastSegmentPath}' must point to at least one JSON node"));
                     return false;
                 }
@@ -152,6 +160,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
                 {
                     return false;
                 }
+                itemRemoved = true;
             }
         }
         return true;

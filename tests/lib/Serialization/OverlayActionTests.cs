@@ -362,6 +362,46 @@ public class OverlayActionTests
         Assert.Empty(overlayDiagnostic.Errors);
     }
     [Fact]
+    public void ApplyToDocument_ShouldRemoveANodeAndNotErrorInWildcard()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.components.schemas['Foo'].anyOf[*].default",
+            Remove = true
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            },
+            "components": {
+                "schemas": {
+                    "Foo": {
+                        "anyOf": [
+                            {
+                                "default": "value1"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.True(result);
+        Assert.Null(jsonNode["components"]?["schemas"]?["Foo"]?["anyOf"]?[0]?["default"]);
+        Assert.Null(jsonNode["components"]?["schemas"]?["Foo"]?["anyOf"]?[1]?["default"]);
+        Assert.Equal("string", jsonNode["components"]?["schemas"]?["Foo"]?["anyOf"]?[1]?["type"]?.GetValue<string>());
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+    [Fact]
     public void ApplyToDocument_ShouldUpdateANode()
     {
         var overlayAction = new OverlayAction
