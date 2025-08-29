@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0-preview.8](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.7...v1.0.0-preview.8) (2025-08-29)
+
+
+### Features
+
+* adds a CLI tool to apply overlays ([f1e100d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f1e100d479af937e51540d7d65715a4d5888c2bf))
+
+
+### Bug Fixes
+
+* adds missing unit test ([86b249b](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/86b249b30f10c908abce8b3fe16052a192669b5b))
+
 ## [1.0.0-preview.7](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.6...v1.0.0-preview.7) (2025-08-16)
 
 
