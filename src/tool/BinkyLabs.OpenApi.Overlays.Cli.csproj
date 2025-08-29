@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\lib\BinkyLabs.OpenApi.Overlays.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SignAssembly>true</SignAssembly>
+    <Authors>BinkyLabs</Authors>
+    <Copyright>BinkyLabs. All rights reserved.</Copyright>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageIcon>logo-binkylabs.png</PackageIcon>
+    <IncludePackageIcon>true</IncludePackageIcon>
+    <RepositoryUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/BinkyLabs/openapi-overlays-dotnet</PackageProjectUrl>
+    <PackageReleaseNotes>
+      https://github.com/BinkyLabs/openapi-overlays-dotnet/releases
+    </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Tool packaging properties -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>clio</ToolCommandName>
+    <PackageId>BinkyLabs.OpenApi.Overlays.Tool</PackageId>
+    <Version>1.0.0-preview.7</Version>
+    <Authors>BinkyLabs</Authors>
+    <Description>OpenAPI Overlays CLI - Apply overlays to OpenAPI documents</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>openapi;overlays;api;swagger;json;yaml;specification;dotnet</PackageTags>
+    <AssemblyOriginatorKeyFile>../../keyfile.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+   <ItemGroup>
+    <None Include="./README.md" Pack="true" PackagePath="" />
+    <None Include="..\Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png"/>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="4.14.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

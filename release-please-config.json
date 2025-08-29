@@ -21,7 +21,12 @@
       "extra-files": [
         {
           "type": "xml",
-          "path": "src/BinkyLabs.OpenApi.Overlays.csproj",
+          "path": "src/lib/BinkyLabs.OpenApi.Overlays.csproj",
+          "xpath": "//Project/PropertyGroup/Version"
+        },
+        {
+          "type": "xml",
+          "path": "src/tool/BinkyLabs.OpenApi.Overlays.Cli.csproj",
           "xpath": "//Project/PropertyGroup/Version"
         }
       ]

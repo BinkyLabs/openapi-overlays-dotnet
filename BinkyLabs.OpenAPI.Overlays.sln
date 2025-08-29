@@ -5,11 +5,15 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays", "src\BinkyLabs.OpenApi.Overlays.csproj", "{B7DD3C6F-D7E3-408D-884D-D3064FCBFFA6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays", "src\lib\BinkyLabs.OpenApi.Overlays.csproj", "{B7DD3C6F-D7E3-408D-884D-D3064FCBFFA6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Tests", "tests\BinkyLabs.OpenApi.Overlays.Tests.csproj", "{11760C61-3CCF-42BB-8B28-513A8511D98E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Tests", "tests\lib\BinkyLabs.OpenApi.Overlays.Tests.csproj", "{11760C61-3CCF-42BB-8B28-513A8511D98E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Cli", "src\tool\BinkyLabs.OpenApi.Overlays.Cli.csproj", "{6B7C4DDD-350A-4951-9313-D949DE6A6B60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinkyLabs.OpenApi.Overlays.Cli.Tests", "tests\tool\BinkyLabs.OpenApi.Overlays.Cli.Tests.csproj", "{055FB10E-5108-4EBD-A779-2992478BF5F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,30 @@ Global
 		{11760C61-3CCF-42BB-8B28-513A8511D98E}.Release|x64.Build.0 = Release|Any CPU
 		{11760C61-3CCF-42BB-8B28-513A8511D98E}.Release|x86.ActiveCfg = Release|Any CPU
 		{11760C61-3CCF-42BB-8B28-513A8511D98E}.Release|x86.Build.0 = Release|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Debug|x64.Build.0 = Debug|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Debug|x86.Build.0 = Debug|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Release|x64.ActiveCfg = Release|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Release|x64.Build.0 = Release|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Release|x86.ActiveCfg = Release|Any CPU
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60}.Release|x86.Build.0 = Release|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Debug|x64.Build.0 = Debug|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Debug|x86.Build.0 = Debug|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Release|x64.ActiveCfg = Release|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Release|x64.Build.0 = Release|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Release|x86.ActiveCfg = Release|Any CPU
+		{055FB10E-5108-4EBD-A779-2992478BF5F8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,5 +80,10 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B7DD3C6F-D7E3-408D-884D-D3064FCBFFA6} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{11760C61-3CCF-42BB-8B28-513A8511D98E} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{6B7C4DDD-350A-4951-9313-D949DE6A6B60} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{055FB10E-5108-4EBD-A779-2992478BF5F8} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {180B5EE3-D49E-424F-931C-D025770136B7}
 	EndGlobalSection
 EndGlobal

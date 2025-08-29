@@ -1,9 +1,7 @@
 ﻿
-using System.Net.Http;
 using System.Text.Json.Nodes;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.MicrosoftExtensions;
 using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays;
