@@ -12,9 +12,9 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Cli;
 
-public class OverlayCliApp
+public static class OverlayCliApp
 {
-    public async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
+    public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
         var rootCommand = new RootCommand("BinkyLabs OpenAPI Overlays CLI - Apply overlays to OpenAPI documents");
         var applyCommand = CreateApplyCommand();
@@ -22,7 +22,7 @@ public class OverlayCliApp
         return await rootCommand.Parse(args).InvokeAsync(cancellationToken: cancellationToken);
     }
 
-    private Command CreateApplyCommand()
+    private static Command CreateApplyCommand()
     {
         var applyCommand = new Command("apply", "Apply one or more overlays to an OpenAPI document");
 
@@ -69,7 +69,7 @@ public class OverlayCliApp
         return applyCommand;
     }
 
-    private async Task HandleApplyCommand(
+    private static async Task HandleApplyCommand(
         string input,
         string[] overlays,
         string output,
@@ -124,7 +124,7 @@ public class OverlayCliApp
         }
     }
 
-    private async Task ApplyOverlaysAsync(
+    private static async Task ApplyOverlaysAsync(
         string inputPath,
         string[] overlayPaths,
         string outputPath,

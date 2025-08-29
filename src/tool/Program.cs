@@ -15,7 +15,6 @@ internal static class Program
             cts.Cancel();
         };
 
-        var app = new OverlayCliApp();
-        return await app.RunAsync(args, cts.Token);
+        return await OverlayCliApp.RunAsync(args, cts.Token);
     }
 }
