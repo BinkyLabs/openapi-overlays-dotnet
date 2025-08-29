@@ -483,9 +483,8 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
+# debug samples
+debug-samples/updated.yaml
+
 # Test files
-description.yaml
-overlay/
-updated.yaml
-updated2.yaml
 test-api.json
