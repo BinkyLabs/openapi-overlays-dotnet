@@ -46,7 +46,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.OpenApi" Version="2.2.0"/>
     <None Include="..\..\README.md" Pack="true" PackagePath="README.md"/>
-    <None Include="Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png"/>
+    <None Include="..\Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png"/>
     <PackageReference Include="Microsoft.OpenApi.YamlReader" Version="2.2.0"/>
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
