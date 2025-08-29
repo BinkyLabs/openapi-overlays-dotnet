@@ -7,6 +7,7 @@ using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 
 using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
@@ -755,5 +756,70 @@ public class OverlayDocumentTests
         Assert.Equal("Target3", result.Actions[2].Target);
         Assert.Equal("Description3", result.Actions[2].Description);
         Assert.False(result.Actions[2].Remove);
+    }
+
+    [Fact]
+    public async Task ApplyToDocumentAsync_WithRelativePath_ShouldSucceed()
+    {
+        // Arrange
+        var openApiDocument = """
+        {
+            "openapi": "3.0.1",
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            },
+            "paths": {
+                "/test": {
+                    "get": {
+                        "summary": "Original summary"
+                    }
+                }
+            }
+        }
+        """;
+
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
+            Actions = new List<OverlayAction>
+            {
+                new OverlayAction
+                {
+                    Target = "$.paths['/test'].get",
+                    Description = "Update summary",
+                    Update = new JsonObject
+                    {
+                        ["summary"] = "Updated summary"
+                    }
+                }
+            }
+        };
+
+        // Create a temporary file with a relative path
+        var relativePath = "./test-api.json";
+        await File.WriteAllTextAsync(relativePath, openApiDocument);
+
+        try
+        {
+            // Act
+            var (document, overlayDiagnostic, openApiDiagnostic) = await overlayDocument.ApplyToDocumentAsync(relativePath);
+
+            // Assert
+            Assert.NotNull(document);
+            Assert.NotNull(overlayDiagnostic);
+            Assert.NotNull(openApiDiagnostic);
+            Assert.Empty(overlayDiagnostic.Errors);
+            Assert.Empty(openApiDiagnostic.Errors);
+            Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?[HttpMethod.Get].Summary);
+        }
+        finally
+        {
+            // Cleanup
+            if (File.Exists(relativePath))
+            {
+                File.Delete(relativePath);
+            }
+        }
     }
 }
