@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\lib\BinkyLabs.OpenApi.Overlays.csproj" />
-    <ProjectReference Include="..\..\src\tool\BinkyLabs.OpenApi.Overlays.Cli.csproj" />
   </ItemGroup>
 
 </Project>
