@@ -103,7 +103,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
         else if (Remove is true)
         {
-            var parentPathString = $"{(jsonPath.Scope is PathScope.Global ? "$" : "@")}{string.Join('.', jsonPath.Segments[..^1].Select(static s => s.ToString()))}";
+            var parentPathString = $"{(jsonPath.Scope is PathScope.Global ? "$" : "@")}{string.Concat(jsonPath.Segments[..^1].Select(static s => s.ToString()))}";
             if (!JsonPath.TryParse(parentPathString, out var parentPath))
             {
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(), $"Invalid parent JSON Path: '{parentPathString}'"));
