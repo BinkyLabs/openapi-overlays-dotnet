@@ -43,6 +43,7 @@
     <Authors>BinkyLabs</Authors>
     <Description>OpenAPI Overlays CLI - Apply overlays to OpenAPI documents</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>openapi;overlays;api;swagger;json;yaml;specification;dotnet</PackageTags>
     <AssemblyOriginatorKeyFile>../../keyfile.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
