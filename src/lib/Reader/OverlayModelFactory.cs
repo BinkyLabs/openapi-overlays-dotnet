@@ -95,7 +95,7 @@ public static class OverlayModelFactory
     {
         settings ??= DefaultReaderSettings.Value;
         var reader = settings.GetReader(format);
-        
+
         // Handle URI creation more safely for file paths
         Uri location;
         if (input is FileStream fileStream)
