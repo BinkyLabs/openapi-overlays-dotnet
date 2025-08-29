@@ -110,16 +110,16 @@ internal static class OverlayCliApp
 
             await ApplyOverlaysAsync(input, overlays, output, cancellationToken);
 
-            Console.WriteLine("✅ Overlays applied successfully!");
+            Console.WriteLine("Overlays applied successfully!");
         }
         catch (OperationCanceledException)
         {
-            Console.WriteLine("\n❌ Operation was cancelled.");
+            Console.WriteLine("Operation was cancelled.");
             Environment.Exit(130);
         }
         catch (Exception ex)
         {
-            await Console.Error.WriteLineAsync($"❌ Error: {ex.Message}");
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
             Environment.Exit(1);
         }
     }
@@ -132,14 +132,14 @@ internal static class OverlayCliApp
     {
         try
         {
-            Console.WriteLine("🔄 Processing input document...");
+            Console.WriteLine("Processing input document...");
 
             var allDiagnostics = new List<OverlayDiagnostic>();
             var overlayDocuments = new List<OverlayDocument>();
 
             foreach (var overlayPath in overlayPaths)
             {
-                Console.WriteLine($"🔄 Loading overlay: {Path.GetFileName(overlayPath)}...");
+                Console.WriteLine($"Loading overlay: {Path.GetFileName(overlayPath)}...");
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
@@ -169,19 +169,31 @@ internal static class OverlayCliApp
             var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
-            Console.WriteLine("🔄 Writing output document...");
+            if (openApiDocument is null)
+            {
+                if (openApiDocumentDiagnostic is { Errors.Count: > 0 })
+                {
+                    var errorMessages = string.Join(", ", openApiDocumentDiagnostic.Errors.Select(static e => e.Message));
+                    throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
+                }
+                else if (applyOverlayDiagnostic is { Errors.Count: > 0 })
+                {
+                    var errorMessages = string.Join(", ", applyOverlayDiagnostic.Errors.Select(static e => e.Message));
+                    throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
+                }
+                throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
+            }
+
+            Console.WriteLine("Writing output document...");
 
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
-
-            if (openApiDocument is null)
-                throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
 
             await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, openApiDocumentDiagnostic?.Format ?? OpenApiConstants.Json, cancellationToken);
 
             var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
             if (allWarnings.Length > 0)
             {
-                Console.WriteLine($"⚠️ Warnings during processing:");
+                Console.WriteLine($"Warnings during processing:");
                 foreach (var warning in allWarnings)
                 {
                     Console.WriteLine($"  - {warning.Message}");
