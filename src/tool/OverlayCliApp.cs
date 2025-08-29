@@ -176,8 +176,7 @@ internal static class OverlayCliApp
             if (openApiDocument is null)
                 throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
 
-            await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, OpenApiConstants.Json, cancellationToken);
-            // TODO add the format like the version when this is released https://github.com/microsoft/OpenAPI.NET/pull/2482
+            await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, openApiDocumentDiagnostic?.Format ?? OpenApiConstants.Json, cancellationToken);
 
             var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
             if (allWarnings.Length > 0)
