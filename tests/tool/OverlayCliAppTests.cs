@@ -87,22 +87,4 @@ public sealed class OverlayCliAppTests : IDisposable
         var result = await app.RunAsync([]);
         Assert.Equal(1, result);
     }
-
-    [Fact]
-    public void InspectStreamFormat_JsonAndYamlDetection()
-    {
-        var app = new OverlayCliApp();
-
-        // JSON stream
-        using var jsonStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("{"));
-        var jsonFormat = typeof(OverlayCliApp).GetMethod("InspectStreamFormat", BindingFlags.NonPublic | BindingFlags.Instance);
-        Assert.NotNull(jsonFormat);
-        var resultJson = Assert.IsType<string>(jsonFormat.Invoke(app, new object[] { jsonStream }));
-        Assert.Equal("json", resultJson);
-
-        // YAML stream
-        using var yamlStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("openapi: 3.0.0"));
-        var resultYaml = Assert.IsType<string>(jsonFormat.Invoke(app, new object[] { yamlStream }));
-        Assert.Equal("yaml", resultYaml);
-    }
 }

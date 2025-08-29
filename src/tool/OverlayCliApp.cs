@@ -146,9 +146,8 @@ public class OverlayCliApp
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
-                var formatOverlay = InspectStreamFormat(overlayStream);
 
-                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, formatOverlay, readerSettings, cancellationToken);
+                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, settings: readerSettings, cancellationToken: cancellationToken);
 
                 if (overlayDocument == null)
                 {
@@ -170,7 +169,7 @@ public class OverlayCliApp
                 _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
             };
 
-            var (openApiDocument, applyOverlayDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, null, cancellationToken: cancellationToken);
+            var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
             Console.WriteLine("🔄 Writing output document...");
@@ -180,10 +179,11 @@ public class OverlayCliApp
             if (openApiDocument is null)
                 throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
 
-            await openApiDocument.SerializeAsync(outputStream, OpenApiSpecVersion.OpenApi3_1, OpenApiConstants.Json, cancellationToken);
+            await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, OpenApiConstants.Json, cancellationToken);
+            // TODO add the format like the version when this is released https://github.com/microsoft/OpenAPI.NET/pull/2482
 
-            var allWarnings = allDiagnostics.SelectMany(d => d.Warnings).ToList();
-            if (allWarnings.Count > 0)
+            var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
+            if (allWarnings.Length > 0)
             {
                 Console.WriteLine($"⚠️ Warnings during processing:");
                 foreach (var warning in allWarnings)
@@ -192,40 +192,9 @@ public class OverlayCliApp
                 }
             }
         }
-        catch (Exception ex) when (!(ex is OperationCanceledException))
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new InvalidOperationException($"Failed to apply overlays: {ex.Message}", ex);
         }
-    }
-
-    private string InspectStreamFormat(Stream stream)
-    {
-        ArgumentNullException.ThrowIfNull(stream);
-
-        long initialPosition = stream.Position;
-        int currentByte;
-        char firstChar = '\0';
-
-        // Read until we find a non-whitespace character or reach end of stream
-        do
-        {
-            currentByte = stream.ReadByte();
-            if (currentByte == -1)
-            {
-                // End of stream, treat as YAML by default
-                stream.Position = initialPosition;
-                return OpenApiConstants.Yaml;
-            }
-            firstChar = (char)currentByte;
-        }
-        while (char.IsWhiteSpace(firstChar));
-
-        stream.Position = initialPosition;
-
-        return firstChar switch
-        {
-            '{' or '[' => OpenApiConstants.Json,
-            _ => OpenApiConstants.Yaml
-        };
     }
 }
