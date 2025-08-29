@@ -7,7 +7,6 @@ using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Models;
 
 using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
@@ -772,7 +771,12 @@ public class OverlayDocumentTests
             "paths": {
                 "/test": {
                     "get": {
-                        "summary": "Original summary"
+                        "summary": "Original summary",
+                        "responses": {
+                            "200": {
+                                "description": "Success"
+                            }
+                        }
                     }
                 }
             }
@@ -811,7 +815,7 @@ public class OverlayDocumentTests
             Assert.NotNull(openApiDiagnostic);
             Assert.Empty(overlayDiagnostic.Errors);
             Assert.Empty(openApiDiagnostic.Errors);
-            Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?[HttpMethod.Get].Summary);
+            Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?.Values?.FirstOrDefault()?.Summary);
         }
         finally
         {
