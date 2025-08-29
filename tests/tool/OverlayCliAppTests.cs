@@ -1,9 +1,11 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using BinkyLabs.OpenApi.Overlays.Cli;
-using System.Reflection;
+
 using Xunit;
 
 namespace BinkyLabs.OpenApi.Overlays.Cli.Tests;
