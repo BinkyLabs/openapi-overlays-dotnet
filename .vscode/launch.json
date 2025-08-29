@@ -12,11 +12,11 @@
       "program": "${workspaceFolder}/src/tool/bin/Debug/net8.0/BinkyLabs.OpenApi.Overlays.Cli.dll",
       "args": [
         "apply",
-        "debug-samples/description.yaml",
+        "${workspaceFolder}/debug-samples/description.yaml",
         "-o",
-        "debug-samples/overlay.yaml",
+        "${workspaceFolder}/debug-samples/overlay.yaml",
         "-out",
-        "debug-samples/updated.yaml"
+        "${workspaceFolder}/debug-samples/updated.yaml"
       ],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,
