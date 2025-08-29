@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.0-preview.9](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.8...v1.0.0-preview.9) (2025-08-29)
+
+
+### Bug Fixes
+
+* applying remove wilcard would fail if other nodes did not have the same property ([46066ed](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/46066ed639107723eafa72ea83e075948edf8af2))
+* applying remove wilcard would fail if other nodes did not have the same property ([19489ea](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/19489ea29704ebd5def62e8f38cd948b66b41862))
+* better error messages when applying overlays through CLI ([9234bdd](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/9234bdd901f0d238ab5eec25d3a8a88782be699c))
+* better error messages when applying overlays through CLI ([3bfefd0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3bfefd04bc4b2ca5b43fda727f884c68f5782768))
+* do not warn on $schema ([d9d9cec](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d9d9cecbbc8b54efc73ec4d09c37609fb46b827d))
+* do not warn on $schema ([28fdaa9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/28fdaa9d8a24deb556cc6faba3dffdae655ff72a))
+* removal JSON path buildup contains extra dots leading to failure ([26caaac](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/26caaac292105f24405d86e13da07c1520a3b507))
+* removal JSON path buildup contains extra dots leading to failure ([b2bf77c](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/b2bf77cffcec603fa7b2ae0caedff2b431d7c295))
+
 ## [1.0.0-preview.8](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.7...v1.0.0-preview.8) (2025-08-29)
 
 
