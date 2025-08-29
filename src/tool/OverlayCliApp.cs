@@ -134,9 +134,6 @@ internal static class OverlayCliApp
         {
             Console.WriteLine("🔄 Processing input document...");
 
-            var readerSettings = new OverlayReaderSettings();
-            readerSettings.AddJsonReader();
-
             var allDiagnostics = new List<OverlayDiagnostic>();
             var overlayDocuments = new List<OverlayDocument>();
 
@@ -147,7 +144,7 @@ internal static class OverlayCliApp
 
                 using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
 
-                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, settings: readerSettings, cancellationToken: cancellationToken);
+                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, cancellationToken: cancellationToken);
 
                 if (overlayDocument == null)
                 {
