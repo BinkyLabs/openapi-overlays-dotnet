@@ -95,9 +95,19 @@ public static class OverlayModelFactory
     {
         settings ??= DefaultReaderSettings.Value;
         var reader = settings.GetReader(format);
-        var location =
-                    (input is FileStream fileStream ? new Uri(fileStream.Name) : null) ??
-                    new Uri(OpenApiConstants.BaseRegistryUri);
+
+        // Handle URI creation more safely for file paths
+        Uri location;
+        if (input is FileStream fileStream)
+        {
+            // Convert to absolute path and then create a file URI to handle relative paths correctly
+            var absolutePath = Path.GetFullPath(fileStream.Name);
+            location = new Uri(absolutePath, UriKind.Absolute);
+        }
+        else
+        {
+            location = new Uri(OpenApiConstants.BaseRegistryUri);
+        }
 
         var readResult = await reader.ReadAsync(input, location, settings, cancellationToken).ConfigureAwait(false);
 
