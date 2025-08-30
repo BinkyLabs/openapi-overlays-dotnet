@@ -163,7 +163,20 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             using var fileStream = new FileStream(documentPathOrUri, FileMode.Open, FileAccess.Read);
             await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
         }
-        var uri = new Uri(documentPathOrUri, UriKind.RelativeOrAbsolute);
+
+        // Convert file paths to absolute paths before creating URI to handle relative paths correctly
+        Uri uri;
+        if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            uri = new Uri(documentPathOrUri);
+        }
+        else
+        {
+            // Convert to absolute path and then create a file URI
+            var absolutePath = Path.GetFullPath(documentPathOrUri);
+            uri = new Uri(absolutePath, UriKind.Absolute);
+        }
         var result = await ApplyToDocumentStreamAsync(input, uri, format, readerSettings, cancellationToken).ConfigureAwait(false);
         await input.DisposeAsync().ConfigureAwait(false);
         return result;

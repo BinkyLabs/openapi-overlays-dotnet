@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 
 # debug samples
 debug-samples/updated.yaml
+
+# Test files
+test-api.json
