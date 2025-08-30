@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.10](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.9...v1.0.0-preview.10) (2025-08-30)
+
+
+### Bug Fixes
+
+* relative path management when loading overlay documents ([2d7eb4d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/2d7eb4de7d70c70d815f186a0245b362870c2cc3))
+
 ## [1.0.0-preview.9](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.8...v1.0.0-preview.9) (2025-08-29)
 
 
