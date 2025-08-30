@@ -68,7 +68,7 @@ public class OverlayReaderSettings
 
     internal IOverlayReader GetReader(string format)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(format);
+        ArgumentException.ThrowIfNullOrEmpty(format);
         if (Readers.TryGetValue(format, out var reader))
         {
             return reader;
@@ -95,15 +95,8 @@ public class OverlayReaderSettings
     /// <returns>True if the reader was added, false if it already existed</returns>
     public bool TryAddReader(string format, IOverlayReader reader)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(format);
+        ArgumentException.ThrowIfNullOrEmpty(format);
         ArgumentNullException.ThrowIfNull(reader);
         return Readers.TryAdd(format, reader);
-    }
-
-
-    private void TryAddExtensionParser(string name, Func<JsonNode, OverlaySpecVersion, IOverlayExtension> parser)
-    {
-        ExtensionParsers?.TryAdd(name, parser);
-
     }
 }
