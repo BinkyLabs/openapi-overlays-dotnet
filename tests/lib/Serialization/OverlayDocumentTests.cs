@@ -655,7 +655,7 @@ public class OverlayDocumentTests
     public async Task Parse_WithValidJson_ReturnsReadResultYamlAsync()
     {
         // Arrange
-        var json = """
+        var yaml = """
         overlay: 1.0.0
         info:
           title: Test Overlay
@@ -667,7 +667,7 @@ public class OverlayDocumentTests
         """;
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(yaml);
 
         // Assert
         Assert.NotNull(overlayDocument);

@@ -1,0 +1,26 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Core Launch (console)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "dotnet: build",
+      "program": "${workspaceFolder}/src/tool/bin/Debug/net8.0/BinkyLabs.OpenApi.Overlays.Cli.dll",
+      "args": [
+        "apply",
+        "${workspaceFolder}/debug-samples/description.yaml",
+        "-o",
+        "${workspaceFolder}/debug-samples/overlay.yaml",
+        "-out",
+        "${workspaceFolder}/debug-samples/updated.yaml"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    }
+  ]
+}

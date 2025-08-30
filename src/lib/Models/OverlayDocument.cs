@@ -207,13 +207,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             format = detectedFormat;
             input = bufferedStream;
         }
-        var reader = readerSettings.GetReader(format);
-        if (reader is null)
-        {
-            throw new NotSupportedException($"No reader found for format '{format}'.");
-        }
-
-
+        var reader = readerSettings.GetReader(format) ?? throw new NotSupportedException($"No reader found for format '{format}'.");
         var jsonNode = await reader.GetJsonNodeFromStreamAsync(input, cancellationToken).ConfigureAwait(false) ??
             throw new InvalidOperationException("Failed to parse the OpenAPI document.");
         var overlayDiagnostic = new OverlayDiagnostic();

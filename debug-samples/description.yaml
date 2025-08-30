@@ -1,0 +1,12 @@
+  openapi: 3.1.0
+  info:
+    title: Test API
+    version: 1.0.0
+    description: Test Description
+    paths:
+      /test:
+        get:
+          summary: Test endpoint
+          responses:
+            '200':
+              description: OK
