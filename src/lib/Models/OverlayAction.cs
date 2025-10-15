@@ -39,7 +39,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
 
     /// <summary>
     /// A string value that indicates that the target object or array MUST be copied to the location indicated by this string, which MUST be a JSON Pointer.
-    /// This field is mutually exclusive with the "remove" and "update" fields.
+    /// This field is mutually exclusive with the <see cref="Remove"/> and <see cref="Update"/> fields.
     /// This field is experimental and not part of the OpenAPI Overlay specification v1.0.0.
     /// This field is an implementation of <see href="https://github.com/OAI/Overlay-Specification/pull/150">the copy proposal</see>.
     /// </summary>

@@ -1,6 +1,5 @@
 [![NuGet Version](https://img.shields.io/nuget/vpre/BinkyLabs.OpenApi.Overlays)](https://www.nuget.org/packages/BinkyLabs.OpenApi.Overlays) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/BinkyLabs/openapi-overlays-dotnet/dotnet.yml)](https://github.com/BinkyLabs/openapi-overlays-dotnet/actions/workflows/dotnet.yml)
 
-
 # OpenAPI Overlay Libraries for dotnet
 
 This project provides a .NET implementation of the [OpenAPI Overlay Specification](https://spec.openapis.org/overlay/latest.html), allowing you to dynamically apply overlays (patches) to existing OpenAPI documents (v3.0+), following the official OpenAPI Overlay 1.0.0 specification.
@@ -75,12 +74,27 @@ var jsonResult = textWriter.ToString();
 // or use flush async if the underlying writer is a stream writer to a file or network stream
 ```
 
+## Experimental features
+
+This library implements the following experimental features:
+
+### Copy
+
+The [copy proposal](https://github.com/OAI/Overlay-Specification/pull/150) to the Overlay specification works similarly to the update action, except it sources its value from another node. This library adds a property under an experimental flag, serializes and deserializes the value, and applies a copy overlay to an OpenAPI document.
+
+```json
+{
+    "target": "$.info.title",
+    "description": "Copy description to title",
+    "x-copy": "$.info.description"
+}
+```
+
 ## Release notes
 
 The OpenAPI Overlay Libraries releases notes are available from the [CHANGELOG](CHANGELOG.md)
 
 ## Debugging
-
 
 ## Contributing
 
