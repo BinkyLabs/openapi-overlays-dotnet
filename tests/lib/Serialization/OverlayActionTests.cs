@@ -298,7 +298,7 @@ public class OverlayActionTests
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
-        Assert.Equal("Either 'remove' or 'update' must be specified", overlayDiagnostic.Errors[0].Message);
+        Assert.Equal("At least one of 'remove', 'update' or 'x-copy' must be specified", overlayDiagnostic.Errors[0].Message);
     }
     [Fact]
     public void ApplyToDocument_ShouldFailBothRemoveAndUpdate()
@@ -317,7 +317,7 @@ public class OverlayActionTests
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
-        Assert.Equal("'remove' and 'update' cannot be used together", overlayDiagnostic.Errors[0].Message);
+        Assert.Equal("At most one of 'remove', 'update' or 'x-copy' can be specified", overlayDiagnostic.Errors[0].Message);
     }
     [Fact]
     public void ApplyToDocument_ShouldFailInvalidJsonPath()

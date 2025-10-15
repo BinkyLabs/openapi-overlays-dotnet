@@ -14,6 +14,8 @@ BinkyLabs.OpenApi.Overlays.JsonNodeExtension.JsonNodeExtension(System.Text.Json.
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Node.get -> System.Text.Json.Nodes.JsonNode!
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Write(Microsoft.OpenApi.IOpenApiWriter! writer, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction
+BinkyLabs.OpenApi.Overlays.OverlayAction.Copy.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Copy.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Description.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Description.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
