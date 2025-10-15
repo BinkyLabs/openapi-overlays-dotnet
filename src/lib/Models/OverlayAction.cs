@@ -283,12 +283,45 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             targetArray.Clear();
             foreach (var item in updateArray)
             {
-                targetArray.Add(item);
+                targetArray.Add(item?.DeepClone());
             }
+        }
+        else if (target is JsonValue && update is JsonValue)
+        {
+            ReplaceValueInParent(target, update);
         }
         else
         {
-            overlayDiagnostic.Errors.Add(new OpenApiError("Update", "Cannot merge non-object or non-array types"));
+            overlayDiagnostic.Errors.Add(new OpenApiError("Update", "Cannot merge incompatible types"));
+        }
+    }
+
+    private static void ReplaceValueInParent(JsonNode target, JsonNode update)
+    {
+        var parent = target.Parent;
+        if (parent is JsonObject parentObject)
+        {
+            // Find the property name for this target
+            foreach (var kvp in parentObject)
+            {
+                if (kvp.Value == target)
+                {
+                    parentObject[kvp.Key] = update.DeepClone();
+                    return;
+                }
+            }
+        }
+        else if (parent is JsonArray parentArray)
+        {
+            // Find the index for this target
+            for (int i = 0; i < parentArray.Count; i++)
+            {
+                if (parentArray[i] == target)
+                {
+                    parentArray[i] = update.DeepClone();
+                    return;
+                }
+            }
         }
     }
 }
