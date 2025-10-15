@@ -173,7 +173,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
 #pragma warning restore BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     private static string GetPointer(int index) => $"$.actions[{index}]";
-    
+
     private bool RemoveNodes(JsonNode documentJsonNode, JsonPath jsonPath, OverlayDiagnostic overlayDiagnostic, int index)
     {
         var parentPathString = $"{(jsonPath.Scope is PathScope.Global ? "$" : "@")}{string.Concat(jsonPath.Segments[..^1].Select(static s => s.ToString()))}";
