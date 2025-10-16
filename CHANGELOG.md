@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.11](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.10...v1.0.0-preview.11) (2025-10-16)
+
+
+### Features
+
+* adds the ability to copy a node into another ([5f86d20](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/5f86d20de56aede1947fda00a8ac40eeb099af4b))
+
 ## [1.0.0-preview.10](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.9...v1.0.0-preview.10) (2025-08-30)
 
 
