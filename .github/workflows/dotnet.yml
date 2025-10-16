@@ -4,11 +4,11 @@ on:
   push:
   pull_request:
 
-permissions:
-  contents: write
 jobs:
   dotnet-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v5
@@ -48,6 +48,7 @@ jobs:
     needs: dotnet-build
     permissions:
       id-token: write
+      contents: write
     steps:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
