@@ -107,15 +107,16 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             return true; // No actions to apply, nothing to do
         }
         var i = 0;
+        var result = true;
         foreach (var action in Actions)
         {
             if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i))
             {
-                return false; // If any action fails, the entire application fails
+                result = false; // If any action fails, the entire application fails
             }
             i++;
         }
-        return true;
+        return result;
     }
     /// <summary>
     /// Applies the action to an OpenAPI document loaded from the extends property.
