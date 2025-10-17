@@ -76,35 +76,48 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     }
 
 #pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-    internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
-    {
-        ArgumentNullException.ThrowIfNull(documentJsonNode);
-        ArgumentNullException.ThrowIfNull(overlayDiagnostic);
-        if (string.IsNullOrEmpty(Target))
+    
+    private (bool, JsonPath?, PathResult?) ValidateBeforeApplying(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
+	{
+		if (string.IsNullOrEmpty(Target))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "Target is required"));
-            return false;
+            return (false, null, null);
         }
         if (Remove is not true && Update is null && string.IsNullOrEmpty(Copy))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "At least one of 'remove', 'update' or 'x-copy' must be specified"));
-            return false;
+            return (false, null, null);
         }
         if (Remove is true ^ Update is not null ? !string.IsNullOrEmpty(Copy) : Remove is true)
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "At most one of 'remove', 'update' or 'x-copy' can be specified"));
-            return false;
+            return (false, null, null);
         }
         if (!JsonPath.TryParse(Target, out var jsonPath))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Invalid JSON Path: '{Target}'"));
-            return false;
+            return (false, null, null);
         }
         if (jsonPath.Evaluate(documentJsonNode) is not { } parseResult)
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target not found: '{Target}'"));
+            return (false, null, null);
+        }
+        return (true, jsonPath, parseResult);
+	}
+    
+    internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
+    {
+        ArgumentNullException.ThrowIfNull(documentJsonNode);
+        ArgumentNullException.ThrowIfNull(overlayDiagnostic);
+
+        var (isValid, jsonPath, parseResult) = ValidateBeforeApplying(documentJsonNode, overlayDiagnostic, index);
+        if (!isValid || parseResult is null || jsonPath is null)
+        {
             return false;
         }
+        
         if (!string.IsNullOrEmpty(Copy))
         {
             return CopyNodes(parseResult, documentJsonNode, overlayDiagnostic, index);
