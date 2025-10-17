@@ -218,10 +218,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         foreach (var match in matches)
         {
             if (match.Location is null || match.Value is null)
-			{
+            {
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
                 return false;
-			}
+            }
             if (!Json.Pointer.JsonPointer.TryParse(match.Location.AsJsonPointer(), out var currentJsonPointer))
             {
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
@@ -246,7 +246,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             {
                 return false;
             }
-		}
+        }
         return true;
     }
 
