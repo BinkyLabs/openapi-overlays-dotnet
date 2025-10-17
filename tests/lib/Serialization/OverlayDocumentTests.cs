@@ -12,7 +12,7 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public class OverlayDocumentTests
+public sealed class OverlayDocumentTests : IDisposable
 {
     [Fact]
     public void SerializeAsV1_ShouldWriteCorrectJson()
@@ -381,7 +381,8 @@ public class OverlayDocumentTests
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri);
+        Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
         Assert.NotNull(openApiDiagnostic);
@@ -450,7 +451,8 @@ public class OverlayDocumentTests
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri);
+        Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
         Assert.NotNull(openApiDiagnostic);
@@ -757,6 +759,8 @@ public class OverlayDocumentTests
         Assert.False(result.Actions[2].Remove);
     }
 
+    private readonly string _tempFilePath = Path.ChangeExtension(Path.GetTempFileName(), ".json");
+
     [Fact]
     public async Task ApplyToDocumentAsync_WithRelativePath_ShouldSucceed()
     {
@@ -801,29 +805,94 @@ public class OverlayDocumentTests
         };
 
         // Create a temporary file with a relative path
-        var relativePath = "./test-api.json";
-        await File.WriteAllTextAsync(relativePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
 
-        try
-        {
-            // Act
-            var (document, overlayDiagnostic, openApiDiagnostic) = await overlayDocument.ApplyToDocumentAsync(relativePath);
+        // Act
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAsync(_tempFilePath);
 
-            // Assert
-            Assert.NotNull(document);
-            Assert.NotNull(overlayDiagnostic);
-            Assert.NotNull(openApiDiagnostic);
-            Assert.Empty(overlayDiagnostic.Errors);
-            Assert.Empty(openApiDiagnostic.Errors);
-            Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?.Values?.FirstOrDefault()?.Summary);
-        }
-        finally
+        // Assert
+        Assert.True(result, "Overlay application should succeed.");
+        Assert.NotNull(document);
+        Assert.NotNull(overlayDiagnostic);
+        Assert.NotNull(openApiDiagnostic);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(openApiDiagnostic.Errors);
+        Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?.Values?.FirstOrDefault()?.Summary);
+
+    }
+    [Fact]
+    public async Task ApplyToDocumentAsync_ContinuesToTheNextActionWhenOneFails()
+    {
+        // Arrange
+        var openApiDocument = """
         {
-            // Cleanup
-            if (File.Exists(relativePath))
-            {
-                File.Delete(relativePath);
+            "openapi": "3.0.1",
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            },
+            "paths": {
+                "/test": {
+                    "get": {
+                        "summary": "Original summary",
+                        "responses": {
+                            "200": {
+                                "description": "Success"
+                            }
+                        }
+                    }
+                }
             }
+        }
+        """;
+
+        // Create a temporary file with a relative path
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
+            Actions = new List<OverlayAction>
+            {
+                new OverlayAction
+                {
+                    Target = "$$$$.paths['/nonexistent'].get",
+                    Description = "This action will fail",
+                    Update = new JsonObject
+                    {
+                        ["summary"] = "Should not be applied"
+                    }
+                },
+                new OverlayAction
+                {
+                    Target = "$.paths['/test'].get",
+                    Description = "Update summary",
+                    Update = new JsonObject
+                    {
+                        ["summary"] = "Updated summary"
+                    }
+                }
+            }
+        };
+
+        // Act
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAsync(_tempFilePath);
+        // Assert
+        Assert.False(result, "Overlay application should fail.");
+        Assert.NotNull(document);
+        Assert.NotNull(overlayDiagnostic);
+        Assert.NotNull(openApiDiagnostic);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Empty(openApiDiagnostic.Errors);
+        Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?.Values?.FirstOrDefault()?.Summary);
+    }
+
+    public void Dispose()
+    {
+        // Cleanup
+        if (File.Exists(_tempFilePath))
+        {
+            File.Delete(_tempFilePath);
         }
     }
 }

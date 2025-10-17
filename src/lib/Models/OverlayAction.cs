@@ -76,58 +76,84 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     }
 
 #pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-    internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
+
+    private (bool, JsonPath?, PathResult?) ValidateBeforeApplying(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
-        ArgumentNullException.ThrowIfNull(documentJsonNode);
-        ArgumentNullException.ThrowIfNull(overlayDiagnostic);
         if (string.IsNullOrEmpty(Target))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "Target is required"));
-            return false;
+            return (false, null, null);
         }
         if (Remove is not true && Update is null && string.IsNullOrEmpty(Copy))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "At least one of 'remove', 'update' or 'x-copy' must be specified"));
-            return false;
+            return (false, null, null);
         }
         if (Remove is true ^ Update is not null ? !string.IsNullOrEmpty(Copy) : Remove is true)
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "At most one of 'remove', 'update' or 'x-copy' can be specified"));
-            return false;
+            return (false, null, null);
         }
         if (!JsonPath.TryParse(Target, out var jsonPath))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Invalid JSON Path: '{Target}'"));
-            return false;
+            return (false, null, null);
         }
         if (jsonPath.Evaluate(documentJsonNode) is not { } parseResult)
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target not found: '{Target}'"));
+            return (false, null, null);
+        }
+        return (true, jsonPath, parseResult);
+    }
+
+    internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
+    {
+        ArgumentNullException.ThrowIfNull(documentJsonNode);
+        ArgumentNullException.ThrowIfNull(overlayDiagnostic);
+
+        var (isValid, jsonPath, parseResult) = ValidateBeforeApplying(documentJsonNode, overlayDiagnostic, index);
+        if (!isValid || parseResult is null || jsonPath is null)
+        {
             return false;
         }
-        if (!string.IsNullOrEmpty(Copy))
+
+        try
         {
-            return CopyNodes(parseResult, documentJsonNode, overlayDiagnostic, index);
-        }
-        else if (Update is not null)
-        {
-            foreach (var match in parseResult.Matches)
+            if (!string.IsNullOrEmpty(Copy))
             {
-                if (match.Value is null)
-                {
-                    overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
-                    return false;
-                }
-                MergeJsonNode(match.Value, Update, overlayDiagnostic);
+                return CopyNodes(parseResult, documentJsonNode, overlayDiagnostic, index);
             }
-            return true;
+            else if (Update is not null)
+            {
+                return UpdateNodes(parseResult, overlayDiagnostic, index);
+            }
+            else if (Remove is true)
+            {
+                return RemoveNodes(documentJsonNode, jsonPath, overlayDiagnostic, index);
+            }
+            // we should never get here because of the earlier checks
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Error occurred when updating target '{Target}': The action must be either 'remove', 'update' or 'x-copy'"));
+            return false;
         }
-        else if (Remove is true)
+        catch (Exception ex)
         {
-            return RemoveNodes(documentJsonNode, jsonPath, overlayDiagnostic, index);
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Error occurred when updating target '{Target}': {ex.Message}"));
+            return false;
         }
-        // we should never get here because of the earlier checks
-        throw new InvalidOperationException("The action must be either 'remove', 'update' or 'x-copy'");
+    }
+    private bool UpdateNodes(PathResult parseResult, OverlayDiagnostic overlayDiagnostic, int index)
+    {
+        foreach (var match in parseResult.Matches.Select(static m => m.Value))
+        {
+            if (match is null)
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
+                return false;
+            }
+            MergeJsonNode(match, Update!, overlayDiagnostic);
+        }
+        return true;
     }
     private bool CopyNodes(PathResult parseResult, JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
