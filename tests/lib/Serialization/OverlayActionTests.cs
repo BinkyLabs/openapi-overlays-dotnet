@@ -814,10 +814,10 @@ public class OverlayActionTests
     }
 
     [Fact]
-    public void ApplyToDocument_WorksWithDoubleDotsExpressions()
+    public void ApplyToDocument_WorksWithSubSequentRemoval()
     {
         // Given
-        var action = new OverlayAction
+        var firstAction = new OverlayAction
         {
             Target = "$..[?(@['$ref'] == '#/components/schemas/Foo')]",
             Update = JsonNode.Parse(
@@ -835,6 +835,11 @@ public class OverlayActionTests
 }
 """
             )
+        };
+        var secondAction = new OverlayAction
+        {
+            Target = "$..[?(@['$ref'] == '#/components/schemas/Foo' && @.anyOf)]['$ref']",
+            Remove = true,
         };
 
         var documentJson =
@@ -882,7 +887,7 @@ public class OverlayActionTests
         var overlayDiagnostic = new OverlayDiagnostic();
 
         // When
-        var result = action.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+        var result = firstAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
 
         // Then
         Assert.True(result);
@@ -894,5 +899,14 @@ public class OverlayActionTests
         Assert.Equal(2, barAnyOf.Count);
         Assert.Equal(2, bazAnyOf.Count);
         Assert.True(JsonNode.DeepEquals(barAnyOf, bazAnyOf));
+        Assert.NotNull(barFoo["$ref"]);
+        Assert.NotNull(bazFoo["$ref"]);
+
+        result = secondAction.ApplyToDocument(jsonNode, overlayDiagnostic, 1);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Null(barFoo["$ref"]);
+        Assert.Null(bazFoo["$ref"]);
     }
 }
