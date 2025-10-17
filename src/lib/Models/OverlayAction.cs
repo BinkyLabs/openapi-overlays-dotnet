@@ -144,14 +144,16 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     }
     private bool UpdateNodes(PathResult parseResult, OverlayDiagnostic overlayDiagnostic, int index)
     {
-        foreach (var match in parseResult.Matches.Select(static m => m.Value))
+        // Matches are evaluated by the enumerator on demand, so we need to force evaluation here to avoid stack overflows in some contexts
+        var matchValues = parseResult.Matches.Select(static m => m.Value).ToArray();
+        if (matchValues.Any(static m => m is null))
         {
-            if (match is null)
-            {
-                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
-                return false;
-            }
-            MergeJsonNode(match, Update!, overlayDiagnostic);
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
+            return false;
+        }
+        foreach (var match in matchValues)
+        {
+            MergeJsonNode(match!, Update!, overlayDiagnostic);
         }
         return true;
     }
@@ -178,21 +180,23 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"The number of matches for 'target' ({parseResult.Matches.Count}) and 'x-copy' ({copyParseResult.Matches.Count}) must be the same"));
             return false;
         }
-        for (var i = 0; i < copyParseResult.Matches.Count; i++)
+        var matchValues = parseResult.Matches.Select(static m => m.Value).ToArray();
+        if (matchValues.Any(static m => m is null))
         {
-            var match = parseResult.Matches[i];
-            if (match.Value is null)
-            {
-                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
-                return false;
-            }
-            var copyMatch = copyParseResult.Matches[i];
-            if (copyMatch.Value is null)
-            {
-                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy target '{Copy}' does not point to a valid JSON node"));
-                return false;
-            }
-            MergeJsonNode(match.Value, copyMatch.Value, overlayDiagnostic);
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
+            return false;
+        }
+        var copyMatchValues = copyParseResult.Matches.Select(static m => m.Value).ToArray();
+        if (copyMatchValues.Any(static m => m is null))
+        {
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy target '{Copy}' does not point to a valid JSON node"));
+            return false;
+        }
+        for (var i = 0; i < copyMatchValues.Length; i++)
+        {
+            var match = matchValues[i];
+            var copyMatch = copyMatchValues[i];
+            MergeJsonNode(match!, copyMatch!, overlayDiagnostic);
         }
         return true;
     }
