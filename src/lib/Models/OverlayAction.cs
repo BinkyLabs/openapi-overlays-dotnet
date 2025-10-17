@@ -106,7 +106,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
         return (true, jsonPath, parseResult);
 	}
-    
+
     internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
         ArgumentNullException.ThrowIfNull(documentJsonNode);
@@ -117,23 +117,14 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         {
             return false;
         }
-        
+
         if (!string.IsNullOrEmpty(Copy))
         {
             return CopyNodes(parseResult, documentJsonNode, overlayDiagnostic, index);
         }
         else if (Update is not null)
         {
-            foreach (var match in parseResult.Matches)
-            {
-                if (match.Value is null)
-                {
-                    overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
-                    return false;
-                }
-                MergeJsonNode(match.Value, Update, overlayDiagnostic);
-            }
-            return true;
+            return UpdateNodes(parseResult, overlayDiagnostic, index);
         }
         else if (Remove is true)
         {
@@ -142,6 +133,19 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         // we should never get here because of the earlier checks
         throw new InvalidOperationException("The action must be either 'remove', 'update' or 'x-copy'");
     }
+    private bool UpdateNodes(PathResult parseResult, OverlayDiagnostic overlayDiagnostic, int index)
+	{
+		foreach (var match in parseResult.Matches.Select(static m => m.Value))
+        {
+            if (match is null)
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
+                return false;
+            }
+            MergeJsonNode(match, Update!, overlayDiagnostic);
+        }
+        return true;
+	}
     private bool CopyNodes(PathResult parseResult, JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
         if (!JsonPath.TryParse(Copy!, out var copyPath))
