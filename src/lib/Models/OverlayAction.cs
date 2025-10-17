@@ -118,20 +118,29 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             return false;
         }
 
-        if (!string.IsNullOrEmpty(Copy))
+        try
         {
-            return CopyNodes(parseResult, documentJsonNode, overlayDiagnostic, index);
+            if (!string.IsNullOrEmpty(Copy))
+            {
+                return CopyNodes(parseResult, documentJsonNode, overlayDiagnostic, index);
+            }
+            else if (Update is not null)
+            {
+                return UpdateNodes(parseResult, overlayDiagnostic, index);
+            }
+            else if (Remove is true)
+            {
+                return RemoveNodes(documentJsonNode, jsonPath, overlayDiagnostic, index);
+            }
+            // we should never get here because of the earlier checks
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Error occurred when updating target '{Target}': The action must be either 'remove', 'update' or 'x-copy'"));
+            return false;
         }
-        else if (Update is not null)
+        catch (Exception ex)
         {
-            return UpdateNodes(parseResult, overlayDiagnostic, index);
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Error occurred when updating target '{Target}': {ex.Message}"));
+            return false;
         }
-        else if (Remove is true)
-        {
-            return RemoveNodes(documentJsonNode, jsonPath, overlayDiagnostic, index);
-        }
-        // we should never get here because of the earlier checks
-        throw new InvalidOperationException("The action must be either 'remove', 'update' or 'x-copy'");
     }
     private bool UpdateNodes(PathResult parseResult, OverlayDiagnostic overlayDiagnostic, int index)
 	{
