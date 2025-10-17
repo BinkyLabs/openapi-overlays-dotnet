@@ -130,7 +130,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             }
             else if (Remove is true)
             {
-                return RemoveNodes(documentJsonNode, jsonPath, overlayDiagnostic, index);
+                return RemoveNodes(parseResult, documentJsonNode, jsonPath, overlayDiagnostic, index);
             }
             // we should never get here because of the earlier checks
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Error occurred when updating target '{Target}': The action must be either 'remove', 'update' or 'x-copy'"));
@@ -204,24 +204,8 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
 
     private static string GetPointer(int index) => $"$.actions[{index}]";
 
-    private bool RemoveNodes(JsonNode documentJsonNode, JsonPath jsonPath, OverlayDiagnostic overlayDiagnostic, int index)
+    private bool RemoveNodes(PathResult parseResult, JsonNode documentJsonNode, JsonPath jsonPath, OverlayDiagnostic overlayDiagnostic, int index)
     {
-        var parentPathString = $"{(jsonPath.Scope is PathScope.Global ? "$" : "@")}{string.Concat(jsonPath.Segments[..^1].Select(static s => s.ToString()))}";
-        if (!JsonPath.TryParse(parentPathString, out var parentPath))
-        {
-            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Invalid parent JSON Path: '{parentPathString}'"));
-            return false;
-        }
-        if (parentPath.Evaluate(documentJsonNode) is not { } parentParseResult)
-        {
-            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Parent target not found: '{parentPathString}'"));
-            return false;
-        }
-        if (parentParseResult.Matches.Count < 1)
-        {
-            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Parent target '{parentPathString}' must point to at least one JSON node"));
-            return false;
-        }
         var lastSegment = jsonPath.Segments[^1] ?? throw new InvalidOperationException("Last segment of the JSON Path cannot be null");
         var lastSegmentPath = $"${lastSegment}";
         if (!JsonPath.TryParse(lastSegmentPath, out var lastSegmentPathParsed))
@@ -229,29 +213,28 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Invalid last segment JSON Path: '{lastSegmentPath}'"));
             return false;
         }
-        var parentPathEndsWithWildcard = parentPath.Segments[^1].Selectors.FirstOrDefault() is WildcardSelector;
-        var itemRemoved = false;
-        foreach (var parentMatch in parentParseResult.Matches)
+        // Matches are evaluated by the enumerator on demand, so we need to force evaluation here to avoid stack overflows in some contexts
+        var matches = parseResult.Matches.ToArray();
+        foreach (var match in matches)
         {
-            if (parentMatch.Value is not JsonNode parentJsonNode)
+            if (match.Location is null || match.Value is null)
             {
-                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Parent target '{parentPathString}' does not point to a valid JSON node"));
+                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
+                return false;
+            }
+            if (!Json.Pointer.JsonPointer.TryParse(match.Location.AsJsonPointer(), out var currentJsonPointer))
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
+                return false;
+            }
+            if (!currentJsonPointer.GetAncestor(1).TryEvaluate(documentJsonNode, out var parentJsonNode) || parentJsonNode is null)
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Could not find the parent node for '{Target}'"));
                 return false;
             }
             if (lastSegmentPathParsed.Evaluate(parentJsonNode) is not { } lastSegmentParseResult)
             {
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Last segment target not found: '{lastSegmentPath}'"));
-                return false;
-            }
-            if (lastSegmentParseResult.Matches.Count < 1)
-            {
-                if (parentPathEndsWithWildcard && itemRemoved)
-                {
-                    // If the parent path ends with a wildcard and we've already removed an item,
-                    // it's acceptable for some segments to have no matches.
-                    continue;
-                }
-                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Last segment target '{lastSegmentPath}' must point to at least one JSON node"));
                 return false;
             }
             if (lastSegmentParseResult.Matches[0].Value is not JsonNode nodeToRemove)
@@ -263,7 +246,6 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             {
                 return false;
             }
-            itemRemoved = true;
         }
         return true;
     }

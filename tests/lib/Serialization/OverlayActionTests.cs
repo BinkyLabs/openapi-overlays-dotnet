@@ -812,4 +812,101 @@ public class OverlayActionTests
         // Assert
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
     }
+
+    [Fact]
+    public void ApplyToDocument_WorksWithSubSequentRemoval()
+    {
+        // Given
+        var firstAction = new OverlayAction
+        {
+            Target = "$..[?(@['$ref'] == '#/components/schemas/Foo')]",
+            Update = JsonNode.Parse(
+"""
+{
+    "anyOf":
+    [
+        {
+            "$ref": "#/components/schemas/Foo"
+        },
+        {
+            "type": "null"
+        }
+    ]
+}
+"""
+            )
+        };
+        var secondAction = new OverlayAction
+        {
+            Target = "$..[?(@['$ref'] == '#/components/schemas/Foo' && @.anyOf)]['$ref']",
+            Remove = true,
+        };
+
+        var documentJson =
+"""
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "(title)",
+        "version": "0.0.0"
+    },
+    "tags": [],
+    "paths": {},
+    "components": {
+        "schemas": {
+            "Bar": {
+                "type": "object",
+                "required": [
+                    "foo"
+                ],
+                "properties": {
+                    "foo": {
+                        "$ref": "#/components/schemas/Foo"
+                    }
+                }
+            },
+            "Baz": {
+                "type": "object",
+                "required": [
+                    "foo"
+                ],
+                "properties": {
+                    "foo": {
+                        "$ref": "#/components/schemas/Foo"
+                    }
+                }
+            },
+            "Foo": {
+                "type": "object"
+            }
+        }
+    }
+}
+""";
+        var jsonNode = JsonNode.Parse(documentJson)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // When
+        var result = firstAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        // Then
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+        var barFoo = Assert.IsType<JsonObject>(jsonNode["components"]?["schemas"]?["Bar"]?["properties"]?["foo"]);
+        var bazFoo = Assert.IsType<JsonObject>(jsonNode["components"]?["schemas"]?["Baz"]?["properties"]?["foo"]);
+        var barAnyOf = Assert.IsType<JsonArray>(barFoo["anyOf"]);
+        var bazAnyOf = Assert.IsType<JsonArray>(bazFoo["anyOf"]);
+        Assert.Equal(2, barAnyOf.Count);
+        Assert.Equal(2, bazAnyOf.Count);
+        Assert.True(JsonNode.DeepEquals(barAnyOf, bazAnyOf));
+        Assert.NotNull(barFoo["$ref"]);
+        Assert.NotNull(bazFoo["$ref"]);
+
+        result = secondAction.ApplyToDocument(jsonNode, overlayDiagnostic, 1);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Null(barFoo["$ref"]);
+        Assert.Null(bazFoo["$ref"]);
+    }
 }
