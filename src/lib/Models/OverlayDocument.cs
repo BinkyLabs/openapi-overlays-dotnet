@@ -215,6 +215,10 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var result = ApplyToDocument(jsonNode, overlayDiagnostic);
         var openAPIJsonReader = new OpenApiJsonReader();
         var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonNode, location, readerSettings.OpenApiSettings);
+        if (openApiDiagnostic is not null)
+		{
+            openApiDiagnostic.Format = format;
+		}
         return new OverlayApplicationResult
         {
             Document = openAPIDocument,
