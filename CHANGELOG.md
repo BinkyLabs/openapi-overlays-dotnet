@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.0-preview.12](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.11...v1.0.0-preview.12) (2025-10-17)
+
+
+### Features
+
+* adds a result type for apply methods ([47df43e](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/47df43e688a2942855086c9ea01613fe9b598622))
+* attempt to go through subsequent actions if one fails ([b73ad65](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/b73ad6545fc2cace549876a2d69664fef98899fb))
+
+
+### Bug Fixes
+
+* adds a try catch so a single failing action does not crash the whole document application ([cb88170](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/cb88170a20dc2e7db020f6b718bed9f7e91cd27b))
+* an issue where the default format for the updated document would always be json instead of the format of the source document ([5034c95](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/5034c95ef8cf437b62bb1c84fda83b8778c1817f))
+* an issue where the default format for the updated document would always be json instead of the format of the source document ([d6db167](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d6db167e7eb4f3cf425c4529d6abfd03e6cd6609))
+* avoid stack overflows when applying changes for updates or copies ([3faf8e3](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3faf8e388563e26b8abc77143b96a902876322d8))
+* avoid stack overflows when applying changes for updates or copies ([84c6ee5](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/84c6ee535dda086b79cbc633f9a664da0625e400))
+
 ## [1.0.0-preview.11](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.10...v1.0.0-preview.11) (2025-10-16)
 
 
