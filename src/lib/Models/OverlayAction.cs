@@ -76,10 +76,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     }
 
 #pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-    
+
     private (bool, JsonPath?, PathResult?) ValidateBeforeApplying(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
-	{
-		if (string.IsNullOrEmpty(Target))
+    {
+        if (string.IsNullOrEmpty(Target))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), "Target is required"));
             return (false, null, null);
@@ -105,7 +105,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             return (false, null, null);
         }
         return (true, jsonPath, parseResult);
-	}
+    }
 
     internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
@@ -143,8 +143,8 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
     }
     private bool UpdateNodes(PathResult parseResult, OverlayDiagnostic overlayDiagnostic, int index)
-	{
-		foreach (var match in parseResult.Matches.Select(static m => m.Value))
+    {
+        foreach (var match in parseResult.Matches.Select(static m => m.Value))
         {
             if (match is null)
             {
@@ -154,7 +154,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             MergeJsonNode(match, Update!, overlayDiagnostic);
         }
         return true;
-	}
+    }
     private bool CopyNodes(PathResult parseResult, JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
         if (!JsonPath.TryParse(Copy!, out var copyPath))

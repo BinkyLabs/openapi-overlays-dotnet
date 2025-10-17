@@ -126,7 +126,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToExtendedDocumentAsync(string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<OverlayApplicationResult> ApplyToExtendedDocumentAsync(string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(Extends))
         {
@@ -144,7 +144,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<OverlayApplicationResult> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
@@ -193,7 +193,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<(OpenApiDocument?, OverlayDiagnostic, OpenApiDiagnostic?)> ApplyToDocumentStreamAsync(Stream input, Uri location, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<OverlayApplicationResult> ApplyToDocumentStreamAsync(Stream input, Uri location, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
         readerSettings ??= new OverlayReaderSettings();
@@ -213,13 +213,15 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException("Failed to parse the OpenAPI document.");
         var overlayDiagnostic = new OverlayDiagnostic();
         var result = ApplyToDocument(jsonNode, overlayDiagnostic);
-        if (!result)
-        {
-            return (null, overlayDiagnostic, null);
-        }
         var openAPIJsonReader = new OpenApiJsonReader();
         var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonNode, location, readerSettings.OpenApiSettings);
-        return (openAPIDocument, overlayDiagnostic, openApiDiagnostic);
+        return new OverlayApplicationResult
+        {
+            Document = openAPIDocument,
+            Diagnostic = overlayDiagnostic,
+            OpenApiDiagnostic = openApiDiagnostic,
+            IsSuccessful = result,
+        };
     }
     /// <summary>
     /// Combines this overlay document with another overlay document.

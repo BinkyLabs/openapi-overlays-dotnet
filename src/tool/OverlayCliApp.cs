@@ -166,7 +166,7 @@ internal static class OverlayCliApp
                 _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
             };
 
-            var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
+            var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
             if (openApiDocument is null)
