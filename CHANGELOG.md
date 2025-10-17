@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.13](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.12...v1.0.0-preview.13) (2025-10-17)
+
+
+### Bug Fixes
+
+* an issue where navigating to the parent for removal would fail based on the expression ([b2d3b34](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/b2d3b341352ff5056ba109dd90098ef317afa111))
+
 ## [1.0.0-preview.12](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.11...v1.0.0-preview.12) (2025-10-17)
 
 
