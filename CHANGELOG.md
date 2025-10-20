@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.14](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.13...v1.0.0-preview.14) (2025-10-20)
+
+
+### Bug Fixes
+
+* upgrades dependencies to fix empty default array values ([05214ba](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/05214baa6544618c4b2a0e96a2a0e3de612b9159))
+* upgrades dependencies to fix empty default array values ([5f22256](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/5f22256617b2d0fedbcbdba525e7fecf75a7a721))
+
 ## [1.0.0-preview.13](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.12...v1.0.0-preview.13) (2025-10-17)
 
 
