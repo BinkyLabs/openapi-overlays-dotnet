@@ -39,7 +39,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>clio</ToolCommandName>
     <PackageId>BinkyLabs.OpenApi.Overlays.Tool</PackageId>
-    <Version>1.0.0-preview.14</Version>
+    <Version>1.0.0-preview.15</Version>
     <Authors>BinkyLabs</Authors>
     <Description>OpenAPI Overlays CLI - Apply overlays to OpenAPI documents</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
