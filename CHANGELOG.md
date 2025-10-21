@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.15](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.14...v1.0.0-preview.15) (2025-10-21)
+
+
+### Features
+
+* Update x-copy behavior to require single source match per specification OAI/Overlay-Specificatino#PR [#150](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/150) ([#121](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/121)) ([8263215](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/8263215105cd023bfd5b18e318c46f0a09d31f13))
+
 ## [1.0.0-preview.14](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.13...v1.0.0-preview.14) (2025-10-20)
 
 
