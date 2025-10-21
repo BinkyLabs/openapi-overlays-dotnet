@@ -169,34 +169,28 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy target not found: '{Copy}'"));
             return false;
         }
-        if (copyParseResult.Matches.Count < 1)
+        if (copyParseResult.Matches.Count != 1)
         {
-            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy target '{Copy}' must point to at least one JSON node"));
+            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy JSON Path '{Copy}' must match exactly one result, but matched {copyParseResult.Matches.Count}"));
             return false;
         }
 
-        if (parseResult.Matches.Count != copyParseResult.Matches.Count)
-        {
-            overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"The number of matches for 'target' ({parseResult.Matches.Count}) and 'x-copy' ({copyParseResult.Matches.Count}) must be the same"));
-            return false;
-        }
         var matchValues = parseResult.Matches.Select(static m => m.Value).ToArray();
         if (matchValues.Any(static m => m is null))
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
             return false;
         }
-        var copyMatchValues = copyParseResult.Matches.Select(static m => m.Value).ToArray();
-        if (copyMatchValues.Any(static m => m is null))
+        var copyMatch = copyParseResult.Matches[0].Value;
+        if (copyMatch is null)
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy target '{Copy}' does not point to a valid JSON node"));
             return false;
         }
-        for (var i = 0; i < copyMatchValues.Length; i++)
+        // Copy the same source to all targets
+        foreach (var match in matchValues)
         {
-            var match = matchValues[i];
-            var copyMatch = copyMatchValues[i];
-            MergeJsonNode(match!, copyMatch!, overlayDiagnostic);
+            MergeJsonNode(match!, copyMatch, overlayDiagnostic);
         }
         return true;
     }

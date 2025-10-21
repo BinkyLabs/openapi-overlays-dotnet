@@ -547,21 +547,22 @@ public class OverlayActionTests
         var overlayAction = new OverlayAction
         {
             Target = "$.paths[*].get.summary",
-            Copy = "$.paths[*].get.operationId"
+            Copy = "$.info.title"
         };
         var jsonNode = JsonNode.Parse("""
         {
+            "info": {
+                "title": "My API"
+            },
             "paths": {
                 "/users": {
                     "get": {
-                        "summary": "Get users",
-                        "operationId": "listUsers"
+                        "summary": "Get users"
                     }
                 },
                 "/posts": {
                     "get": {
-                        "summary": "Get posts",
-                        "operationId": "listPosts"
+                        "summary": "Get posts"
                     }
                 }
             }
@@ -572,8 +573,8 @@ public class OverlayActionTests
         var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
 
         Assert.True(result);
-        Assert.Equal("listUsers", jsonNode["paths"]?["/users"]?["get"]?["summary"]?.GetValue<string>());
-        Assert.Equal("listPosts", jsonNode["paths"]?["/posts"]?["get"]?["summary"]?.GetValue<string>());
+        Assert.Equal("My API", jsonNode["paths"]?["/users"]?["get"]?["summary"]?.GetValue<string>());
+        Assert.Equal("My API", jsonNode["paths"]?["/posts"]?["get"]?["summary"]?.GetValue<string>());
         Assert.Empty(overlayDiagnostic.Errors);
     }
 
@@ -624,7 +625,7 @@ public class OverlayActionTests
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
-        Assert.Equal("Copy target '$.nonexistent.field' must point to at least one JSON node", overlayDiagnostic.Errors[0].Message);
+        Assert.Equal("Copy JSON Path '$.nonexistent.field' must match exactly one result, but matched 0", overlayDiagnostic.Errors[0].Message);
     }
 
     [Fact]
@@ -656,31 +657,30 @@ public class OverlayActionTests
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
-        Assert.Equal("Copy target '$.paths[*].get.nonexistent' must point to at least one JSON node", overlayDiagnostic.Errors[0].Message);
+        Assert.Equal("Copy JSON Path '$.paths[*].get.nonexistent' must match exactly one result, but matched 0", overlayDiagnostic.Errors[0].Message);
     }
 
     [Fact]
-    public void ApplyToDocument_CopyShouldFailWhenMatchCountsDiffer()
+    public void ApplyToDocument_CopyShouldFailWhenCopyHasMultipleMatches()
     {
         var overlayAction = new OverlayAction
         {
             Target = "$.paths[*].get.summary",
-            Copy = "$.info.title"
+            Copy = "$.paths[*].get.operationId"
         };
         var jsonNode = JsonNode.Parse("""
         {
-            "info": {
-                "title": "Test API"
-            },
             "paths": {
                 "/users": {
                     "get": {
-                        "summary": "Get users"
+                        "summary": "Get users",
+                        "operationId": "listUsers"
                     }
                 },
                 "/posts": {
                     "get": {
-                        "summary": "Get posts"
+                        "summary": "Get posts",
+                        "operationId": "listPosts"
                     }
                 }
             }
@@ -693,7 +693,7 @@ public class OverlayActionTests
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
-        Assert.Equal("The number of matches for 'target' (2) and 'x-copy' (1) must be the same", overlayDiagnostic.Errors[0].Message);
+        Assert.Equal("Copy JSON Path '$.paths[*].get.operationId' must match exactly one result, but matched 2", overlayDiagnostic.Errors[0].Message);
     }
 
     [Fact]
@@ -908,5 +908,152 @@ public class OverlayActionTests
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Null(barFoo["$ref"]);
         Assert.Null(bazFoo["$ref"]);
+    }
+
+    [Fact]
+    public void ApplyToDocument_CopyShouldCopySingleSourceToMultipleTargets()
+    {
+        // This test validates the new behavior where a single copy source
+        // is copied to multiple targets
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.paths[*].get.operationId",
+            Copy = "$.info.title"
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Common Title"
+            },
+            "paths": {
+                "/users": {
+                    "get": {
+                        "operationId": "oldOperationId1"
+                    }
+                },
+                "/posts": {
+                    "get": {
+                        "operationId": "oldOperationId2"
+                    }
+                },
+                "/comments": {
+                    "get": {
+                        "operationId": "oldOperationId3"
+                    }
+                }
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+        // All three targets should now have the same value from the single copy source
+        Assert.Equal("Common Title", jsonNode["paths"]?["/users"]?["get"]?["operationId"]?.GetValue<string>());
+        Assert.Equal("Common Title", jsonNode["paths"]?["/posts"]?["get"]?["operationId"]?.GetValue<string>());
+        Assert.Equal("Common Title", jsonNode["paths"]?["/comments"]?["get"]?["operationId"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public void ApplyToDocument_CopyShouldFailWhenCopyMatchesZeroResults()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.info.title",
+            Copy = "$.paths[*].get.nonexistent"
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Test API"
+            },
+            "paths": {
+                "/users": {
+                    "get": {
+                        "summary": "Get users"
+                    }
+                }
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.False(result);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("Copy JSON Path '$.paths[*].get.nonexistent' must match exactly one result, but matched 0", overlayDiagnostic.Errors[0].Message);
+    }
+
+    [Fact]
+    public void ApplyToDocument_CopyShouldFailWhenCopyMatchesTwoResults()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.info.title",
+            Copy = "$.paths[*].get.summary"
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Test API"
+            },
+            "paths": {
+                "/users": {
+                    "get": {
+                        "summary": "Get users"
+                    }
+                },
+                "/posts": {
+                    "get": {
+                        "summary": "Get posts"
+                    }
+                }
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.False(result);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("Copy JSON Path '$.paths[*].get.summary' must match exactly one result, but matched 2", overlayDiagnostic.Errors[0].Message);
+    }
+
+    [Fact]
+    public void ApplyToDocument_CopyShouldSucceedWithExactlyOneMatch()
+    {
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.paths['/users'].get.summary",
+            Copy = "$.info.description"
+        };
+        var jsonNode = JsonNode.Parse("""
+        {
+            "info": {
+                "title": "Test API",
+                "description": "API Description"
+            },
+            "paths": {
+                "/users": {
+                    "get": {
+                        "summary": "Old summary"
+                    }
+                }
+            }
+        }
+        """)!;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, 0);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal("API Description", jsonNode["paths"]?["/users"]?["get"]?["summary"]?.GetValue<string>());
     }
 }
