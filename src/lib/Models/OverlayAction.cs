@@ -181,8 +181,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
             return false;
         }
-        var copyMatch = copyParseResult.Matches[0].Value;
-        if (copyMatch is null)
+        if (copyParseResult.Matches[0].Value is not {} copyMatch)
         {
             overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Copy target '{Copy}' does not point to a valid JSON node"));
             return false;
