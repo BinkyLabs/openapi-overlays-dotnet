@@ -84,7 +84,7 @@ internal static class OverlayCliApp
                 return 1;
             }
 
-            await HandleApplyCommandAsync(input, overlays ?? [], output, cancellationToken);
+            await HandleCommandAsync(input, overlays ?? [], output, ApplyOverlaysAsync, cancellationToken);
             return 0;
         });
 
@@ -123,17 +123,17 @@ internal static class OverlayCliApp
                 return 1;
             }
 
-            await HandleApplyAndNormalizeCommandAsync(input, overlays ?? [], output, cancellationToken);
+            await HandleCommandAsync(input, overlays ?? [], output, ApplyOverlaysAndNormalizeAsync, cancellationToken);
             return 0;
         });
 
         return applyCommand;
     }
-
-    private static async Task HandleApplyCommandAsync(
+    private static async Task HandleCommandAsync(
         string input,
         string[] overlays,
         string output,
+        Func<string, string[], string, CancellationToken, Task> applyAsync,
         CancellationToken cancellationToken)
     {
         try
@@ -169,62 +169,7 @@ internal static class OverlayCliApp
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            await ApplyOverlaysAsync(input, overlays, output, cancellationToken);
-
-            Console.WriteLine("Overlays applied successfully!");
-        }
-        catch (OperationCanceledException)
-        {
-            Console.WriteLine("Operation was cancelled.");
-            Environment.Exit(130);
-        }
-        catch (Exception ex)
-        {
-            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
-            Environment.Exit(1);
-        }
-    }
-
-    private static async Task HandleApplyAndNormalizeCommandAsync(
-        string input,
-        string[] overlays,
-        string output,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Console.Out.WriteLineAsync($"Applying overlays to OpenAPI document...");
-            await Console.Out.WriteLineAsync($"Input: {input}");
-            await Console.Out.WriteLineAsync($"Overlays: {string.Join(", ", overlays)}");
-            await Console.Out.WriteLineAsync($"Output: {output}");
-
-            if (!File.Exists(input))
-            {
-                await Console.Error.WriteLineAsync($"Error: Input file '{input}' does not exist.");
-                Environment.Exit(1);
-                return;
-            }
-
-            var missingOverlays = overlays.Where(overlay => !File.Exists(overlay)).ToArray();
-            if (missingOverlays.Length > 0)
-            {
-                foreach (var overlay in missingOverlays)
-                {
-                    await Console.Error.WriteLineAsync($"Error: Overlay file '{overlay}' does not exist.");
-                }
-                Environment.Exit(1);
-                return;
-            }
-
-            var outputDirectory = Path.GetDirectoryName(output);
-            if (!string.IsNullOrEmpty(outputDirectory) && !Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await ApplyOverlaysAndNormalizeAsync(input, overlays, output, cancellationToken);
+            await applyAsync(input, overlays, output, cancellationToken).ConfigureAwait(false);
 
             Console.WriteLine("Overlays applied successfully!");
         }
