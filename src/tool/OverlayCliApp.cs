@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.YamlReader;
+
+using SharpYaml.Serialization;
 
 namespace BinkyLabs.OpenApi.Overlays.Cli;
 
@@ -166,10 +170,10 @@ internal static class OverlayCliApp
                 _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
             };
 
-            var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
+            var (jsonNode, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
-            if (openApiDocument is null)
+            if (jsonNode is null)
             {
                 if (openApiDocumentDiagnostic is { Errors.Count: > 0 })
                 {
@@ -188,7 +192,22 @@ internal static class OverlayCliApp
 
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
 
-            await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, openApiDocumentDiagnostic?.Format ?? OpenApiConstants.Json, cancellationToken);
+            switch (openApiDocumentDiagnostic?.Format)
+            {
+                case "yml":
+                case "yaml":
+                    var yamlStream = new YamlStream(new YamlDocument(jsonNode.ToYamlNode()));
+                    var writer = new StreamWriter(outputStream);
+                    yamlStream.Save(writer);
+                    break;
+                case "json":
+                    await JsonSerializer.SerializeAsync(outputStream, jsonNode, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    break;
+                default:
+                    throw new NotImplementedException($"'{openApiDocumentDiagnostic?.Format}' output format is not yet implemented.");
+            }
+
+            await outputStream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
             var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
             if (allWarnings.Length > 0)

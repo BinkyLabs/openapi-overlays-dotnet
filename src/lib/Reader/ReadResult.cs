@@ -27,4 +27,12 @@ public class ReadResult
         document = Document;
         diagnostic = Diagnostic;
     }
+    /// <summary>
+    /// Deconstructs the result for easier assignment on the client application.
+    /// </summary>
+    /// <param name="document">The parsed overlay document.</param>
+    public void Deconstruct(out OverlayDocument? document)
+	{
+		Deconstruct(out document, out _);
+	}
 }

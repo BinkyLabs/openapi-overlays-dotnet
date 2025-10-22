@@ -126,7 +126,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<OverlayApplicationResult> ApplyToExtendedDocumentAsync(string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<OverlayApplicationResultOfJsonNode> ApplyToExtendedDocumentAsync(string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(Extends))
         {
@@ -134,6 +134,24 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         return await ApplyToDocumentAsync(Extends, format, readerSettings, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Applies the action to an OpenAPI document loaded from the extends property.
+    /// The document is read in the specified format (e.g., JSON or YAML).
+    /// </summary>
+    /// <param name="format">The format of the document (e.g., JSON or YAML).</param>
+    /// <param name="readerSettings">Settings to use when reading the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>The OpenAPI document after applying the action.</returns>
+    public async Task<OverlayApplicationResultOfOpenApiDocument> ApplyToExtendedDocumentAndLoadAsync(string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(Extends))
+        {
+            throw new InvalidOperationException("The 'extends' property must be set to apply the overlay to an extended document.");
+        }
+        var jsonResult = await ApplyToExtendedDocumentAsync(format, readerSettings, cancellationToken).ConfigureAwait(false);
+        return LoadDocument(jsonResult, new Uri(Extends), format ?? string.Empty, readerSettings);
+	}
 
     /// <summary>
     /// Applies the action to an OpenAPI document loaded from a specified path or URI.
@@ -144,7 +162,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<OverlayApplicationResult> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<OverlayApplicationResultOfJsonNode> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
@@ -164,6 +182,23 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             using var fileStream = new FileStream(documentPathOrUri, FileMode.Open, FileAccess.Read);
             await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
         }
+        var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, cancellationToken).ConfigureAwait(false);
+        await input.DisposeAsync().ConfigureAwait(false);
+        return result;
+    }
+
+    /// <summary>
+    /// Applies the action to an OpenAPI document loaded from a specified path or URI.
+    /// The document is read in the specified format (e.g., JSON or YAML).
+    /// </summary>
+    /// <param name="documentPathOrUri">Path or URI to the OpenAPI document.</param>
+    /// <param name="format">The format of the document (e.g., JSON or YAML).</param>
+    /// <param name="readerSettings">Settings to use when reading the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>The OpenAPI document after applying the action.</returns>
+    public async Task<OverlayApplicationResultOfOpenApiDocument> ApplyToDocumentAndLoadAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    {
+        var jsonResult = await ApplyToDocumentAsync(documentPathOrUri, format, readerSettings, cancellationToken).ConfigureAwait(false);
 
         // Convert file paths to absolute paths before creating URI to handle relative paths correctly
         Uri uri;
@@ -178,9 +213,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             var absolutePath = Path.GetFullPath(documentPathOrUri);
             uri = new Uri(absolutePath, UriKind.Absolute);
         }
-        var result = await ApplyToDocumentStreamAsync(input, uri, format, readerSettings, cancellationToken).ConfigureAwait(false);
-        await input.DisposeAsync().ConfigureAwait(false);
-        return result;
+
+        return LoadDocument(jsonResult, uri, format ?? string.Empty, readerSettings);
     }
 
     /// <summary>
@@ -188,12 +222,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// The document is read in the specified format (e.g., JSON or YAML).
     /// </summary>
     /// <param name="input">A stream containing the OpenAPI document.</param>
-    /// <param name="location">The URI location of the document, used for to load external references.</param>
     /// <param name="format">The format of the document (e.g., JSON or YAML).</param>
     /// <param name="readerSettings">Settings to use when reading the document.</param>
     /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     /// <returns>The OpenAPI document after applying the action.</returns>
-    public async Task<OverlayApplicationResult> ApplyToDocumentStreamAsync(Stream input, Uri location, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    public async Task<OverlayApplicationResultOfJsonNode> ApplyToDocumentStreamAsync(Stream input, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
         readerSettings ??= new OverlayReaderSettings();
@@ -213,20 +246,47 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException("Failed to parse the OpenAPI document.");
         var overlayDiagnostic = new OverlayDiagnostic();
         var result = ApplyToDocument(jsonNode, overlayDiagnostic);
+        return new OverlayApplicationResultOfJsonNode
+        {
+            Document = jsonNode,
+            Diagnostic = overlayDiagnostic,
+            IsSuccessful = result,
+            OpenApiDiagnostic = new OpenApiDiagnostic()
+			{
+				Format = format
+			}
+        };
+    }
+    /// <summary>
+    /// Applies the action to an OpenAPI document loaded from a specified path or URI.
+    /// The document is read in the specified format (e.g., JSON or YAML).
+    /// </summary>
+    /// <param name="input">A stream containing the OpenAPI document.</param>
+    /// <param name="location">The URI location of the document, used for to load external references.</param>
+    /// <param name="format">The format of the document (e.g., JSON or YAML).</param>
+    /// <param name="readerSettings">Settings to use when reading the document.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>The OpenAPI document after applying the action.</returns>
+    public async Task<OverlayApplicationResultOfOpenApiDocument> ApplyToDocumentStreamAndLoadAsync(Stream input, Uri location, string? format = default, OverlayReaderSettings? readerSettings = default, CancellationToken cancellationToken = default)
+    {
+        var jsonResult = await ApplyToDocumentStreamAsync(input, format, readerSettings, cancellationToken).ConfigureAwait(false);
+        return LoadDocument(jsonResult, location, format ?? string.Empty, readerSettings);
+    }
+    private static OverlayApplicationResultOfOpenApiDocument LoadDocument(OverlayApplicationResultOfJsonNode jsonResult, Uri location, string format, OverlayReaderSettings? readerSettings)
+	{
+		readerSettings ??= new OverlayReaderSettings();
         var openAPIJsonReader = new OpenApiJsonReader();
-        var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonNode, location, readerSettings.OpenApiSettings);
-        if (openApiDiagnostic is not null)
+        if (jsonResult.Document is null)
+		{
+            return OverlayApplicationResultOfOpenApiDocument.FromJsonResultWithFailedLoad(jsonResult);
+		}
+        var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonResult.Document, location, readerSettings.OpenApiSettings);
+        if (openApiDiagnostic is not null && !string.IsNullOrEmpty(format))
         {
             openApiDiagnostic.Format = format;
         }
-        return new OverlayApplicationResult
-        {
-            Document = openAPIDocument,
-            Diagnostic = overlayDiagnostic,
-            OpenApiDiagnostic = openApiDiagnostic,
-            IsSuccessful = result,
-        };
-    }
+        return OverlayApplicationResultOfOpenApiDocument.FromJsonResult(jsonResult, openAPIDocument, openApiDiagnostic);
+	}
     /// <summary>
     /// Combines this overlay document with another overlay document.
     /// The returned document will be a new document, and its metadata (info, etc.) will be the one from the other document.
