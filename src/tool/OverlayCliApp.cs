@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using BinkyLabs.OpenApi.Overlays.Reader;
 
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.Reader;
 using Microsoft.OpenApi.YamlReader;
 
 using SharpYaml.Serialization;
@@ -293,6 +294,22 @@ internal static class OverlayCliApp
         }
     }
 
+    private static void CheckDiagnosticsAndThrowIfErrors(
+        OpenApiDiagnostic? openApiDocumentDiagnostic,
+        OverlayDiagnostic applyOverlayDiagnostic)
+    {
+        if (openApiDocumentDiagnostic is { Errors.Count: > 0 })
+        {
+            var errorMessages = string.Join(", ", openApiDocumentDiagnostic.Errors.Select(static e => e.Message));
+            throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
+        }
+        else if (applyOverlayDiagnostic is { Errors.Count: > 0 })
+        {
+            var errorMessages = string.Join(", ", applyOverlayDiagnostic.Errors.Select(static e => e.Message));
+            throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
+        }
+    }
+
     private static async Task ApplyOverlaysAndNormalizeAsync(
         string inputPath,
         string[] overlayPaths,
@@ -308,16 +325,7 @@ internal static class OverlayCliApp
 
             if (openApiDocument is null)
             {
-                if (openApiDocumentDiagnostic is { Errors.Count: > 0 })
-                {
-                    var errorMessages = string.Join(", ", openApiDocumentDiagnostic.Errors.Select(static e => e.Message));
-                    throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
-                }
-                else if (applyOverlayDiagnostic is { Errors.Count: > 0 })
-                {
-                    var errorMessages = string.Join(", ", applyOverlayDiagnostic.Errors.Select(static e => e.Message));
-                    throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
-                }
+                CheckDiagnosticsAndThrowIfErrors(openApiDocumentDiagnostic, applyOverlayDiagnostic);
                 throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
             }
 
@@ -350,17 +358,8 @@ internal static class OverlayCliApp
 
             if (jsonNode is null)
             {
-                if (openApiDocumentDiagnostic is { Errors.Count: > 0 })
-                {
-                    var errorMessages = string.Join(", ", openApiDocumentDiagnostic.Errors.Select(static e => e.Message));
-                    throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
-                }
-                else if (applyOverlayDiagnostic is { Errors.Count: > 0 })
-                {
-                    var errorMessages = string.Join(", ", applyOverlayDiagnostic.Errors.Select(static e => e.Message));
-                    throw new InvalidOperationException($"Failed to apply overlays. Errors: {errorMessages}");
-                }
-                throw new InvalidOperationException("OpenApiDocument is null after applying overlays.");
+                CheckDiagnosticsAndThrowIfErrors(openApiDocumentDiagnostic, applyOverlayDiagnostic);
+                throw new InvalidOperationException("JsonNode is null after applying overlays.");
             }
 
             Console.WriteLine("Writing output document...");
