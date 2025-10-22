@@ -151,7 +151,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         var jsonResult = await ApplyToExtendedDocumentAsync(format, readerSettings, cancellationToken).ConfigureAwait(false);
         return LoadDocument(jsonResult, new Uri(Extends), format ?? string.Empty, readerSettings);
-	}
+    }
 
     /// <summary>
     /// Applies the action to an OpenAPI document loaded from a specified path or URI.
@@ -252,9 +252,9 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             Diagnostic = overlayDiagnostic,
             IsSuccessful = result,
             OpenApiDiagnostic = new OpenApiDiagnostic()
-			{
-				Format = format
-			}
+            {
+                Format = format
+            }
         };
     }
     /// <summary>
@@ -273,20 +273,20 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return LoadDocument(jsonResult, location, format ?? string.Empty, readerSettings);
     }
     internal static OverlayApplicationResultOfOpenApiDocument LoadDocument(OverlayApplicationResultOfJsonNode jsonResult, Uri location, string format, OverlayReaderSettings? readerSettings)
-	{
-		readerSettings ??= new OverlayReaderSettings();
+    {
+        readerSettings ??= new OverlayReaderSettings();
         var openAPIJsonReader = new OpenApiJsonReader();
         if (jsonResult.Document is null)
-		{
+        {
             return OverlayApplicationResultOfOpenApiDocument.FromJsonResultWithFailedLoad(jsonResult);
-		}
+        }
         var (openAPIDocument, openApiDiagnostic) = openAPIJsonReader.Read(jsonResult.Document, location, readerSettings.OpenApiSettings);
         if (openApiDiagnostic is not null && !string.IsNullOrEmpty(format))
         {
             openApiDiagnostic.Format = format;
         }
         return OverlayApplicationResultOfOpenApiDocument.FromJsonResult(jsonResult, openAPIDocument, openApiDiagnostic);
-	}
+    }
     /// <summary>
     /// Combines this overlay document with another overlay document.
     /// The returned document will be a new document, and its metadata (info, etc.) will be the one from the other document.

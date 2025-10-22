@@ -32,7 +32,7 @@ public class ReadResult
     /// </summary>
     /// <param name="document">The parsed overlay document.</param>
     public void Deconstruct(out OverlayDocument? document)
-	{
-		Deconstruct(out document, out _);
-	}
+    {
+        Deconstruct(out document, out _);
+    }
 }

@@ -24,7 +24,7 @@ public class OverlayApplicationResultOfOpenApiDocument : OverlayApplicationResul
             IsSuccessful = false,
         };
     }
-	internal static OverlayApplicationResultOfOpenApiDocument FromJsonResult(OverlayApplicationResultOfJsonNode jsonResult, OpenApiDocument? document, OpenApiDiagnostic? openApiDiagnostic)
+    internal static OverlayApplicationResultOfOpenApiDocument FromJsonResult(OverlayApplicationResultOfJsonNode jsonResult, OpenApiDocument? document, OpenApiDiagnostic? openApiDiagnostic)
     {
         ArgumentNullException.ThrowIfNull(jsonResult);
         return new OverlayApplicationResultOfOpenApiDocument
