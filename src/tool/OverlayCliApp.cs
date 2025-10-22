@@ -239,6 +239,47 @@ internal static class OverlayCliApp
         }
     }
 
+    private static async Task<(OverlayDocument CombinedOverlay, List<OverlayDiagnostic> AllDiagnostics)> LoadAndCombineOverlaysAsync(
+        string[] overlayPaths,
+        CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine("Processing input document...");
+
+        var allDiagnostics = new List<OverlayDiagnostic>();
+        var overlayDocuments = new List<OverlayDocument>();
+
+        foreach (var overlayPath in overlayPaths)
+        {
+            Console.WriteLine($"Loading overlay: {Path.GetFileName(overlayPath)}...");
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
+
+            var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, cancellationToken: cancellationToken);
+
+            if (overlayDocument == null)
+            {
+                throw new InvalidOperationException($"Failed to load overlay: {overlayPath}. Errors: {string.Join(", ", overlayDiagnostic?.Errors.Select(e => e.Message) ?? Array.Empty<string>())}");
+            }
+
+            overlayDocuments.Add(overlayDocument);
+
+            if (overlayDiagnostic != null)
+            {
+                allDiagnostics.Add(overlayDiagnostic);
+            }
+        }
+
+        var combinedOverlay = overlayDocuments.Count switch
+        {
+            0 => throw new InvalidOperationException("No overlays to apply."),
+            1 => overlayDocuments[0],
+            _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
+        };
+
+        return (combinedOverlay, allDiagnostics);
+    }
+
     private static async Task ApplyOverlaysAndNormalizeAsync(
         string inputPath,
         string[] overlayPaths,
@@ -247,39 +288,7 @@ internal static class OverlayCliApp
     {
         try
         {
-            Console.WriteLine("Processing input document...");
-
-            var allDiagnostics = new List<OverlayDiagnostic>();
-            var overlayDocuments = new List<OverlayDocument>();
-
-            foreach (var overlayPath in overlayPaths)
-            {
-                Console.WriteLine($"Loading overlay: {Path.GetFileName(overlayPath)}...");
-                cancellationToken.ThrowIfCancellationRequested();
-
-                using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
-
-                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, cancellationToken: cancellationToken);
-
-                if (overlayDocument == null)
-                {
-                    throw new InvalidOperationException($"Failed to load overlay: {overlayPath}. Errors: {string.Join(", ", overlayDiagnostic?.Errors.Select(e => e.Message) ?? Array.Empty<string>())}");
-                }
-
-                overlayDocuments.Add(overlayDocument);
-
-                if (overlayDiagnostic != null)
-                {
-                    allDiagnostics.Add(overlayDiagnostic);
-                }
-            }
-
-            var combinedOverlay = overlayDocuments.Count switch
-            {
-                0 => throw new InvalidOperationException("No overlays to apply."),
-                1 => overlayDocuments[0],
-                _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
-            };
+            var (combinedOverlay, allDiagnostics) = await LoadAndCombineOverlaysAsync(overlayPaths, cancellationToken);
 
             var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAndLoadAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
@@ -304,7 +313,7 @@ internal static class OverlayCliApp
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
 
             await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, openApiDocumentDiagnostic?.Format ?? OpenApiConstants.Json, cancellationToken);
-            
+
             var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
             if (allWarnings.Length > 0)
             {
@@ -329,39 +338,7 @@ internal static class OverlayCliApp
     {
         try
         {
-            Console.WriteLine("Processing input document...");
-
-            var allDiagnostics = new List<OverlayDiagnostic>();
-            var overlayDocuments = new List<OverlayDocument>();
-
-            foreach (var overlayPath in overlayPaths)
-            {
-                Console.WriteLine($"Loading overlay: {Path.GetFileName(overlayPath)}...");
-                cancellationToken.ThrowIfCancellationRequested();
-
-                using var overlayStream = new FileStream(overlayPath, FileMode.Open, FileAccess.Read);
-
-                var (overlayDocument, overlayDiagnostic) = await OverlayDocument.LoadFromStreamAsync(overlayStream, cancellationToken: cancellationToken);
-
-                if (overlayDocument == null)
-                {
-                    throw new InvalidOperationException($"Failed to load overlay: {overlayPath}. Errors: {string.Join(", ", overlayDiagnostic?.Errors.Select(e => e.Message) ?? Array.Empty<string>())}");
-                }
-
-                overlayDocuments.Add(overlayDocument);
-
-                if (overlayDiagnostic != null)
-                {
-                    allDiagnostics.Add(overlayDiagnostic);
-                }
-            }
-
-            var combinedOverlay = overlayDocuments.Count switch
-            {
-                0 => throw new InvalidOperationException("No overlays to apply."),
-                1 => overlayDocuments[0],
-                _ => overlayDocuments[0].CombineWith([.. overlayDocuments[1..]]),
-            };
+            var (combinedOverlay, allDiagnostics) = await LoadAndCombineOverlaysAsync(overlayPaths, cancellationToken);
 
             var (jsonNode, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
