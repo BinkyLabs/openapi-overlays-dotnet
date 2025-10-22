@@ -22,9 +22,9 @@ internal static class OverlayCliApp
     public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
         var rootCommand = new RootCommand("BinkyLabs OpenAPI Overlays CLI - Apply overlays to OpenAPI documents");
-        var applyCommand = CreateApplyCommand();
+        var applyCommand = CreateApplyCommand("apply", "Apply one or more overlays to an OpenAPI document", ApplyOverlaysAsync);
         rootCommand.Add(applyCommand);
-        var applyAndNormalizeCommand = CreateApplyAndNormalizeCommand();
+        var applyAndNormalizeCommand = CreateApplyCommand("apply-and-normalize", "Apply one or more overlays to an OpenAPI document, and normalize the output with OpenAPI.net", ApplyOverlaysAndNormalizeAsync);
         rootCommand.Add(applyAndNormalizeCommand);
         return await rootCommand.Parse(args).InvokeAsync(cancellationToken: cancellationToken);
     }
@@ -52,9 +52,9 @@ internal static class OverlayCliApp
         return outputOption;
     }
 
-    private static Command CreateApplyCommand()
+    private static Command CreateApplyCommand(string name, string description, Func<string, string[], string, CancellationToken, Task> applyAsync)
     {
-        var applyCommand = new Command("apply-and-normalize", "Apply one or more overlays to an OpenAPI document, and normalize the output with OpenAPI.net");
+        var applyCommand = new Command(name, description);
 
         var inputArgument = CreateInputArgument();
 
@@ -84,51 +84,13 @@ internal static class OverlayCliApp
                 return 1;
             }
 
-            await HandleCommandAsync(input, overlays ?? [], output, ApplyOverlaysAsync, cancellationToken);
+            await HandleCommandAsync(input, overlays ?? [], output, applyAsync, cancellationToken);
             return 0;
         });
 
         return applyCommand;
     }
 
-    private static Command CreateApplyAndNormalizeCommand()
-    {
-        var applyCommand = new Command("apply", "Apply one or more overlays to an OpenAPI document");
-
-        var inputArgument = CreateInputArgument();
-
-        var overlayOption = CreateOverlayOption();
-
-        var outputOption = CreateOutputOption();
-
-        applyCommand.Add(inputArgument);
-        applyCommand.Add(overlayOption);
-        applyCommand.Add(outputOption);
-
-        applyCommand.SetAction(async (parseResult, cancellationToken) =>
-        {
-            var input = parseResult.GetValue(inputArgument);
-            var overlays = parseResult.GetValue(overlayOption);
-            var output = parseResult.GetValue(outputOption);
-
-            if (string.IsNullOrEmpty(input))
-            {
-                await Console.Error.WriteLineAsync("Error: Input argument is required.");
-                return 1;
-            }
-
-            if (string.IsNullOrEmpty(output))
-            {
-                await Console.Error.WriteLineAsync("Error: Output option is required.");
-                return 1;
-            }
-
-            await HandleCommandAsync(input, overlays ?? [], output, ApplyOverlaysAndNormalizeAsync, cancellationToken);
-            return 0;
-        });
-
-        return applyCommand;
-    }
     private static async Task HandleCommandAsync(
         string input,
         string[] overlays,
