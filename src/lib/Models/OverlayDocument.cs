@@ -272,7 +272,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var jsonResult = await ApplyToDocumentStreamAsync(input, format, readerSettings, cancellationToken).ConfigureAwait(false);
         return LoadDocument(jsonResult, location, format ?? string.Empty, readerSettings);
     }
-    private static OverlayApplicationResultOfOpenApiDocument LoadDocument(OverlayApplicationResultOfJsonNode jsonResult, Uri location, string format, OverlayReaderSettings? readerSettings)
+    internal static OverlayApplicationResultOfOpenApiDocument LoadDocument(OverlayApplicationResultOfJsonNode jsonResult, Uri location, string format, OverlayReaderSettings? readerSettings)
 	{
 		readerSettings ??= new OverlayReaderSettings();
         var openAPIJsonReader = new OpenApiJsonReader();
