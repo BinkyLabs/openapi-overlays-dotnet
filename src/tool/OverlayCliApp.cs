@@ -280,6 +280,19 @@ internal static class OverlayCliApp
         return (combinedOverlay, allDiagnostics);
     }
 
+    private static void DisplayWarnings(List<OverlayDiagnostic> allDiagnostics)
+    {
+        var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
+        if (allWarnings.Length > 0)
+        {
+            Console.WriteLine($"Warnings during processing:");
+            foreach (var warning in allWarnings)
+            {
+                Console.WriteLine($"  - {warning.Message}");
+            }
+        }
+    }
+
     private static async Task ApplyOverlaysAndNormalizeAsync(
         string inputPath,
         string[] overlayPaths,
@@ -314,15 +327,7 @@ internal static class OverlayCliApp
 
             await openApiDocument.SerializeAsync(outputStream, openApiDocumentDiagnostic?.SpecificationVersion ?? OpenApiSpecVersion.OpenApi3_1, openApiDocumentDiagnostic?.Format ?? OpenApiConstants.Json, cancellationToken);
 
-            var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
-            if (allWarnings.Length > 0)
-            {
-                Console.WriteLine($"Warnings during processing:");
-                foreach (var warning in allWarnings)
-                {
-                    Console.WriteLine($"  - {warning.Message}");
-                }
-            }
+            DisplayWarnings(allDiagnostics);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -379,15 +384,7 @@ internal static class OverlayCliApp
 
             await outputStream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-            var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
-            if (allWarnings.Length > 0)
-            {
-                Console.WriteLine($"Warnings during processing:");
-                foreach (var warning in allWarnings)
-                {
-                    Console.WriteLine($"  - {warning.Message}");
-                }
-            }
+            DisplayWarnings(allDiagnostics);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
