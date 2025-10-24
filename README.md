@@ -21,7 +21,7 @@ dotnet add <pathToCsProj> package BinkyLabs.OpenApi.Overlays
 The following example illustrates how you can load or parse an Overlay document from JSON or YAML.
 
 ```csharp
-var overlayDocument = await OverlayDocument.LoadFromUrlAsync("https://source/overlay.json");
+var (overlayDocument) = await OverlayDocument.LoadFromUrlAsync("https://source/overlay.json");
 ```
 
 ### Applying an Overlay document to an OpenAPI document
@@ -29,7 +29,7 @@ var overlayDocument = await OverlayDocument.LoadFromUrlAsync("https://source/ove
 The following example illustrates how you can apply an Overlay document to an OpenAPI document.
 
 ```csharp
-var resultOpenApiDocument = await overlayDocument.ApplyToDocumentAsync("https://source/openapi.json");
+var (resultOpenApiDocument) = await overlayDocument.ApplyToDocumentAndLoadAsync("https://source/openapi.json");
 ```
 
 ### Applying multiple Overlay documents to an OpenAPI document
@@ -39,7 +39,7 @@ The following example illustrates how you can apply multiple Overlay documents t
 ```csharp
 var combinedOverlay = overlayDocument1.CombineWith(overlayDocument2);
 // order matters during the combination, the actions will be appended
-var resultOpenApiDocument = await combinedOverlay.ApplyToDocumentAsync("https://source/openapi.json");
+var (resultOpenApiDocument) = await combinedOverlay.ApplyToDocumentAndLoadAsync("https://source/openapi.json");
 ```
 
 ### Serializing an Overlay document
