@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.0-preview.16](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.15...v1.0.0-preview.16) (2025-10-27)
+
+
+### Features
+
+* adds a new normalize command ([f9da1e5](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f9da1e57437e11ef25950c610f00b40b4105a211))
+* adds split commands for overlay only and overlay with normalization ([07aeaaf](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/07aeaaf432282edd37fad5fb70b2f7ef1610d047))
+* bypass the openapi.net object model when applying overlays to avoid normalization ([0fd0bf0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0fd0bf0f2a02e8f5c323a315e267aceed86a06b9))
+
+
+### Bug Fixes
+
+* upgrade oai.net dependency to avoid bad yaml formatting during serialization ([7c4ac46](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/7c4ac46b6794bad206afe85de79a0bac6d1e0b74))
+
 ## [1.0.0-preview.15](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.14...v1.0.0-preview.15) (2025-10-21)
 
 
