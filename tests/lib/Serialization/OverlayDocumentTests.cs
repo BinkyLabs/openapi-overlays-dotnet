@@ -381,7 +381,7 @@ public sealed class OverlayDocumentTests : IDisposable
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri);
         Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
@@ -451,7 +451,7 @@ public sealed class OverlayDocumentTests : IDisposable
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri);
         Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
@@ -808,7 +808,7 @@ public sealed class OverlayDocumentTests : IDisposable
         await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
 
         // Act
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
 
         // Assert
         Assert.True(result, "Overlay application should succeed.");
@@ -876,7 +876,7 @@ public sealed class OverlayDocumentTests : IDisposable
         };
 
         // Act
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
         // Assert
         Assert.False(result, "Overlay application should fail.");
         Assert.NotNull(document);
