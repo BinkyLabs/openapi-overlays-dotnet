@@ -15,9 +15,9 @@ namespace BinkyLabs.OpenApi.Overlays;
 public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 {
     /// <summary>
-    /// Gets or sets the overlay version. Default is "1.0.0".
+    /// Gets or sets the overlay version. Default is "1.1.0".
     /// </summary>
-    public string? Overlay { get; internal set; } = "1.0.0";
+    public string? Overlay { get; internal set; } = "1.1.0";
 
     /// <summary>
     /// Gets or sets the overlay info object.
@@ -44,7 +44,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
         writer.WriteStartObject();
-        writer.WriteRequiredProperty("overlay", Overlay);
+        writer.WriteRequiredProperty("overlay", SpecVersionToStringMap[version]);
         if (Info != null)
         {
             writer.WriteRequiredObject("info", Info, serializeAction);
@@ -57,6 +57,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
+    private static readonly Dictionary<OverlaySpecVersion, string> SpecVersionToStringMap = new()
+    {
+        { OverlaySpecVersion.Overlay1_0, "1.0.0" },
+        { OverlaySpecVersion.Overlay1_1, "1.1.0" },
+    };
 
     /// <summary>
     /// Parses a local file path or Url into an Open API document.
