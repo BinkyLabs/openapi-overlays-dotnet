@@ -19,7 +19,7 @@ internal class OverlayV1VersionService : IOverlayVersionService
     {
     }
 
-    internal static readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new Dictionary<Type, Func<ParseNode, object?>>
+    private static readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new()
     {
         [typeof(JsonNodeExtension)] = OverlayV1Deserializer.LoadAny,
         [typeof(OverlayAction)] = OverlayV1Deserializer.LoadAction,

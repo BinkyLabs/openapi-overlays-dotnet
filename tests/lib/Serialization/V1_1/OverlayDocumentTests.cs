@@ -45,7 +45,7 @@ public sealed class OverlayDocumentV1_1Tests : IDisposable
 
         var expectedJson = """
         {
-            "overlay": "1.0.0",
+            "overlay": "1.1.0",
             "info": {
                 "title": "Test Overlay",
                 "version": "1.0.0"
@@ -169,7 +169,7 @@ public sealed class OverlayDocumentV1_1Tests : IDisposable
 
         var expectedJson = """
         {
-            "overlay": "1.0.0",
+            "overlay": "1.1.0",
             "info": {
                 "title": "Test Overlay",
                 "version": "1.0.0"

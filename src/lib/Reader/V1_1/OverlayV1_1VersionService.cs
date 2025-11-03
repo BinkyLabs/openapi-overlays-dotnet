@@ -21,11 +21,12 @@ internal class OverlayV1_1VersionService : IOverlayVersionService
     {
     }
 
-    private readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new Dictionary<Type, Func<ParseNode, object?>>(OverlayV1VersionService._loaders)
+    private readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new()
     {
-        [typeof(OverlayInfo)] = OverlayV1_1Deserializer.LoadInfo,
+        [typeof(JsonNodeExtension)] = OverlayV1Deserializer.LoadAny,
         [typeof(OverlayAction)] = OverlayV1_1Deserializer.LoadAction,
         [typeof(OverlayDocument)] = OverlayV1_1Deserializer.LoadDocument,
+        [typeof(OverlayInfo)] = OverlayV1_1Deserializer.LoadInfo,
     };
 
     public OverlayDocument LoadDocument(RootNode rootNode, Uri location)
