@@ -372,7 +372,7 @@ public sealed class OverlayDocumentTests
         }
         """;
 
-        var tempFile = @"./ValidFile.json";
+        var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".json");
         await File.WriteAllTextAsync(tempFile, json);
 
         // Act
