@@ -37,24 +37,24 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
-    /// <summary>
-    /// Serializes the overlay document as an OpenAPI Overlay v1.0.0 JSON object.
-    /// </summary>
-    /// <param name="writer">The OpenAPI writer to use for serialization.</param>
-    public void SerializeAsV1(IOpenApiWriter writer)
+    /// <inheritdoc/>
+    public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, (w, obj) => obj.SerializeAsV1(w));
+    /// <inheritdoc/>
+    public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, (w, obj) => obj.SerializeAsV1_1(w));
+    private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
         writer.WriteStartObject();
-        writer.WriteRequiredProperty("overlay", "1.0.0");
+        writer.WriteRequiredProperty("overlay", Overlay);
         if (Info != null)
         {
-            writer.WriteRequiredObject("info", Info, (w, obj) => obj.SerializeAsV1(w));
+            writer.WriteRequiredObject("info", Info, serializeAction);
         }
         writer.WriteProperty("extends", Extends);
         if (Actions != null)
         {
-            writer.WriteRequiredCollection<OverlayAction>("actions", Actions, (w, action) => action.SerializeAsV1(w));
+            writer.WriteRequiredCollection<OverlayAction>("actions", Actions, serializeAction);
         }
-        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
+        writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
 
