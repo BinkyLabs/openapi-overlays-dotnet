@@ -12,7 +12,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 /// </summary>
 internal class OverlayV1_1VersionService : BaseOverlayVersionService
 {
-    private readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new()
+    private static readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new()
     {
         [typeof(JsonNodeExtension)] = OverlayV1Deserializer.LoadAny,
         [typeof(OverlayAction)] = OverlayV1_1Deserializer.LoadAction,
