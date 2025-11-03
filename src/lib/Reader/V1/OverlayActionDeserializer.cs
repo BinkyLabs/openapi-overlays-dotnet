@@ -19,13 +19,11 @@ internal static partial class OverlayV1Deserializer
         { "update", (o, v) => o.Update = v.CreateAny() },
         { "x-copy", (o, v) => o.Copy = v.GetScalarValue() },
     };
-    public static PatternFieldMap<OverlayAction> GetActionPatternFields(OverlaySpecVersion version)
+    public static PatternFieldMap<OverlayAction> GetActionPatternFields(OverlaySpecVersion version) =>
+    new()
     {
-        return new PatternFieldMap<OverlayAction>()
-        {
-            {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k,LoadExtension(k, n, version))}
-        };
-    }
+        {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k,LoadExtension(k, n, version))}
+    };
     public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = GetActionPatternFields(OverlaySpecVersion.Overlay1_0);
     public static OverlayAction LoadAction(ParseNode node)
     {
