@@ -4,7 +4,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 
 internal static partial class OverlayV1_1Deserializer
 {
-    public static readonly FixedFieldMap<OverlayAction> ActionFixedFields = new(OverlayV1Deserializer.ActionFixedFields)
+    public static readonly FixedFieldMap<OverlayAction> ActionFixedFields = new(OverlayV1Deserializer.ActionFixedFields, ["x-copy"])
     {
         { "copy", (o, v) => o.Copy = v.GetScalarValue() },
     };
