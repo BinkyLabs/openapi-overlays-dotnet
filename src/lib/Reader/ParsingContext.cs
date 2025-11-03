@@ -1,15 +1,12 @@
 ﻿
 // Licensed under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader;
 
@@ -54,6 +51,7 @@ public class ParsingContext
         Diagnostic = diagnostic;
     }
     private const string OverlayV1Version = "1.0.0";
+    private const string OverlayV1_1Version = "1.1.0";
 
     /// <summary>
     /// Initiates the parsing process.  Not thread safe and should only be called once on a parsing context
@@ -75,6 +73,12 @@ public class ParsingContext
                 VersionService = new OverlayV1VersionService(Diagnostic);
                 doc = VersionService.LoadDocument(RootNode, location);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_0;
+                ValidateRequiredFields(doc, version);
+                break;
+            case string version when OverlayV1_1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
+                VersionService = new OverlayV1_1VersionService(Diagnostic);
+                doc = VersionService.LoadDocument(RootNode, location);
+                this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_1;
                 ValidateRequiredFields(doc, version);
                 break;
 
@@ -101,6 +105,10 @@ public class ParsingContext
         {
             case OverlaySpecVersion.Overlay1_0:
                 VersionService = new OverlayV1VersionService(Diagnostic);
+                element = this.VersionService.LoadElement<T>(node);
+                break;
+            case OverlaySpecVersion.Overlay1_1:
+                VersionService = new OverlayV1_1VersionService(Diagnostic);
                 element = this.VersionService.LoadElement<T>(node);
                 break;
             default:

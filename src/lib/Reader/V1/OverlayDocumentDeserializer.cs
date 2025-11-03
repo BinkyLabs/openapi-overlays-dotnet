@@ -11,10 +11,14 @@ internal static partial class OverlayV1Deserializer
         { "info", (o, v) => o.Info = LoadInfo(v) },
         { "actions", (o, v) => o.Actions = v.CreateList<OverlayAction>(LoadAction) }
     };
-    public static readonly PatternFieldMap<OverlayDocument> DocumentPatternFields = new()
+    public static PatternFieldMap<OverlayDocument> GetDocumentPatternFields(OverlaySpecVersion version)
     {
-        {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k,LoadExtension(k, n))}
-    };
+        return new PatternFieldMap<OverlayDocument>()
+        {
+            {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k, LoadExtension(k, n, version))}
+        };
+    }
+    public static readonly PatternFieldMap<OverlayDocument> DocumentPatternFields = GetDocumentPatternFields(OverlaySpecVersion.Overlay1_0);
     public static OverlayDocument LoadOverlayDocument(RootNode rootNode, Uri location)
     {
         var document = new OverlayDocument();
