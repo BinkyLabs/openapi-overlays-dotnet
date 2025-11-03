@@ -25,11 +25,12 @@ internal static partial class OverlayV1Deserializer
         {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k,LoadExtension(k, n, version))}
     };
     public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = GetActionPatternFields(OverlaySpecVersion.Overlay1_0);
-    public static OverlayAction LoadAction(ParseNode node)
+    public static OverlayAction LoadAction(ParseNode node) => LoadActionInternal(node, ActionFixedFields, ActionPatternFields);
+    public static OverlayAction LoadActionInternal(ParseNode node, FixedFieldMap<OverlayAction> actionFixedFields, PatternFieldMap<OverlayAction> actionPatternFields)
     {
         var mapNode = node.CheckMapNode("Action");
         var action = new OverlayAction();
-        ParseMap(mapNode, action, ActionFixedFields, ActionPatternFields);
+        ParseMap(mapNode, action, actionFixedFields, actionPatternFields);
 
         return action;
     }

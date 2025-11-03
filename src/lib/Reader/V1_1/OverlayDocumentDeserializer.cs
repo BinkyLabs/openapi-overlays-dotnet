@@ -10,18 +10,5 @@ internal static partial class OverlayV1_1Deserializer
         { "actions", (o, v) => o.Actions = v.CreateList<OverlayAction>(LoadAction) }
     };
     public static readonly PatternFieldMap<OverlayDocument> DocumentPatternFields = OverlayV1Deserializer.GetDocumentPatternFields(OverlaySpecVersion.Overlay1_1);
-    public static OverlayDocument LoadOverlayDocument(RootNode rootNode, Uri location)
-    {
-        var document = new OverlayDocument();
-        ParseMap(rootNode.GetMap(), document, DocumentFixedFields, DocumentPatternFields);
-        return document;
-    }
-    public static OverlayDocument LoadDocument(ParseNode node)
-    {
-        var mapNode = node.CheckMapNode("Document");
-        var info = new OverlayDocument();
-        ParseMap(mapNode, info, DocumentFixedFields, DocumentPatternFields);
-
-        return info;
-    }
+    public static OverlayDocument LoadDocument(ParseNode node) => OverlayV1Deserializer.LoadDocumentInternal(node, DocumentFixedFields, DocumentPatternFields);
 }

@@ -29,9 +29,9 @@ internal class OverlayV1_1VersionService : IOverlayVersionService
         [typeof(OverlayInfo)] = OverlayV1_1Deserializer.LoadInfo,
     };
 
-    public OverlayDocument LoadDocument(RootNode rootNode, Uri location)
+    public OverlayDocument LoadDocument(RootNode rootNode)
     {
-        return OverlayV1_1Deserializer.LoadOverlayDocument(rootNode, location);
+        return OverlayV1_1Deserializer.LoadDocument(rootNode.GetMap());
     }
 
     public T? LoadElement<T>(ParseNode node) where T : IOpenApiElement

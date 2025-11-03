@@ -15,11 +15,12 @@ internal static partial class OverlayV1Deserializer
         {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k, LoadExtension(k, n, version))}
     };
     public static readonly PatternFieldMap<OverlayInfo> InfoPatternFields = GetInfoPatternFields(OverlaySpecVersion.Overlay1_0);
-    public static OverlayInfo LoadInfo(ParseNode node)
+    public static OverlayInfo LoadInfo(ParseNode node) => LoadInfoInternal(node, InfoFixedFields, InfoPatternFields);
+    public static OverlayInfo LoadInfoInternal(ParseNode node, FixedFieldMap<OverlayInfo> infoFixedFields, PatternFieldMap<OverlayInfo> infoPatternFields)
     {
         var mapNode = node.CheckMapNode("Info");
         var info = new OverlayInfo();
-        ParseMap(mapNode, info, InfoFixedFields, InfoPatternFields);
+        ParseMap(mapNode, info, infoFixedFields, infoPatternFields);
 
         return info;
     }

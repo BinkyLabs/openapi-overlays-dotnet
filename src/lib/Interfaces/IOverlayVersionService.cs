@@ -24,7 +24,6 @@ internal interface IOverlayVersionService
     /// Converts a generic RootNode instance into a strongly typed OverlayDocument
     /// </summary>
     /// <param name="rootNode">RootNode containing the information to be converted into an OpenAPI Document</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <returns>Instance of OverlayDocument populated with data from rootNode</returns>
-    OverlayDocument LoadDocument(RootNode rootNode, Uri location);
+    OverlayDocument LoadDocument(RootNode rootNode);
 }
