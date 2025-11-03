@@ -104,6 +104,7 @@ BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.Readers.init -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.TryAddReader(string! format, BinkyLabs.OpenApi.Overlays.IOverlayReader! reader) -> bool
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_0 = 1 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_1 = 2 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.OverlayYamlReader() -> void
