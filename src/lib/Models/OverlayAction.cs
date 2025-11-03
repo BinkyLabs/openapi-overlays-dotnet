@@ -46,11 +46,11 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
-    /// <summary>
-    /// Serializes the action object as an OpenAPI Overlay v1.0.0 JSON object.
-    /// </summary>
-    /// <param name="writer">The OpenAPI writer to use for serialization.</param>
-    public void SerializeAsV1(IOpenApiWriter writer)
+    /// <inheritdoc/>
+    public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, "x-copy");
+    /// <inheritdoc/>
+    public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, "copy");
+    private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, string copyFieldName)
     {
         writer.WriteStartObject();
         writer.WriteRequiredProperty("target", Target);
@@ -63,10 +63,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
         if (Copy != null)
         {
-            writer.WriteProperty("x-copy", Copy);
+            writer.WriteProperty(copyFieldName, Copy);
         }
 
-        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
+        writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
 

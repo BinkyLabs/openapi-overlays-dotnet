@@ -22,16 +22,16 @@ public class OverlayInfo : IOverlaySerializable, IOverlayExtensible
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
-    /// <summary>
-    /// Serializes the info object as an OpenAPI Overlay v1.0.0 JSON object.
-    /// </summary>
-    /// <param name="writer">The OpenAPI writer to use for serialization.</param>
-    public void SerializeAsV1(IOpenApiWriter writer)
+    /// <inheritdoc/>
+    public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0);
+    /// <inheritdoc/>
+    public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1);
+    private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version)
     {
         writer.WriteStartObject();
         writer.WriteProperty("title", Title);
         writer.WriteProperty("version", Version);
-        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
+        writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
 }

@@ -9,6 +9,7 @@ BinkyLabs.OpenApi.Overlays.IOverlayReader.GetJsonNodeFromStreamAsync(System.IO.S
 BinkyLabs.OpenApi.Overlays.IOverlayReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.JsonNodeExtension(System.Text.Json.Nodes.JsonNode! jsonNode) -> void
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Node.get -> System.Text.Json.Nodes.JsonNode!
@@ -24,6 +25,7 @@ BinkyLabs.OpenApi.Overlays.OverlayAction.OverlayAction() -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
@@ -66,6 +68,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Info.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Overlay.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.OverlayDocument() -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayException
 BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException(string! message) -> void
@@ -78,6 +81,7 @@ BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.get -> System.Collections.Gene
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.OverlayInfo() -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.get -> string?
