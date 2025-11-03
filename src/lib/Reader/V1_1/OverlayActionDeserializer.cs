@@ -8,7 +8,7 @@ internal static partial class OverlayV1_1Deserializer
     {
         { "copy", (o, v) => o.Copy = v.GetScalarValue() },
     };
-    public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = new(OverlayV1Deserializer.GetActionPatternFields(OverlaySpecVersion.Overlay1_1));
+    public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = OverlayV1Deserializer.GetActionPatternFields(OverlaySpecVersion.Overlay1_1);
     public static OverlayAction LoadAction(ParseNode node)
     {
         var mapNode = node.CheckMapNode("Action");
