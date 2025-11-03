@@ -17,18 +17,13 @@ internal static partial class OverlayV1Deserializer
         {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k, LoadExtension(k, n, version))}
     };
     public static readonly PatternFieldMap<OverlayDocument> DocumentPatternFields = GetDocumentPatternFields(OverlaySpecVersion.Overlay1_0);
-    public static OverlayDocument LoadOverlayDocument(RootNode rootNode, Uri location)
-    {
-        var document = new OverlayDocument();
-        ParseMap(rootNode.GetMap(), document, DocumentFixedFields, DocumentPatternFields);
-        return document;
-    }
-    public static OverlayDocument LoadDocument(ParseNode node)
+    public static OverlayDocument LoadDocument(ParseNode node) => LoadDocumentInternal(node, DocumentFixedFields, DocumentPatternFields);
+    public static OverlayDocument LoadDocumentInternal(ParseNode node, FixedFieldMap<OverlayDocument> documentFixedFields, PatternFieldMap<OverlayDocument> documentPatternFields)
     {
         var mapNode = node.CheckMapNode("Document");
-        var info = new OverlayDocument();
-        ParseMap(mapNode, info, DocumentFixedFields, DocumentPatternFields);
+        var document = new OverlayDocument();
+        ParseMap(mapNode, document, documentFixedFields, documentPatternFields);
 
-        return info;
+        return document;
     }
 }

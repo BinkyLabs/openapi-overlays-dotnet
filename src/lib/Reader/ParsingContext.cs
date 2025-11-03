@@ -57,9 +57,8 @@ public class ParsingContext
     /// Initiates the parsing process.  Not thread safe and should only be called once on a parsing context
     /// </summary>
     /// <param name="jsonNode">Set of Json nodes to parse.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <returns>An OverlayDocument populated based on the passed yamlDocument </returns>
-    public OverlayDocument Parse(JsonNode jsonNode, Uri location)
+    public OverlayDocument Parse(JsonNode jsonNode)
     {
         RootNode = new RootNode(this, jsonNode);
 
@@ -71,13 +70,13 @@ public class ParsingContext
         {
             case string version when OverlayV1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
                 VersionService = new OverlayV1VersionService(Diagnostic);
-                doc = VersionService.LoadDocument(RootNode, location);
+                doc = VersionService.LoadDocument(RootNode);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_0;
                 ValidateRequiredFields(doc, version);
                 break;
             case string version when OverlayV1_1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
                 VersionService = new OverlayV1_1VersionService(Diagnostic);
-                doc = VersionService.LoadDocument(RootNode, location);
+                doc = VersionService.LoadDocument(RootNode);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_1;
                 ValidateRequiredFields(doc, version);
                 break;

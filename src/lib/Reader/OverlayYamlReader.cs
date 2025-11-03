@@ -19,7 +19,6 @@ public class OverlayYamlReader : IOverlayReader
     private const int copyBufferSize = 4096;
     private static readonly OverlayJsonReader _jsonReader = new();
     private ReadResult Read(MemoryStream input,
-                           Uri location,
                            OverlayReaderSettings settings)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -49,40 +48,37 @@ public class OverlayYamlReader : IOverlayReader
             };
         }
 
-        return Read(jsonNode, location, settings);
+        return Read(jsonNode, settings);
     }
 
     private ReadResult Read(JsonNode jsonNode,
-                           Uri location,
                            OverlayReaderSettings settings)
     {
-        return _jsonReader.Read(jsonNode, location, settings);
+        return _jsonReader.Read(jsonNode, settings);
     }
 
     /// <summary>
     /// Reads the stream input asynchronously and parses it into an Open API document.
     /// </summary>
     /// <param name="input">Memory stream containing OpenAPI description to parse.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <param name="settings">The Reader settings to be used during parsing.</param>
     /// <param name="cancellationToken">Propagates notifications that operations should be cancelled.</param>
     /// <returns></returns>
     public async Task<ReadResult> ReadAsync(Stream input,
-                                            Uri location,
                                             OverlayReaderSettings settings,
                                             CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
         if (input is MemoryStream memoryStream)
         {
-            return Read(memoryStream, location, settings);
+            return Read(memoryStream, settings);
         }
         else
         {
             using var preparedStream = new MemoryStream();
             await input.CopyToAsync(preparedStream, copyBufferSize, cancellationToken).ConfigureAwait(false);
             preparedStream.Position = 0;
-            return Read(preparedStream, location, settings);
+            return Read(preparedStream, settings);
         }
     }
 

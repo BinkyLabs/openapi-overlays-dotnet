@@ -91,27 +91,12 @@ public static class OverlayModelFactory
 
     private static readonly Lazy<OverlayReaderSettings> DefaultReaderSettings = new(() => new OverlayReaderSettings());
 
-    private static async Task<ReadResult> InternalLoadAsync(Stream input, string format, OverlayReaderSettings settings, CancellationToken cancellationToken = default)
+    private static Task<ReadResult> InternalLoadAsync(Stream input, string format, OverlayReaderSettings settings, CancellationToken cancellationToken = default)
     {
         settings ??= DefaultReaderSettings.Value;
         var reader = settings.GetReader(format);
 
-        // Handle URI creation more safely for file paths
-        Uri location;
-        if (input is FileStream fileStream)
-        {
-            // Convert to absolute path and then create a file URI to handle relative paths correctly
-            var absolutePath = Path.GetFullPath(fileStream.Name);
-            location = new Uri(absolutePath, UriKind.Absolute);
-        }
-        else
-        {
-            location = new Uri(OpenApiConstants.BaseRegistryUri);
-        }
-
-        var readResult = await reader.ReadAsync(input, location, settings, cancellationToken).ConfigureAwait(false);
-
-        return readResult;
+        return reader.ReadAsync(input, settings, cancellationToken);
     }
 
     private static async Task<(Stream, string?)> RetrieveStreamAndFormatAsync(string url, OverlayReaderSettings settings, CancellationToken token = default)
