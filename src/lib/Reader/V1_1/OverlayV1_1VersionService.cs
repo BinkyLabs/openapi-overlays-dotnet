@@ -1,35 +1,36 @@
 ﻿
 // Licensed under the MIT license.
 
+using BinkyLabs.OpenApi.Overlays.Reader.V1;
+
 using Microsoft.OpenApi;
 
-namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
+namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 
 /// <summary>
-/// The version service for the Overlay 1.0 specification.
+/// The version service for the Overlay 1.1 specification.
 /// </summary>
-internal class OverlayV1VersionService : IOverlayVersionService
+internal class OverlayV1_1VersionService : IOverlayVersionService
 {
 
     /// <summary>
     /// Create Parsing Context
     /// </summary>
     /// <param name="diagnostic">Provide instance for diagnostic object for collecting and accessing information about the parsing.</param>
-    public OverlayV1VersionService(OverlayDiagnostic diagnostic)
+    public OverlayV1_1VersionService(OverlayDiagnostic diagnostic)
     {
     }
 
-    internal static readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new Dictionary<Type, Func<ParseNode, object?>>
+    private readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new Dictionary<Type, Func<ParseNode, object?>>(OverlayV1VersionService._loaders)
     {
-        [typeof(JsonNodeExtension)] = OverlayV1Deserializer.LoadAny,
-        [typeof(OverlayAction)] = OverlayV1Deserializer.LoadAction,
-        [typeof(OverlayDocument)] = OverlayV1Deserializer.LoadDocument,
-        [typeof(OverlayInfo)] = OverlayV1Deserializer.LoadInfo,
+        [typeof(OverlayInfo)] = OverlayV1_1Deserializer.LoadInfo,
+        [typeof(OverlayAction)] = OverlayV1_1Deserializer.LoadAction,
+        [typeof(OverlayDocument)] = OverlayV1_1Deserializer.LoadDocument,
     };
 
     public OverlayDocument LoadDocument(RootNode rootNode, Uri location)
     {
-        return OverlayV1Deserializer.LoadOverlayDocument(rootNode, location);
+        return OverlayV1_1Deserializer.LoadOverlayDocument(rootNode, location);
     }
 
     public T? LoadElement<T>(ParseNode node) where T : IOpenApiElement
