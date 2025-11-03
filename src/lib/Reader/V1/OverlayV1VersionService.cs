@@ -11,11 +11,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 internal class OverlayV1VersionService : IOverlayVersionService
 {
 
-    /// <summary>
-    /// Create Parsing Context
-    /// </summary>
-    /// <param name="diagnostic">Provide instance for diagnostic object for collecting and accessing information about the parsing.</param>
-    public OverlayV1VersionService(OverlayDiagnostic diagnostic)
+    public OverlayV1VersionService()
     {
     }
 
