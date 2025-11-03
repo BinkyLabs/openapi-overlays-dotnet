@@ -69,13 +69,13 @@ public class ParsingContext
         switch (inputVersion)
         {
             case string version when OverlayV1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
-                VersionService = new OverlayV1VersionService(Diagnostic);
+                VersionService = new OverlayV1VersionService();
                 doc = VersionService.LoadDocument(RootNode);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_0;
                 ValidateRequiredFields(doc, version);
                 break;
             case string version when OverlayV1_1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
-                VersionService = new OverlayV1_1VersionService(Diagnostic);
+                VersionService = new OverlayV1_1VersionService();
                 doc = VersionService.LoadDocument(RootNode);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_1;
                 ValidateRequiredFields(doc, version);
@@ -103,11 +103,11 @@ public class ParsingContext
         switch (version)
         {
             case OverlaySpecVersion.Overlay1_0:
-                VersionService = new OverlayV1VersionService(Diagnostic);
+                VersionService = new OverlayV1VersionService();
                 element = this.VersionService.LoadElement<T>(node);
                 break;
             case OverlaySpecVersion.Overlay1_1:
-                VersionService = new OverlayV1_1VersionService(Diagnostic);
+                VersionService = new OverlayV1_1VersionService();
                 element = this.VersionService.LoadElement<T>(node);
                 break;
             default:
