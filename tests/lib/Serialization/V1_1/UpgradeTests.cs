@@ -46,7 +46,7 @@ public class UpgradeV1_1Tests
     }
     [Fact]
     public async Task DowngradesAV1_1DocumentToV1_0Async()
-	{
+    {
         // Given
         var inputJson =
         """
@@ -81,5 +81,5 @@ public class UpgradeV1_1Tests
 
         // Then
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The downgraded JSON does not match the expected JSON.");
-	}
+    }
 }
