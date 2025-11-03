@@ -40,10 +40,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// A string value that indicates that the target object or array MUST be copied to the location indicated by this string, which MUST be a JSON Pointer.
     /// This field is mutually exclusive with the <see cref="Remove"/> and <see cref="Update"/> fields.
-    /// This field is experimental and not part of the OpenAPI Overlay specification v1.0.0.
-    /// This field is an implementation of <see href="https://github.com/OAI/Overlay-Specification/pull/150">the copy proposal</see>.
     /// </summary>
-    [Experimental("BOO001", UrlFormat = "https://github.com/OAI/Overlay-Specification/pull/150")]
     public string? Copy { get; set; }
 
     /// <inheritdoc/>
@@ -64,18 +61,14 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         {
             writer.WriteOptionalObject("update", Update, (w, s) => w.WriteAny(s));
         }
-#pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         if (Copy != null)
         {
             writer.WriteProperty("x-copy", Copy);
         }
-#pragma warning restore BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
         writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();
     }
-
-#pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     private (bool, JsonPath?, PathResult?) ValidateBeforeApplying(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {
@@ -193,7 +186,6 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
         return true;
     }
-#pragma warning restore BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     private static string GetPointer(int index) => $"$.actions[{index}]";
 
