@@ -10,9 +10,9 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         }
         public FixedFieldMap(FixedFieldMap<T> source) : base(source)
-		{
-			
-		}
+        {
+
+        }
         public FixedFieldMap(FixedFieldMap<T> source, HashSet<string> except) : base(source.Where(kv => !except.Contains(kv.Key)))
         {
 
