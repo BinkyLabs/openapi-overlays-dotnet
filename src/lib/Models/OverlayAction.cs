@@ -274,7 +274,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
         return false;
     }
-    private static void MergeJsonNode(JsonNode target, JsonNode update, OverlayDiagnostic overlayDiagnostic)
+    private static void MergeJsonNode(JsonNode target, JsonNode update, OverlayDiagnostic overlayDiagnostic, int level = 0)
     {
         if (target is JsonObject targetObject && update is JsonObject updateObject)
         {
@@ -291,7 +291,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
                     targetObject[kvp.Key] = kvp.Value.DeepClone();
                     continue;
                 }
-                MergeJsonNode(objectTargetValue, kvp.Value, overlayDiagnostic);
+                MergeJsonNode(objectTargetValue, kvp.Value, overlayDiagnostic, level + 1);
             }
         }
         else if (target is JsonArray targetArray && update is JsonArray updateArray)
@@ -300,6 +300,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             {
                 targetArray.Add(item?.DeepClone());
             }
+        }
+        else if (level == 0 && target is JsonArray specificTargetArray && update is not JsonArray)
+        {
+            specificTargetArray.Add(update.DeepClone());
         }
         else if (target is JsonValue && update is JsonValue)
         {

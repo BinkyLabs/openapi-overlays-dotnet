@@ -115,7 +115,7 @@ public sealed class SpecificationTests
                 Assert.Fail($"Expected result file does not exist: {expectedResultPath}. To create it, set the environment variable {RECORD_MODE_ENV_VAR}=true and re-run the tests.");
             }
             var expectedJsonNode = await GetJsonNodeForFilePath(expectedResultPath);
-            Assert.True(JsonNode.DeepEquals(expectedJsonNode, inputJsonNode), $"The resulting document does not match the expected result. Expected result file path: {expectedResultPath}");
+            Assert.True(JsonNode.DeepEquals(expectedJsonNode, inputJsonNode), $"The resulting document does not match the expected result. Expected result file path: {expectedResultPath}, got input file path: {inputJsonNode}");
         }
     }
 }
