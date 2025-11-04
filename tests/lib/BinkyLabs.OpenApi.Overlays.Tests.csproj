@@ -31,4 +31,13 @@
     <ProjectReference Include="..\..\src\lib\BinkyLabs.OpenApi.Overlays.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Specification\examples\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Specification\results\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
