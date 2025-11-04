@@ -287,10 +287,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
                 }
                 var objectTargetValue = targetObject[kvp.Key];
                 if (objectTargetValue is null)
-				{
+                {
                     targetObject[kvp.Key] = kvp.Value.DeepClone();
                     continue;
-				}
+                }
                 MergeJsonNode(objectTargetValue, kvp.Value, overlayDiagnostic);
             }
         }
