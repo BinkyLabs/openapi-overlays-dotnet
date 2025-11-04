@@ -1,12 +1,46 @@
 [![NuGet Version](https://img.shields.io/nuget/vpre/BinkyLabs.OpenApi.Overlays)](https://www.nuget.org/packages/BinkyLabs.OpenApi.Overlays) [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/BinkyLabs/openapi-overlays-dotnet/dotnet.yml)](https://github.com/BinkyLabs/openapi-overlays-dotnet/actions/workflows/dotnet.yml)
 
-# OpenAPI Overlay Libraries for dotnet
+# OpenAPI Overlay Library & CLI for dotnet
 
 This project provides a .NET implementation of the [OpenAPI Overlay Specification](https://spec.openapis.org/overlay/latest.html), allowing you to dynamically apply overlays (patches) to existing OpenAPI documents (v3.0+), following the official OpenAPI Overlay 1.0.0 specification.
 
 The library enables developers to programmatically apply overlays, validate them, and generate updated OpenAPI documents without relying on third-party tools like Swagger.
 
-## Installing
+The CLI enables developers to apply overlays to an OpenAPI document from their favourite shell.
+
+## CLI
+
+### Installing the CLI
+
+```shell
+dotnet tool install -g BinkyLabs.OpenApi.Overlays.Tool --prerelease
+```
+
+### Usage
+
+#### Apply an overlay to an OpenAPI description
+
+The apply command applies the overlay actions to an OpenAPI description and preserves the source ordering of fields.
+
+```shell
+clio apply pathOrUrlToInputDescription --overlay pathOrUrlToOverlay -out pathForResultingDescription
+```
+
+> Note: the overlay argument can be specified multiple times, the order matters.
+
+#### Apply and normalize
+
+The apply command applies the overlay actions to an OpenAPI description and normalizes the description based on OpenAPI.net rules and fields ordering.
+
+```shell
+clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverlay -out pathForResultingDescription
+```
+
+> Note: the overlay argument can be specified multiple times, the order matters.
+
+## Library
+
+### Installing the library
 
 You can install this library via the package explorer or using the following command.
 
@@ -14,9 +48,9 @@ You can install this library via the package explorer or using the following com
 dotnet add <pathToCsProj> package BinkyLabs.OpenApi.Overlays
 ```
 
-## Examples
+### Examples
 
-### Parsing an Overlay document
+#### Parsing an Overlay document
 
 The following example illustrates how you can load or parse an Overlay document from JSON or YAML.
 
@@ -24,7 +58,7 @@ The following example illustrates how you can load or parse an Overlay document 
 var (overlayDocument) = await OverlayDocument.LoadFromUrlAsync("https://source/overlay.json");
 ```
 
-### Applying an Overlay document to an OpenAPI document
+#### Applying an Overlay document to an OpenAPI document
 
 The following example illustrates how you can apply an Overlay document to an OpenAPI document.
 
@@ -32,7 +66,7 @@ The following example illustrates how you can apply an Overlay document to an Op
 var (resultOpenApiDocument) = await overlayDocument.ApplyToDocumentAndLoadAsync("https://source/openapi.json");
 ```
 
-### Applying multiple Overlay documents to an OpenAPI document
+#### Applying multiple Overlay documents to an OpenAPI document
 
 The following example illustrates how you can apply multiple Overlay documents to an OpenAPI document.
 
@@ -42,7 +76,7 @@ var combinedOverlay = overlayDocument1.CombineWith(overlayDocument2);
 var (resultOpenApiDocument) = await combinedOverlay.ApplyToDocumentAndLoadAsync("https://source/openapi.json");
 ```
 
-### Serializing an Overlay document
+#### Serializing an Overlay document
 
 The following example illustrates how you can serialize an Overlay document, built by the application or previously parsed, to JSON.
 
