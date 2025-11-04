@@ -1,0 +1,59 @@
+openapi: 3.1.2
+info:
+  title: Input similar to https://github.com/OAI/Overlay-Specification/issues/38
+  version: 1.0.0
+# traits:
+#   pagable:
+#     parameters:
+#       - name: pageSize
+#         in: query
+#         type: number
+#         required: false
+#         default: 10
+#       - name: pageNumber
+#         in: query
+#         type: number
+#         required: false
+#         default: 1
+#     response:
+#       200:
+#         schema:
+#           pagination:
+#             $ref: "#/definitions/PaginationFragment"
+# mixins:
+#   metadata:
+#     schema:
+#       metadata:
+#         $ref: "#/definitions/MetadataFragment"
+paths:
+  /foo:
+    get:
+      description: search for foo resources
+      parameters:
+        - name: q
+          in: query
+          type: string
+          required: true
+        - name: pageSize
+          in: query
+          type: number
+          required: false
+          default: 10
+        - name: pageNumber
+          in: query
+          type: number
+          required: false
+          default: 1
+      responses:
+        200:
+          schema:
+            type: object
+            properties:
+              FooItems:
+                type: array
+                items:
+                  $ref: "#/definitions/FooItem"
+              pagination:
+                $ref: "#/definitions/PaginationFragment"
+              metadata:
+                $ref: "#/definitions/MetadataFragment"
