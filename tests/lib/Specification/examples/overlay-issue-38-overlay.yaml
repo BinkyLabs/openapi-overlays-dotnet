@@ -3,7 +3,7 @@ info:
   title: Apply Traits
   version: 1.0.0
 actions:
-  - target: $.paths.*.get[?(@.x-is[?(@ == 'pagable')])]
+  - target: $.paths[?(@.get['x-is'][?(@ == 'pagable')])].get
     update:
       parameters:
         - name: pageSize
@@ -16,13 +16,13 @@ actions:
           type: number
           required: false
           default: 1
-  - target: $.paths.*.get[?(@.x-is[?(@ == 'pagable')])].responses.*.schema.properties
+  - target: $.paths[?(@.get['x-is'][?(@ == 'pagable')])].get.responses.*.schema.properties
     update:
       pagination:
         $ref: "#/definitions/PaginationFragment"
-  - target: $.paths.*.get.x-is
+  - target: $.paths.*.get['x-is']
     remove: true
-  - target: $.paths.*.*.responses.*[?(@.has[?(@ == 'metadata')])].schema.properties
+  - target: $.paths.*.*.responses[?(@.has[?(@ == 'metadata')])].schema.properties
     update:
       metadata:
         $ref: "#/definitions/MetadataFragment"
