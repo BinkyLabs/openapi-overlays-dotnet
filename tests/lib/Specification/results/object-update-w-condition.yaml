@@ -1,0 +1,20 @@
+﻿openapi: 3.1.0
+info:
+  title: API with a paged collection
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            $ref: '#/components/schemas/filterSchema'
+        - name: top
+          in: query
+        - name: skip
+          in: query
+      responses:
+        "200":
+          description: OK
+      x-safe: true
