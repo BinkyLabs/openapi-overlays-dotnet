@@ -20,7 +20,7 @@ public sealed class SpecificationTests
     private const string InputSuffix = "-input";
     private const string OverlaySuffix = "-overlay";
 
-    private static readonly Lazy<string> SpecificationsBasePath = new (() => 
+    private static readonly Lazy<string> SpecificationsBasePath = new(() =>
     {
         var assemblyLocation = Path.GetDirectoryName(typeof(SpecificationTests).Assembly.Location);
         return Path.Combine(assemblyLocation!, SpecificationPathSegment);
@@ -38,7 +38,7 @@ public sealed class SpecificationTests
         Assert.NotEmpty(inputFiles);
     }
 
-    private static bool IsRecording => Environment.GetEnvironmentVariable(RECORD_MODE_ENV_VAR) == true.ToString();
+    private static readonly bool IsRecording = Environment.GetEnvironmentVariable(RECORD_MODE_ENV_VAR) == true.ToString();
 
     private static async Task<JsonNode> LoadYamlDocumentAsJsonNode(string filePath)
     {
@@ -56,10 +56,10 @@ public sealed class SpecificationTests
             _ => throw new NotSupportedException($"Unsupported file extension for input file: {filePath}")
         };
     }
-    
+
     private static async Task WriteJsonNodeToFile(JsonNode jsonNode, string filePath, Stream stream)
-	{
-		switch (Path.GetExtension(filePath).ToLowerInvariant())
+    {
+        switch (Path.GetExtension(filePath).ToLowerInvariant())
         {
             case ".json":
                 await stream.WriteAsync(Encoding.UTF8.GetBytes(jsonNode.ToJsonString(new JsonSerializerOptions { WriteIndented = true })));
@@ -77,7 +77,7 @@ public sealed class SpecificationTests
             default:
                 throw new NotSupportedException($"Unsupported file extension for output file: {filePath}");
         }
-	}
+    }
 
     [Theory]
     [MemberData(nameof(ListInputFiles))]
@@ -106,7 +106,7 @@ public sealed class SpecificationTests
             using var fileStream = File.Create(targetResultPath);
             await WriteJsonNodeToFile(inputJsonNode, targetResultPath, fileStream);
         }
-		else
+        else
         {
             var expectedResultPath = Path.Combine(SpecificationsBasePath.Value, ResultsPathSegment, inputFileName.Replace(InputSuffix, string.Empty, StringComparison.Ordinal));
             var resultFileExists = File.Exists(expectedResultPath);
@@ -114,8 +114,8 @@ public sealed class SpecificationTests
             {
                 Assert.Fail($"Expected result file does not exist: {expectedResultPath}. To create it, set the environment variable {RECORD_MODE_ENV_VAR}=true and re-run the tests.");
             }
-			var expectedJsonNode = await GetJsonNodeForFilePath(expectedResultPath);
+            var expectedJsonNode = await GetJsonNodeForFilePath(expectedResultPath);
             Assert.True(JsonNode.DeepEquals(expectedJsonNode, inputJsonNode), $"The resulting document does not match the expected result. Expected result file path: {expectedResultPath}");
-		}        
-	}
+        }
+    }
 }
