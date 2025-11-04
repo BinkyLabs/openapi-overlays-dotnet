@@ -62,7 +62,7 @@ paths:
       summary: Test endpoint
       responses:
         '200':
-        description: OK
+          description: OK
 """;
 
     private readonly string _validOverlayJson =

@@ -279,7 +279,8 @@ internal static class OverlayCliApp
                 case "yaml":
                     var yamlStream = new YamlStream(new YamlDocument(jsonNode.ToYamlNode()));
                     var writer = new StreamWriter(outputStream);
-                    yamlStream.Save(writer);
+                    yamlStream.Save(writer, true);
+                    await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
                     break;
                 case "json":
                     await JsonSerializer.SerializeAsync(outputStream, jsonNode, cancellationToken: cancellationToken).ConfigureAwait(false);
