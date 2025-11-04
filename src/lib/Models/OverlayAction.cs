@@ -280,12 +280,22 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         {
             foreach (var kvp in updateObject)
             {
-                targetObject[kvp.Key] = kvp.Value?.DeepClone();
+                if (kvp.Value is null)
+                {
+                    targetObject[kvp.Key] = null;
+                    continue;
+                }
+                var objectTargetValue = targetObject[kvp.Key];
+                if (objectTargetValue is null)
+				{
+                    targetObject[kvp.Key] = kvp.Value.DeepClone();
+                    continue;
+				}
+                MergeJsonNode(objectTargetValue, kvp.Value, overlayDiagnostic);
             }
         }
         else if (target is JsonArray targetArray && update is JsonArray updateArray)
         {
-            targetArray.Clear();
             foreach (var item in updateArray)
             {
                 targetArray.Add(item?.DeepClone());

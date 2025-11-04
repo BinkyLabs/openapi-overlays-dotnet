@@ -327,6 +327,70 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(openApiDiagnostic.Errors);
         Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?.Values?.FirstOrDefault()?.Summary);
     }
+    [Fact]
+    public async Task UpdatesExistingArrayAppendsEntries()
+    {
+        // Given
+        // Arrange
+        var openApiDocument = """
+        {
+            "openapi": "3.0.1",
+            "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+            },
+            "paths": {
+                "/test": {
+                    "get": {
+                        "summary": "Original summary",
+                        "responses": {
+                            "200": {
+                                "description": "Success"
+                            }
+                        },
+                        "tags": ["foo"]
+                    }
+                }
+            }
+        }
+        """;
+
+        // Create a temporary file with a relative path
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.paths['/test'].get",
+                    Description = "Append to existing array",
+                    Update = new JsonObject
+                    {
+                        ["tags"] = new JsonArray("bar", "buzz")
+                    }
+                }
+            ]
+        };
+
+        // When
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+
+        // Then
+        Assert.True(result, "Overlay application should succeed.");
+        Assert.NotNull(document);
+        Assert.NotNull(overlayDiagnostic);
+        Assert.NotNull(openApiDiagnostic);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(openApiDiagnostic.Errors);
+        var tags = document.Paths["/test"]?.Operations?[HttpMethod.Get].Tags;
+        Assert.NotNull(tags);
+        Assert.Equal(3, tags.Count);
+        var tagsAsArray = tags.Select(t => t.Name).ToArray();
+        Assert.Contains("foo", tagsAsArray);
+        Assert.Contains("bar", tagsAsArray);
+        Assert.Contains("buzz", tagsAsArray);
+    }
     public void Dispose()
     {
         // Cleanup

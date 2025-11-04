@@ -6,5 +6,7 @@ paths:
   /items:
     get:
       tags:
+        - these
+        - should stay
         - added
       description: This was added
