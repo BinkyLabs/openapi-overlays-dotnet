@@ -1,0 +1,10 @@
+overlay: 1.0.0
+info:
+  title: Update an object
+  version: 1.0.0
+actions:
+  - target: $.paths["/items"].get
+    update:
+      description: This was added
+      tags:
+        - added

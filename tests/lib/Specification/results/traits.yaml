@@ -1,0 +1,37 @@
+﻿openapi: 3.1.0
+info:
+  title: API with a paged collection
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      x-oai-traits:
+        - paged
+      responses:
+        "200":
+          description: OK
+      parameters:
+        - name: top
+          in: query
+        - name: skip
+          in: query
+  /items/{id}/subitems:
+    get:
+      x-oai-traits:
+        - paged
+      parameters:
+        - name: id
+          in: path
+          required: true
+        - name: top
+          in: query
+        - name: skip
+          in: query
+      responses:
+        "200":
+          description: OK
+  /other:
+    get:
+      responses:
+        "200":
+          description: OK

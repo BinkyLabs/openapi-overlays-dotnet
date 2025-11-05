@@ -1,0 +1,5 @@
+openapi: 3.0.0
+info:
+  title: Primitive Update Input
+  version: 1.0.0
+paths: {}
