@@ -77,6 +77,8 @@ BinkyLabs.OpenApi.Overlays.OverlayException.Pointer.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayException.Pointer.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayExtensibleExtensions
 BinkyLabs.OpenApi.Overlays.OverlayInfo
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Description.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.OverlayInfo() -> void
