@@ -7,7 +7,8 @@ internal static partial class OverlayV1Deserializer
     public static readonly FixedFieldMap<OverlayInfo> InfoFixedFields = new()
     {
         { "title", (o, v) => o.Title = v.GetScalarValue() },
-        { "version", (o, v) => o.Version = v.GetScalarValue() }
+        { "version", (o, v) => o.Version = v.GetScalarValue() },
+        { "x-description", (o, v) => o.Description = v.GetScalarValue() }
     };
     public static PatternFieldMap<OverlayInfo> GetInfoPatternFields(OverlaySpecVersion version) =>
     new()
