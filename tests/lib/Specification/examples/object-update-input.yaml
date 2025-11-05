@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info:
+  title: Object Update Input
+  version: 1.0.0
+  contact:
+    name: This should have been changed
+paths:
+  /items:
+    get:
+      tags:
+        - good
+        - bad

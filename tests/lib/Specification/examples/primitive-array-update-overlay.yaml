@@ -1,0 +1,7 @@
+overlay: 1.0.0
+info:
+  title: Update an array element
+  version: 1.0.0
+actions:
+  - target: $.paths.*.get.tags[?(@ == 'ugly')]
+    update: special

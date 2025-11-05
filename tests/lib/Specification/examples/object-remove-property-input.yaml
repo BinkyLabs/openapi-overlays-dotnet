@@ -1,0 +1,6 @@
+openapi: 3.0.0
+info:
+  title: Object Remove Property Input
+  description: This should have been removed
+  version: 1.0.0
+paths: {}
