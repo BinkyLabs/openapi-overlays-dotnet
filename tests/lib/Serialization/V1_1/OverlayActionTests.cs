@@ -533,9 +533,10 @@ public class OverlayActionV1_1Tests
         Assert.True(result);
         var targetTags = jsonNode["paths"]?["/users"]?["get"]?["tags"]?.AsArray();
         Assert.NotNull(targetTags);
-        Assert.Equal(2, targetTags.Count);
-        Assert.Equal("post", targetTags[0]?.GetValue<string>());
-        Assert.Equal("content", targetTags[1]?.GetValue<string>());
+        Assert.Equal(3, targetTags.Count);
+        Assert.Equal("user", targetTags[0]?.GetValue<string>());
+        Assert.Equal("post", targetTags[1]?.GetValue<string>());
+        Assert.Equal("content", targetTags[2]?.GetValue<string>());
         Assert.Empty(overlayDiagnostic.Errors);
     }
 
