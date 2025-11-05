@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.0-preview.17](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.16...v1.0.0-preview.17) (2025-11-05)
+
+
+### Bug Fixes
+
+* a bug where array updates would replace and not append additional values ([71c976a](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/71c976ad348c71b28e88475b2b21a2d9f256570b)), closes [#137](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/137)
+* if targets for updates are arrays, the item should be inserted ([36bcceb](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/36bccebf75dc3deb20c361774d7c454f621c7db2)), closes [#136](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/136)
+* yaml OpenAPI descriptions are empty ([1a3ac73](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/1a3ac73d5743b6a9b93331b557795cd780234e87))
+
 ## [1.0.0-preview.16](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.15...v1.0.0-preview.16) (2025-10-27)
 
 
