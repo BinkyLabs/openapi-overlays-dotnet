@@ -12,7 +12,7 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public sealed class OverlayDocumentV1_1Tests : IDisposable
+public sealed class OverlayDocumentV1_1Tests
 {
     [Fact]
     public void SerializeAsV1_1_ShouldWriteCorrectJson()
