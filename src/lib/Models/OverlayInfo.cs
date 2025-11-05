@@ -36,14 +36,14 @@ public class OverlayInfo : IOverlaySerializable, IOverlayExtensible
         writer.WriteStartObject();
         writer.WriteProperty("title", Title);
         writer.WriteProperty("version", Version);
-        
+
         // Handle version-specific description field name
         if (Description != null)
         {
             var descriptionFieldName = version == OverlaySpecVersion.Overlay1_0 ? "x-description" : "description";
             writer.WriteProperty(descriptionFieldName, Description);
         }
-        
+
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
