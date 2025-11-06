@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.18](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.17...v1.0.0-preview.18) (2025-11-06)
+
+
+### Bug Fixes
+
+* Bump Microsoft.OpenApi and Microsoft.OpenApi.YamlReader for null serialization in yaml ([835ded8](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/835ded8406f86e53458bdbac78eff9bbd378df9a))
+
 ## [1.0.0-preview.17](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.16...v1.0.0-preview.17) (2025-11-05)
 
 
