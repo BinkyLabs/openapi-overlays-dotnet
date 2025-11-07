@@ -21,6 +21,8 @@ BinkyLabs.OpenApi.Overlays.OverlayAction.Description.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.OverlayAction() -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.Parameters.get -> System.Collections.Generic.List<BinkyLabs.OpenApi.Overlays.OverlayParameter!>?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Parameters.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
@@ -86,6 +88,17 @@ BinkyLabs.OpenApi.Overlays.OverlayJsonReader
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.OverlayJsonReader() -> void
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Name.get -> string?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Name.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.OverlayParameter() -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Separator.get -> string?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Separator.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Source.get -> BinkyLabs.OpenApi.Overlays.ParameterValueSource
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Source.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Values.get -> System.Collections.Generic.List<string!>?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Values.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderException
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message) -> void
@@ -108,6 +121,9 @@ BinkyLabs.OpenApi.Overlays.OverlayYamlReader
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.OverlayYamlReader() -> void
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+[BOO002]BinkyLabs.OpenApi.Overlays.ParameterValueSource
+[BOO002]BinkyLabs.OpenApi.Overlays.ParameterValueSource.Environment = 1 -> BinkyLabs.OpenApi.Overlays.ParameterValueSource
+[BOO002]BinkyLabs.OpenApi.Overlays.ParameterValueSource.Inline = 0 -> BinkyLabs.OpenApi.Overlays.ParameterValueSource
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.get -> System.Collections.Generic.IList<Microsoft.OpenApi.OpenApiError!>!
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.set -> void
