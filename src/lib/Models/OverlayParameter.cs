@@ -44,7 +44,12 @@ public class OverlayParameter : IOverlaySerializable
     {
         writer.WriteStartObject();
         writer.WriteRequiredProperty("name", Name);
-        writer.WriteProperty("source", Source.ToString().ToLowerInvariant());
+
+        // Only write source if it's not the default value (Inline)
+        if (Source != ParameterValueSource.Inline)
+        {
+            writer.WriteProperty("source", Source.ToString().ToLowerInvariant());
+        }
 
         if (Values != null && Values.Count > 0)
         {
@@ -57,7 +62,12 @@ public class OverlayParameter : IOverlaySerializable
             writer.WriteEndArray();
         }
 
-        writer.WriteProperty("separator", Separator);
+        // Only write separator if it's not null or empty
+        if (!string.IsNullOrEmpty(Separator))
+        {
+            writer.WriteProperty("separator", Separator);
+        }
+
         writer.WriteEndObject();
     }
 }

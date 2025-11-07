@@ -31,7 +31,6 @@ public class OverlayParameterTests
 """
 {
     "name": "environment",
-    "source": "inline",
     "values": ["dev", "prod"]
 }
 """;

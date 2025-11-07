@@ -1093,7 +1093,6 @@ public class OverlayActionTests
     "x-parameters": [
         {
             "name": "environment",
-            "source": "inline",
             "values": ["dev", "prod"]
         }
     ]
