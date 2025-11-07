@@ -124,6 +124,99 @@ The [copy proposal](https://github.com/OAI/Overlay-Specification/pull/150) to th
 }
 ```
 
+### Action Parameters
+
+The [action parameters proposal](https://github.com/OAI/Overlay-Specification/pull/238) adds support for parameterized overlay actions. This allows you to define parameters that can be used for string interpolation and to generate multiple actions through matrix expansion.
+
+#### Parameter Sources
+
+Parameters can have two sources:
+
+- **Inline**: Values are provided directly in the overlay document
+- **Environment**: Values are sourced from environment variables
+
+#### String Interpolation
+
+Parameters can be referenced in action properties using the `${parameterName}` syntax:
+
+```json
+{
+    "target": "$.info.title",
+    "description": "Update title with environment",
+    "update": "API for ${environment}",
+    "x-parameters": [
+        {
+            "name": "environment",
+            "source": "inline",
+            "values": ["development", "staging", "production"]
+        }
+    ]
+}
+```
+
+#### Matrix Expansion
+
+When an action has parameters with multiple values, the action is expanded into multiple actions (one for each combination of parameter values):
+
+```json
+{
+    "target": "$.paths./api/${version}/users.get.summary",
+    "description": "Update summary for each version and environment",
+    "update": "Get users - ${environment} (${version})",
+    "x-parameters": [
+        {
+            "name": "version",
+            "source": "inline",
+            "values": ["v1", "v2"]
+        },
+        {
+            "name": "environment",
+            "source": "inline",
+            "values": ["dev", "prod"]
+        }
+    ]
+}
+```
+
+This single action expands to 4 actions (v1+dev, v1+prod, v2+dev, v2+prod).
+
+#### Environment Variables
+
+Parameters can read values from environment variables:
+
+```json
+{
+    "target": "$.servers[0].url",
+    "description": "Set server URL from environment",
+    "update": "https://${API_HOST}/api",
+    "x-parameters": [
+        {
+            "name": "API_HOST",
+            "source": "environment"
+        }
+    ]
+}
+```
+
+You can also split environment variable values using a separator:
+
+```json
+{
+    "target": "$.info.version",
+    "description": "Update version for multiple environments",
+    "update": "${version}",
+    "x-parameters": [
+        {
+            "name": "VERSIONS",
+            "source": "environment",
+            "separator": ","
+        }
+    ]
+}
+```
+
+If the `VERSIONS` environment variable contains `"1.0.0,2.0.0,3.0.0"`, this will expand to 3 actions.
+
 ## Release notes
 
 The OpenAPI Overlay Libraries releases notes are available from the [CHANGELOG](CHANGELOG.md)
