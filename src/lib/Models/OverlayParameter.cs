@@ -14,6 +14,12 @@ namespace BinkyLabs.OpenApi.Overlays;
 [Experimental("BOO002", UrlFormat = "https://github.com/OAI/Overlay-Specification/pull/238")]
 public class OverlayParameter : IOverlaySerializable
 {
+    private static readonly IReadOnlyDictionary<ParameterValueSource, string> SourceToStringMap = new Dictionary<ParameterValueSource, string>
+    {
+        { ParameterValueSource.Inline, "inline" },
+        { ParameterValueSource.Environment, "environment" }
+    };
+
     /// <summary>
     /// REQUIRED. The name of the parameter.
     /// </summary>
@@ -48,7 +54,7 @@ public class OverlayParameter : IOverlaySerializable
         // Only write source if it's not the default value (Inline)
         if (Source != ParameterValueSource.Inline)
         {
-            writer.WriteProperty("source", Source.ToString().ToLowerInvariant());
+            writer.WriteProperty("source", SourceToStringMap[Source]);
         }
 
         if (Values != null && Values.Count > 0)
