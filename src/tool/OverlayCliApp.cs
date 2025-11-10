@@ -52,6 +52,13 @@ internal static class OverlayCliApp
         return outputOption;
     }
 
+    private static Option<bool> CreateForceOption()
+    {
+        var forceOption = new Option<bool>("--force") { Description = "Overwrite output file without confirmation" };
+        forceOption.Aliases.Add("-f");
+        return forceOption;
+    }
+
     private static Command CreateApplyCommand(string name, string description, Func<string, string[], string, CancellationToken, Task> applyAsync)
     {
         var applyCommand = new Command(name, description);
@@ -62,15 +69,19 @@ internal static class OverlayCliApp
 
         var outputOption = CreateOutputOption();
 
+        var forceOption = CreateForceOption();
+
         applyCommand.Add(inputArgument);
         applyCommand.Add(overlayOption);
         applyCommand.Add(outputOption);
+        applyCommand.Add(forceOption);
 
         applyCommand.SetAction(async (parseResult, cancellationToken) =>
         {
             var input = parseResult.GetValue(inputArgument);
             var overlays = parseResult.GetValue(overlayOption);
             var output = parseResult.GetValue(outputOption);
+            var force = parseResult.GetValue(forceOption);
 
             if (string.IsNullOrEmpty(input))
             {
@@ -84,7 +95,7 @@ internal static class OverlayCliApp
                 return 1;
             }
 
-            await HandleCommandAsync(input, overlays ?? [], output, applyAsync, cancellationToken);
+            await HandleCommandAsync(input, overlays ?? [], output, force, applyAsync, cancellationToken);
             return 0;
         });
 
@@ -95,6 +106,7 @@ internal static class OverlayCliApp
         string input,
         string[] overlays,
         string output,
+        bool force,
         Func<string, string[], string, CancellationToken, Task> applyAsync,
         CancellationToken cancellationToken)
     {
@@ -127,6 +139,18 @@ internal static class OverlayCliApp
             if (!string.IsNullOrEmpty(outputDirectory) && !Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
+            }
+            else if (File.Exists(output) && !force)
+            {
+                // Check if output file exists and ask for confirmation if not forced
+                await Console.Out.WriteAsync($"Output file '{output}' already exists. Overwrite? (y/n): ");
+                var response = Console.ReadLine();
+                if (!"y".Equals(response?.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    await Console.Out.WriteLineAsync("Operation cancelled by user.");
+                    Environment.Exit(0);
+                    return;
+                }
             }
 
             cancellationToken.ThrowIfCancellationRequested();

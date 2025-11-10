@@ -151,4 +151,57 @@ x-custom-extension:
         var result = await OverlayCliApp.RunAsync([]);
         Assert.Equal(1, result);
     }
+
+    [Fact]
+    public async Task RunAsync_WithForceOption_OverwritesExistingFile_Json()
+    {
+        // First run to create the output file
+        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson]);
+        Assert.Equal(0, result1);
+        Assert.True(File.Exists(_tempOutputFileJson));
+
+        // Second run with --force to overwrite
+        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson, "--force"]);
+        Assert.Equal(0, result2);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson);
+        Assert.NotNull(openApiDocument);
+        Assert.NotNull(diags);
+        Assert.Empty(diags.Errors);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithForceOption_ShortForm_OverwritesExistingFile_Json()
+    {
+        // First run to create the output file
+        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson]);
+        Assert.Equal(0, result1);
+        Assert.True(File.Exists(_tempOutputFileJson));
+
+        // Second run with -f to overwrite
+        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson, "-f"]);
+        Assert.Equal(0, result2);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson);
+        Assert.NotNull(openApiDocument);
+        Assert.NotNull(diags);
+        Assert.Empty(diags.Errors);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithForceOption_OverwritesExistingFile_Yaml()
+    {
+        // First run to create the output file
+        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml]);
+        Assert.Equal(0, result1);
+        Assert.True(File.Exists(_tempOutputFileYaml));
+
+        // Second run with --force to overwrite
+        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml, "--force"]);
+        Assert.Equal(0, result2);
+        var openApiReaderSettings = new OpenApiReaderSettings();
+        openApiReaderSettings.AddYamlReader();
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileYaml, settings: openApiReaderSettings);
+        Assert.NotNull(openApiDocument);
+        Assert.NotNull(diags);
+        Assert.Empty(diags.Errors);
+    }
 }
