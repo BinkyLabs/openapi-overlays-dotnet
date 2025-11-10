@@ -39,8 +39,7 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "environment",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["dev", "prod"]
+                    DefaultValues = ["dev", "prod"]
                 }
             ]
         };
@@ -67,14 +66,12 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "environment",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["dev", "prod"]
+                    DefaultValues = ["dev", "prod"]
                 },
                 new OverlayParameter
                 {
                     Name = "region",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["us", "eu"]
+                    DefaultValues = ["us", "eu"]
                 }
             ]
         };
@@ -103,8 +100,7 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "version",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["v1", "v2"]
+                    DefaultValues = ["v1", "v2"]
                 }
             ]
         };
@@ -139,20 +135,17 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "title",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["My API"]
+                    DefaultValues = ["My API"]
                 },
                 new OverlayParameter
                 {
                     Name = "environment",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["dev"]
+                    DefaultValues = ["dev"]
                 },
                 new OverlayParameter
                 {
                     Name = "domain",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["example"]
+                    DefaultValues = ["example"]
                 }
             ]
         };
@@ -169,7 +162,7 @@ public class ParameterProcessorTests
     }
 
     [Fact]
-    public void ExpandActionWithParameters_EnvironmentSource_ReadsFromEnvironment()
+    public void ExpandActionWithParameters_ReadsFromEnvironment()
     {
         // Arrange
         var testEnvVar = "TEST_ENV_VAR_" + Guid.NewGuid().ToString("N");
@@ -185,8 +178,7 @@ public class ParameterProcessorTests
                 [
                     new OverlayParameter
                     {
-                        Name = testEnvVar,
-                        Source = ParameterValueSource.Environment
+                        Name = testEnvVar
                     }
                 ]
             };
@@ -205,7 +197,7 @@ public class ParameterProcessorTests
     }
 
     [Fact]
-    public void ExpandActionWithParameters_EnvironmentSourceWithSeparator_SplitsValue()
+    public void ExpandActionWithParameters_WithSeparator_SplitsValue()
     {
         // Arrange
         var testEnvVar = "TEST_ENV_VAR_" + Guid.NewGuid().ToString("N");
@@ -222,7 +214,6 @@ public class ParameterProcessorTests
                     new OverlayParameter
                     {
                         Name = testEnvVar,
-                        Source = ParameterValueSource.Environment,
                         Separator = ","
                     }
                 ]
@@ -244,7 +235,7 @@ public class ParameterProcessorTests
     }
 
     [Fact]
-    public void ExpandActionWithParameters_EnvironmentSourceNotSet_UsesFallbackValues()
+    public void ExpandActionWithParameters_EnvironmentNotSet_UsesDefaultValues()
     {
         // Arrange
         var testEnvVar = "NONEXISTENT_ENV_VAR_" + Guid.NewGuid().ToString("N");
@@ -258,8 +249,7 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = testEnvVar,
-                    Source = ParameterValueSource.Environment,
-                    Values = ["fallback"]
+                    DefaultValues = ["fallback"]
                 }
             ]
         };
@@ -295,8 +285,7 @@ public class ParameterProcessorTests
                         new OverlayParameter
                         {
                             Name = "environment",
-                            Source = ParameterValueSource.Inline,
-                            Values = ["production"]
+                            DefaultValues = ["production"]
                         }
                     ]
                 }

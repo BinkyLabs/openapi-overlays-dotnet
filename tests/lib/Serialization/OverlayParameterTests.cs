@@ -15,14 +15,13 @@ namespace BinkyLabs.OpenApi.Overlays.Tests;
 public class OverlayParameterTests
 {
     [Fact]
-    public void SerializeAsV1_WithInlineSource_ShouldWriteCorrectJson()
+    public void SerializeAsV1_WithDefaultValues_ShouldWriteCorrectJson()
     {
         // Arrange
         var parameter = new OverlayParameter
         {
             Name = "environment",
-            Source = ParameterValueSource.Inline,
-            Values = ["dev", "prod"]
+            DefaultValues = ["dev", "prod"]
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -31,7 +30,7 @@ public class OverlayParameterTests
 """
 {
     "name": "environment",
-    "values": ["dev", "prod"]
+    "defaultValues": ["dev", "prod"]
 }
 """;
 
@@ -46,13 +45,12 @@ public class OverlayParameterTests
     }
 
     [Fact]
-    public void SerializeAsV1_WithEnvironmentSource_ShouldWriteCorrectJson()
+    public void SerializeAsV1_WithSeparator_ShouldWriteCorrectJson()
     {
         // Arrange
         var parameter = new OverlayParameter
         {
             Name = "api_key",
-            Source = ParameterValueSource.Environment,
             Separator = ","
         };
         using var textWriter = new StringWriter();
@@ -62,7 +60,6 @@ public class OverlayParameterTests
 """
 {
     "name": "api_key",
-    "source": "environment",
     "separator": ","
 }
 """;
@@ -78,14 +75,13 @@ public class OverlayParameterTests
     }
 
     [Fact]
-    public void Deserialize_WithInlineSource_ShouldSetPropertiesCorrectly()
+    public void Deserialize_WithDefaultValues_ShouldSetPropertiesCorrectly()
     {
         // Arrange
         var json = """
         {
             "name": "environment",
-            "source": "inline",
-            "values": ["dev", "staging", "prod"]
+            "defaultValues": ["dev", "staging", "prod"]
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -97,22 +93,20 @@ public class OverlayParameterTests
 
         // Assert
         Assert.Equal("environment", parameter.Name);
-        Assert.Equal(ParameterValueSource.Inline, parameter.Source);
-        Assert.NotNull(parameter.Values);
-        Assert.Equal(3, parameter.Values.Count);
-        Assert.Equal("dev", parameter.Values[0]);
-        Assert.Equal("staging", parameter.Values[1]);
-        Assert.Equal("prod", parameter.Values[2]);
+        Assert.NotNull(parameter.DefaultValues);
+        Assert.Equal(3, parameter.DefaultValues.Count);
+        Assert.Equal("dev", parameter.DefaultValues[0]);
+        Assert.Equal("staging", parameter.DefaultValues[1]);
+        Assert.Equal("prod", parameter.DefaultValues[2]);
     }
 
     [Fact]
-    public void Deserialize_WithEnvironmentSource_ShouldSetPropertiesCorrectly()
+    public void Deserialize_WithSeparator_ShouldSetPropertiesCorrectly()
     {
         // Arrange
         var json = """
         {
             "name": "api_key",
-            "source": "environment",
             "separator": ","
         }
         """;
@@ -125,18 +119,16 @@ public class OverlayParameterTests
 
         // Assert
         Assert.Equal("api_key", parameter.Name);
-        Assert.Equal(ParameterValueSource.Environment, parameter.Source);
         Assert.Equal(",", parameter.Separator);
     }
 
     [Fact]
-    public void Deserialize_DefaultsToInlineSource()
+    public void Deserialize_WithMinimalData_ShouldSetPropertiesCorrectly()
     {
         // Arrange
         var json = """
         {
-            "name": "test",
-            "values": ["value1"]
+            "name": "test"
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -148,7 +140,8 @@ public class OverlayParameterTests
 
         // Assert
         Assert.Equal("test", parameter.Name);
-        Assert.Equal(ParameterValueSource.Inline, parameter.Source);
+        Assert.Null(parameter.DefaultValues);
+        Assert.Null(parameter.Separator);
     }
 }
 

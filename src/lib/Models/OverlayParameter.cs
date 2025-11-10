@@ -14,31 +14,18 @@ namespace BinkyLabs.OpenApi.Overlays;
 [Experimental("BOO002", UrlFormat = "https://github.com/OAI/Overlay-Specification/pull/238")]
 public class OverlayParameter : IOverlaySerializable
 {
-    private static readonly IReadOnlyDictionary<ParameterValueSource, string> SourceToStringMap = new Dictionary<ParameterValueSource, string>
-    {
-        { ParameterValueSource.Inline, "inline" },
-        { ParameterValueSource.Environment, "environment" }
-    };
-
     /// <summary>
     /// REQUIRED. The name of the parameter.
     /// </summary>
     public string? Name { get; set; }
 
     /// <summary>
-    /// The source of the parameter value. Defaults to Inline.
+    /// Default values for the parameter when the environment variable is not set.
     /// </summary>
-    public ParameterValueSource Source { get; set; } = ParameterValueSource.Inline;
-
-    /// <summary>
-    /// The values for the parameter. For Inline source, this is required.
-    /// For Environment source, this is optional and overrides the environment variable value.
-    /// </summary>
-    public List<string>? Values { get; set; }
+    public List<string>? DefaultValues { get; set; }
 
     /// <summary>
     /// The separator to use when splitting environment variable values into multiple values.
-    /// Only applies when Source is Environment.
     /// </summary>
     public string? Separator { get; set; }
 
@@ -51,17 +38,11 @@ public class OverlayParameter : IOverlaySerializable
         writer.WriteStartObject();
         writer.WriteRequiredProperty("name", Name);
 
-        // Only write source if it's not the default value (Inline)
-        if (Source != ParameterValueSource.Inline)
+        if (DefaultValues != null && DefaultValues.Count > 0)
         {
-            writer.WriteProperty("source", SourceToStringMap[Source]);
-        }
-
-        if (Values != null && Values.Count > 0)
-        {
-            writer.WritePropertyName("values");
+            writer.WritePropertyName("defaultValues");
             writer.WriteStartArray();
-            foreach (var value in Values)
+            foreach (var value in DefaultValues)
             {
                 writer.WriteValue(value);
             }

@@ -1074,8 +1074,7 @@ public class OverlayActionTests
                 new OverlayParameter
                 {
                     Name = "environment",
-                    Source = ParameterValueSource.Inline,
-                    Values = ["dev", "prod"]
+                    DefaultValues = ["dev", "prod"]
                 }
             ]
         };
@@ -1093,7 +1092,7 @@ public class OverlayActionTests
     "x-parameters": [
         {
             "name": "environment",
-            "values": ["dev", "prod"]
+            "defaultValues": ["dev", "prod"]
         }
     ]
 }
@@ -1121,8 +1120,7 @@ public class OverlayActionTests
             "x-parameters": [
                 {
                     "name": "environment",
-                    "source": "inline",
-                    "values": ["development", "production"]
+                    "defaultValues": ["development", "production"]
                 }
             ]
         }
@@ -1141,8 +1139,7 @@ public class OverlayActionTests
         Assert.NotNull(overlayAction.Parameters);
         Assert.Single(overlayAction.Parameters);
         Assert.Equal("environment", overlayAction.Parameters[0].Name);
-        Assert.Equal(ParameterValueSource.Inline, overlayAction.Parameters[0].Source);
-        Assert.Equal(2, overlayAction.Parameters[0].Values?.Count);
+        Assert.Equal(2, overlayAction.Parameters[0].DefaultValues?.Count);
     }
 
 #pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

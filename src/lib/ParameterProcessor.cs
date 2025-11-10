@@ -57,39 +57,30 @@ internal static partial class ParameterProcessor
     }
 
     /// <summary>
-    /// Resolves parameter values based on source.
+    /// Resolves parameter values from environment variables with fallback to default values.
     /// </summary>
     private static List<string>? ResolveParameterValues(OverlayParameter parameter)
     {
-        if (parameter.Source == ParameterValueSource.Inline)
+        var envVarName = parameter.Name;
+        if (string.IsNullOrEmpty(envVarName))
         {
-            return parameter.Values;
-        }
-        else if (parameter.Source == ParameterValueSource.Environment)
-        {
-            var envVarName = parameter.Name;
-            if (string.IsNullOrEmpty(envVarName))
-            {
-                return null;
-            }
-
-            var envValue = Environment.GetEnvironmentVariable(envVarName);
-            if (envValue == null)
-            {
-                // If environment variable is not set, use inline values as fallback
-                return parameter.Values;
-            }
-
-            // Split by separator if provided
-            if (!string.IsNullOrEmpty(parameter.Separator))
-            {
-                return [.. envValue.Split(parameter.Separator, StringSplitOptions.RemoveEmptyEntries)];
-            }
-
-            return [envValue];
+            return null;
         }
 
-        return null;
+        var envValue = Environment.GetEnvironmentVariable(envVarName);
+        if (envValue == null)
+        {
+            // If environment variable is not set, use default values as fallback
+            return parameter.DefaultValues;
+        }
+
+        // Split by separator if provided
+        if (!string.IsNullOrEmpty(parameter.Separator))
+        {
+            return [.. envValue.Split(parameter.Separator, StringSplitOptions.RemoveEmptyEntries)];
+        }
+
+        return [envValue];
     }
 
     /// <summary>

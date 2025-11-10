@@ -4,35 +4,20 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 internal static partial class OverlayV1Deserializer
 {
-    private static readonly IReadOnlyDictionary<string, ParameterValueSource> StringToSourceMap = new Dictionary<string, ParameterValueSource>(StringComparer.OrdinalIgnoreCase)
-    {
-        { "inline", ParameterValueSource.Inline },
-        { "environment", ParameterValueSource.Environment }
-    };
-
     public static readonly FixedFieldMap<OverlayParameter> ParameterFixedFields = new()
     {
         { "name", (o, v) => o.Name = v.GetScalarValue() },
-        { "source", (o, v) =>
-            {
-                var sourceValue = v.GetScalarValue();
-                if (!string.IsNullOrEmpty(sourceValue) && StringToSourceMap.TryGetValue(sourceValue, out var source))
-                {
-                    o.Source = source;
-                }
-            }
-        },
-        { "values", (o, v) =>
+        { "defaultValues", (o, v) =>
             {
                 if (v is ListNode listNode)
                 {
-                    o.Values = [];
+                    o.DefaultValues = [];
                     foreach (var item in listNode)
                     {
                         var itemValue = item.GetScalarValue();
                         if (!string.IsNullOrEmpty(itemValue))
                         {
-                            o.Values.Add(itemValue);
+                            o.DefaultValues.Add(itemValue);
                         }
                     }
                 }
