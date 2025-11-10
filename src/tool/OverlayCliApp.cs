@@ -140,10 +140,9 @@ internal static class OverlayCliApp
             {
                 Directory.CreateDirectory(outputDirectory);
             }
-
-            // Check if output file exists and ask for confirmation if not forced
-            if (File.Exists(output) && !force)
+            else if (File.Exists(output) && !force)
             {
+                // Check if output file exists and ask for confirmation if not forced
                 await Console.Out.WriteAsync($"Output file '{output}' already exists. Overwrite? (y/n): ");
                 var response = Console.ReadLine();
                 if (!"y".Equals(response?.Trim(), StringComparison.OrdinalIgnoreCase))
