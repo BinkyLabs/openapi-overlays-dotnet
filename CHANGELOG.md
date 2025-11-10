@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-preview.19](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.18...v1.0.0-preview.19) (2025-11-10)
+
+
+### Features
+
+* Add confirmation prompt before overwriting files with --force/-f flag ([74d70db](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/74d70dbf7f265341c1c75b2275bb6f5b5e4fe966))
+
 ## [1.0.0-preview.18](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.17...v1.0.0-preview.18) (2025-11-06)
 
 
