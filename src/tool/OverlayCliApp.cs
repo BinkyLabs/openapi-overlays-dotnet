@@ -146,7 +146,7 @@ internal static class OverlayCliApp
             {
                 await Console.Out.WriteAsync($"Output file '{output}' already exists. Overwrite? (y/n): ");
                 var response = Console.ReadLine();
-                if (response?.Trim().ToLowerInvariant() != "y")
+                if (!"y".Equals(response?.Trim(), StringComparer.OrdinalIgnoreCase))
                 {
                     await Console.Out.WriteLineAsync("Operation cancelled by user.");
                     Environment.Exit(0);
