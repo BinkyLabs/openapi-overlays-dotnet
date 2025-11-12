@@ -13,8 +13,7 @@ updates:
   - package-ecosystem: dotnet-sdk
     directory: /
     schedule:
-      interval: weekly
-      day: wednesday
+      interval: daily
     ignore:
       - dependency-name: '*'
         update-types:
