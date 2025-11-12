@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using BinkyLabs.OpenApi.Overlays.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
+
 public sealed class OverlayApplyTests : IDisposable
 {
     [Fact]

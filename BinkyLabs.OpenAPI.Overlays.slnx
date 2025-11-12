@@ -1,0 +1,15 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/lib/BinkyLabs.OpenApi.Overlays.csproj" />
+    <Project Path="src/tool/BinkyLabs.OpenApi.Overlays.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/lib/BinkyLabs.OpenApi.Overlays.Tests.csproj" />
+    <Project Path="tests/tool/BinkyLabs.OpenApi.Overlays.Cli.Tests.csproj" />
+  </Folder>
+</Solution>
