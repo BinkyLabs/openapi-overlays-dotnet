@@ -88,12 +88,12 @@ internal static partial class ParameterProcessor
 
         var envValue = Environment.GetEnvironmentVariable(envVarName);
         var jsonArray = string.IsNullOrEmpty(envValue) switch
-		{
-			false when TryParseJsonValue(envValue, out var parsedEnvValues) => parsedEnvValues,
+        {
+            false when TryParseJsonValue(envValue, out var parsedEnvValues) => parsedEnvValues,
             false => new JsonArray(envValue),
             true when parameter.DefaultValues is JsonArray defaultValues => defaultValues,
             _ => null,
-		};
+        };
         return jsonArray == null ? null : jsonArray.OfType<JsonNode>().Select(ParameterValue.FromJsonNode).ToList();
     }
 
@@ -101,7 +101,7 @@ internal static partial class ParameterProcessor
     {
         try
         {
-            if (JsonNode.Parse(value) is JsonArray parsedValue) 
+            if (JsonNode.Parse(value) is JsonArray parsedValue)
             {
                 if (OverlayParameter.ValidateDefaultValues(parsedValue))
                     throw new InvalidOperationException("Invalid parameter values format.");
@@ -110,9 +110,9 @@ internal static partial class ParameterProcessor
             }
         }
         catch (JsonException)
-		{
-			// TODO log parsing error, we need a logging infrastructure though
-		}
+        {
+            // TODO log parsing error, we need a logging infrastructure though
+        }
         parameterValues = null;
         return false;
     }
@@ -192,14 +192,14 @@ internal static partial class ParameterProcessor
             var paramName = match.Groups[1].Value;
             var paramKey = match.Groups.Count > 2 && match.Groups[2].Success ? match.Groups[2].Value : null;
             return (string.IsNullOrEmpty(paramName), string.IsNullOrEmpty(paramKey), parameters.TryGetValue(paramName, out var value)) switch
-			{
-				(false, true, true) when !string.IsNullOrEmpty(value?.StringValue) => value.StringValue,
+            {
+                (false, true, true) when !string.IsNullOrEmpty(value?.StringValue) => value.StringValue,
                 (false, false, true) when value is { ObjectValue: JsonObject objectValue } &&
                                         objectValue.TryGetPropertyValue(paramKey!, out var compositeValue) &&
                                         compositeValue is JsonValue jsonValue &&
                                         jsonValue.TryGetValue<string>(out var compositeStringValue) => compositeStringValue,
-                (_,_, _) => match.Value,
-			};
+                (_, _, _) => match.Value,
+            };
         });
     }
 
