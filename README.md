@@ -187,7 +187,7 @@ Parameters always try to read from environment variables first. The `name` prope
 }
 ```
 
-You can provide default values that are used when the environment variable is not set:
+You can provide default values that are used when the environment variable is not set. The `defaultValues` can be an array of strings or an array of objects (where each object contains only string key/value pairs):
 
 ```json
 {
@@ -203,23 +203,24 @@ You can provide default values that are used when the environment variable is no
 }
 ```
 
-You can also split environment variable values using a separator:
+For complex scenarios, you can use objects in `defaultValues`:
 
 ```json
 {
-    "target": "$.info.version",
-    "description": "Update version for multiple environments",
-    "update": "${version}",
+    "target": "$.servers",
+    "description": "Add servers from parameter",
+    "update": ${servers},
     "x-parameters": [
         {
-            "name": "VERSIONS",
-            "separator": ","
+            "name": "servers",
+            "defaultValues": [
+                {"url": "https://api1.example.com"},
+                {"url": "https://api2.example.com"}
+            ]
         }
     ]
 }
 ```
-
-If the `VERSIONS` environment variable contains `"1.0.0,2.0.0,3.0.0"`, this will expand to 3 actions.
 
 ## Release notes
 

@@ -39,7 +39,7 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "environment",
-                    DefaultValues = ["dev", "prod"]
+                    DefaultValues = JsonNode.Parse("""["dev", "prod"]""")
                 }
             ]
         };
@@ -66,12 +66,12 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "environment",
-                    DefaultValues = ["dev", "prod"]
+                    DefaultValues = JsonNode.Parse("""["dev", "prod"]""")
                 },
                 new OverlayParameter
                 {
                     Name = "region",
-                    DefaultValues = ["us", "eu"]
+                    DefaultValues = JsonNode.Parse("""["us", "eu"]""")
                 }
             ]
         };
@@ -100,7 +100,7 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "version",
-                    DefaultValues = ["v1", "v2"]
+                    DefaultValues = JsonNode.Parse("""["v1", "v2"]""")
                 }
             ]
         };
@@ -135,17 +135,17 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = "title",
-                    DefaultValues = ["My API"]
+                    DefaultValues = JsonNode.Parse("""["My API"]""")
                 },
                 new OverlayParameter
                 {
                     Name = "environment",
-                    DefaultValues = ["dev"]
+                    DefaultValues = JsonNode.Parse("""["dev"]""")
                 },
                 new OverlayParameter
                 {
                     Name = "domain",
-                    DefaultValues = ["example"]
+                    DefaultValues = JsonNode.Parse("""["example"]""")
                 }
             ]
         };
@@ -197,44 +197,6 @@ public class ParameterProcessorTests
     }
 
     [Fact]
-    public void ExpandActionWithParameters_WithSeparator_SplitsValue()
-    {
-        // Arrange
-        var testEnvVar = "TEST_ENV_VAR_" + Guid.NewGuid().ToString("N");
-        Environment.SetEnvironmentVariable(testEnvVar, "dev,staging,prod");
-
-        try
-        {
-            var action = new OverlayAction
-            {
-                Target = "$.info.title",
-                Update = JsonNode.Parse($"\"API for ${{{testEnvVar}}}\""),
-                Parameters =
-                [
-                    new OverlayParameter
-                    {
-                        Name = testEnvVar,
-                        Separator = ","
-                    }
-                ]
-            };
-
-            // Act
-            var expanded = ParameterProcessor.ExpandActionWithParameters(action);
-
-            // Assert
-            Assert.Equal(3, expanded.Count);
-            Assert.Equal("API for dev", expanded[0].Update?.GetValue<string>());
-            Assert.Equal("API for staging", expanded[1].Update?.GetValue<string>());
-            Assert.Equal("API for prod", expanded[2].Update?.GetValue<string>());
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable(testEnvVar, null);
-        }
-    }
-
-    [Fact]
     public void ExpandActionWithParameters_EnvironmentNotSet_UsesDefaultValues()
     {
         // Arrange
@@ -249,7 +211,7 @@ public class ParameterProcessorTests
                 new OverlayParameter
                 {
                     Name = testEnvVar,
-                    DefaultValues = ["fallback"]
+                    DefaultValues = JsonNode.Parse("""["fallback"]""")
                 }
             ]
         };
@@ -285,7 +247,7 @@ public class ParameterProcessorTests
                         new OverlayParameter
                         {
                             Name = "environment",
-                            DefaultValues = ["production"]
+                            DefaultValues = JsonNode.Parse("""["production"]""")
                         }
                     ]
                 }

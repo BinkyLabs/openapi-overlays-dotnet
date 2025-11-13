@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Writers;
 
@@ -21,13 +22,75 @@ public class OverlayParameter : IOverlaySerializable
 
     /// <summary>
     /// Default values for the parameter when the environment variable is not set.
+    /// Must be an array of strings or an array of objects where each object only contains key/value pairs of strings.
     /// </summary>
-    public List<string>? DefaultValues { get; set; }
+    public JsonNode? DefaultValues { get; set; }
 
     /// <summary>
-    /// The separator to use when splitting environment variable values into multiple values.
+    /// Validates that defaultValues is either an array of strings or an array of objects with string key/value pairs.
     /// </summary>
-    public string? Separator { get; set; }
+    private static bool ValidateDefaultValues(JsonNode? defaultValues)
+    {
+        if (defaultValues == null)
+        {
+            return true;
+        }
+
+        if (defaultValues is not JsonArray array)
+        {
+            return false;
+        }
+
+        if (array.Count == 0)
+        {
+            return true;
+        }
+
+        // Check if all elements are strings
+        var allStrings = true;
+        var allObjects = true;
+
+        foreach (var item in array)
+        {
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (item is JsonValue jsonValue)
+            {
+                allObjects = false;
+                if (!jsonValue.TryGetValue<string>(out _))
+                {
+                    allStrings = false;
+                }
+            }
+            else if (item is JsonObject jsonObject)
+            {
+                allStrings = false;
+                // Validate that all properties have string values
+                foreach (var prop in jsonObject)
+                {
+                    if (prop.Value == null || prop.Value is not JsonValue propValue || !propValue.TryGetValue<string>(out _))
+                    {
+                        allObjects = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            if (!allStrings && !allObjects)
+            {
+                return false;
+            }
+        }
+
+        return allStrings || allObjects;
+    }
 
     /// <summary>
     /// Serializes the parameter object as an OpenAPI Overlay v1.0.0 JSON object.
@@ -38,21 +101,16 @@ public class OverlayParameter : IOverlaySerializable
         writer.WriteStartObject();
         writer.WriteRequiredProperty("name", Name);
 
-        if (DefaultValues != null && DefaultValues.Count > 0)
+        if (DefaultValues != null)
         {
-            writer.WritePropertyName("defaultValues");
-            writer.WriteStartArray();
-            foreach (var value in DefaultValues)
+            if (!ValidateDefaultValues(DefaultValues))
             {
-                writer.WriteValue(value);
+                throw new InvalidOperationException(
+                    "DefaultValues must be an array of strings or an array of objects where each object only contains key/value pairs of strings.");
             }
-            writer.WriteEndArray();
-        }
 
-        // Only write separator if it's not null or empty
-        if (!string.IsNullOrEmpty(Separator))
-        {
-            writer.WriteProperty("separator", Separator);
+            writer.WritePropertyName("defaultValues");
+            writer.WriteRaw(DefaultValues.ToJsonString());
         }
 
         writer.WriteEndObject();

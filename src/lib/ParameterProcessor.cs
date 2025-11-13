@@ -71,16 +71,39 @@ internal static partial class ParameterProcessor
         if (envValue == null)
         {
             // If environment variable is not set, use default values as fallback
-            return parameter.DefaultValues;
-        }
-
-        // Split by separator if provided
-        if (!string.IsNullOrEmpty(parameter.Separator))
-        {
-            return [.. envValue.Split(parameter.Separator, StringSplitOptions.RemoveEmptyEntries)];
+            return ExtractStringValuesFromDefaultValues(parameter.DefaultValues);
         }
 
         return [envValue];
+    }
+
+    /// <summary>
+    /// Extracts string values from the defaultValues JsonNode.
+    /// Supports both array of strings and array of objects.
+    /// </summary>
+    private static List<string>? ExtractStringValuesFromDefaultValues(JsonNode? defaultValues)
+    {
+        if (defaultValues is not JsonArray array || array.Count == 0)
+        {
+            return null;
+        }
+
+        var result = new List<string>();
+
+        foreach (var item in array)
+        {
+            if (item is JsonValue jsonValue && jsonValue.TryGetValue<string>(out var strValue))
+            {
+                result.Add(strValue);
+            }
+            else if (item is JsonObject)
+            {
+                // For objects, we'll serialize them as JSON strings for interpolation
+                result.Add(item.ToJsonString());
+            }
+        }
+
+        return result.Count > 0 ? result : null;
     }
 
     /// <summary>

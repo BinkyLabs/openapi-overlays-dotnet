@@ -1074,7 +1074,7 @@ public class OverlayActionTests
                 new OverlayParameter
                 {
                     Name = "environment",
-                    DefaultValues = ["dev", "prod"]
+                    DefaultValues = JsonNode.Parse("""["dev", "prod"]""")
                 }
             ]
         };
@@ -1139,7 +1139,9 @@ public class OverlayActionTests
         Assert.NotNull(overlayAction.Parameters);
         Assert.Single(overlayAction.Parameters);
         Assert.Equal("environment", overlayAction.Parameters[0].Name);
-        Assert.Equal(2, overlayAction.Parameters[0].DefaultValues?.Count);
+        var defaultValues = overlayAction.Parameters[0].DefaultValues as JsonArray;
+        Assert.NotNull(defaultValues);
+        Assert.Equal(2, defaultValues.Count);
     }
 
 #pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

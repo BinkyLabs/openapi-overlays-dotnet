@@ -21,7 +21,7 @@ public class OverlayParameterTests
         var parameter = new OverlayParameter
         {
             Name = "environment",
-            DefaultValues = ["dev", "prod"]
+            DefaultValues = JsonNode.Parse("""["dev", "prod"]""")
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -45,13 +45,13 @@ public class OverlayParameterTests
     }
 
     [Fact]
-    public void SerializeAsV1_WithSeparator_ShouldWriteCorrectJson()
+    public void SerializeAsV1_WithObjectDefaultValues_ShouldWriteCorrectJson()
     {
         // Arrange
         var parameter = new OverlayParameter
         {
-            Name = "api_key",
-            Separator = ","
+            Name = "servers",
+            DefaultValues = JsonNode.Parse("""[{"url": "https://api1.example.com"}, {"url": "https://api2.example.com"}]""")
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -59,8 +59,8 @@ public class OverlayParameterTests
         var expectedJson =
 """
 {
-    "name": "api_key",
-    "separator": ","
+    "name": "servers",
+    "defaultValues": [{"url": "https://api1.example.com"}, {"url": "https://api2.example.com"}]
 }
 """;
 
@@ -94,20 +94,22 @@ public class OverlayParameterTests
         // Assert
         Assert.Equal("environment", parameter.Name);
         Assert.NotNull(parameter.DefaultValues);
-        Assert.Equal(3, parameter.DefaultValues.Count);
-        Assert.Equal("dev", parameter.DefaultValues[0]);
-        Assert.Equal("staging", parameter.DefaultValues[1]);
-        Assert.Equal("prod", parameter.DefaultValues[2]);
+        var array = parameter.DefaultValues as JsonArray;
+        Assert.NotNull(array);
+        Assert.Equal(3, array.Count);
+        Assert.Equal("dev", array[0]?.GetValue<string>());
+        Assert.Equal("staging", array[1]?.GetValue<string>());
+        Assert.Equal("prod", array[2]?.GetValue<string>());
     }
 
     [Fact]
-    public void Deserialize_WithSeparator_ShouldSetPropertiesCorrectly()
+    public void Deserialize_WithObjectDefaultValues_ShouldSetPropertiesCorrectly()
     {
         // Arrange
         var json = """
         {
-            "name": "api_key",
-            "separator": ","
+            "name": "servers",
+            "defaultValues": [{"url": "https://api1.example.com"}, {"url": "https://api2.example.com"}]
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -118,8 +120,14 @@ public class OverlayParameterTests
         var parameter = OverlayV1Deserializer.LoadParameter(parseNode);
 
         // Assert
-        Assert.Equal("api_key", parameter.Name);
-        Assert.Equal(",", parameter.Separator);
+        Assert.Equal("servers", parameter.Name);
+        Assert.NotNull(parameter.DefaultValues);
+        var array = parameter.DefaultValues as JsonArray;
+        Assert.NotNull(array);
+        Assert.Equal(2, array.Count);
+        var obj1 = array[0] as JsonObject;
+        Assert.NotNull(obj1);
+        Assert.Equal("https://api1.example.com", obj1["url"]?.GetValue<string>());
     }
 
     [Fact]
@@ -141,7 +149,22 @@ public class OverlayParameterTests
         // Assert
         Assert.Equal("test", parameter.Name);
         Assert.Null(parameter.DefaultValues);
-        Assert.Null(parameter.Separator);
+    }
+
+    [Fact]
+    public void SerializeAsV1_WithInvalidDefaultValues_ShouldThrow()
+    {
+        // Arrange
+        var parameter = new OverlayParameter
+        {
+            Name = "test",
+            DefaultValues = JsonNode.Parse("""["string", 123]""") // Mixed types - invalid
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => parameter.SerializeAsV1(writer));
     }
 }
 
