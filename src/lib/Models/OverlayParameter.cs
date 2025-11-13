@@ -29,7 +29,7 @@ public class OverlayParameter : IOverlaySerializable
     /// <summary>
     /// Validates that defaultValues is either an array of strings or an array of objects with string key/value pairs.
     /// </summary>
-    private static bool ValidateDefaultValues(JsonNode? defaultValues)
+    internal static bool ValidateDefaultValues(JsonNode? defaultValues)
     {
         if (defaultValues == null)
         {

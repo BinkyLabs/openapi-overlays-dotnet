@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
@@ -59,10 +60,19 @@ internal static partial class ParameterProcessor
     /// <summary>
     /// Represents a parameter value that can be either a string or an object.
     /// </summary>
-    private class ParameterValue
+    private record ParameterValue
     {
-        public string StringValue { get; set; } = string.Empty;
-        public JsonObject? ObjectValue { get; set; }
+        public string StringValue { get; init; } = string.Empty;
+        public JsonObject? ObjectValue { get; init; }
+        public static ParameterValue FromJsonNode(JsonNode node)
+        {
+            return node switch
+            {
+                JsonValue jsonValue when jsonValue.TryGetValue<string>(out var str) && !string.IsNullOrEmpty(str) => new ParameterValue { StringValue = str },
+                JsonObject jsonObject => new ParameterValue { ObjectValue = jsonObject },
+                _ => throw new InvalidOperationException("Invalid parameter value type."),
+            };
+        }
     }
 
     /// <summary>
@@ -77,127 +87,34 @@ internal static partial class ParameterProcessor
         }
 
         var envValue = Environment.GetEnvironmentVariable(envVarName);
-        if (envValue == null)
-        {
-            // If environment variable is not set, use default values as fallback
-            return ExtractParameterValues(parameter.DefaultValues);
-        }
+        var jsonArray = string.IsNullOrEmpty(envValue) switch
+		{
+			false when TryParseJsonValue(envValue, out var parsedEnvValues) => parsedEnvValues,
+            false => new JsonArray(envValue),
+            true when parameter.DefaultValues is JsonArray defaultValues => defaultValues,
+            _ => null,
+		};
+        return jsonArray == null ? null : jsonArray.OfType<JsonNode>().Select(ParameterValue.FromJsonNode).ToList();
+    }
 
-        // Try to parse environment variable as JSON
+    private static bool TryParseJsonValue(string value, [NotNullWhen(true)] out JsonArray? parameterValues)
+    {
         try
         {
-            var parsedEnvValue = JsonNode.Parse(envValue);
-            if (parsedEnvValue != null)
+            if (JsonNode.Parse(value) is JsonArray parsedValue) 
             {
-                // Validate and extract values from the parsed JSON
-                if (!ValidateEnvironmentValue(parsedEnvValue))
-                {
-                    throw new InvalidOperationException(
-                        $"Environment variable '{envVarName}' must be a JSON array of strings or array of objects where each object only contains key/value pairs of strings.");
-                }
-                return ExtractParameterValues(parsedEnvValue);
+                if (OverlayParameter.ValidateDefaultValues(parsedValue))
+                    throw new InvalidOperationException("Invalid parameter values format.");
+                parameterValues = parsedValue;
+                return true;
             }
         }
-        catch (System.Text.Json.JsonException)
-        {
-            // If it's not valid JSON, treat it as a plain string
-            return [new ParameterValue { StringValue = envValue }];
-        }
-
-        return [new ParameterValue { StringValue = envValue }];
-    }
-
-    /// <summary>
-    /// Validates that an environment variable value conforms to the same rules as defaultValues.
-    /// </summary>
-    private static bool ValidateEnvironmentValue(JsonNode value)
-    {
-        if (value is not JsonArray array)
-        {
-            return false;
-        }
-
-        if (array.Count == 0)
-        {
-            return true;
-        }
-
-        var allStrings = true;
-        var allObjects = true;
-
-        foreach (var item in array)
-        {
-            if (item == null)
-            {
-                return false;
-            }
-
-            if (item is JsonValue jsonValue)
-            {
-                allObjects = false;
-                if (!jsonValue.TryGetValue<string>(out _))
-                {
-                    allStrings = false;
-                }
-            }
-            else if (item is JsonObject jsonObject)
-            {
-                allStrings = false;
-                // Validate that all properties have string values
-                foreach (var prop in jsonObject)
-                {
-                    if (prop.Value == null || prop.Value is not JsonValue propValue || !propValue.TryGetValue<string>(out _))
-                    {
-                        allObjects = false;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                return false;
-            }
-
-            if (!allStrings && !allObjects)
-            {
-                return false;
-            }
-        }
-
-        return allStrings || allObjects;
-    }
-
-    /// <summary>
-    /// Extracts parameter values from the defaultValues JsonNode.
-    /// Supports both array of strings and array of objects.
-    /// </summary>
-    private static List<ParameterValue>? ExtractParameterValues(JsonNode? defaultValues)
-    {
-        if (defaultValues is not JsonArray array || array.Count == 0)
-        {
-            return null;
-        }
-
-        var result = new List<ParameterValue>();
-
-        foreach (var item in array)
-        {
-            if (item is JsonValue jsonValue && jsonValue.TryGetValue<string>(out var strValue))
-            {
-                result.Add(new ParameterValue { StringValue = strValue });
-            }
-            else if (item is JsonObject jsonObject)
-            {
-                // For objects, store both the JSON string and the object for dotted access
-                result.Add(new ParameterValue
-                {
-                    StringValue = item.ToJsonString(),
-                    ObjectValue = jsonObject
-                });
-            }
-        }
-
-        return result.Count > 0 ? result : null;
+        catch (JsonException)
+		{
+			// TODO log parsing error, we need a logging infrastructure though
+		}
+        parameterValues = null;
+        return false;
     }
 
     /// <summary>
@@ -273,27 +190,16 @@ internal static partial class ParameterProcessor
         return ParameterPlaceholderRegex().Replace(value, match =>
         {
             var paramName = match.Groups[1].Value;
-            var keyName = match.Groups[2].Success ? match.Groups[2].Value : null;
-
-            if (!parameters.TryGetValue(paramName, out var paramValue))
-            {
-                return match.Value;
-            }
-
-            // If a key is specified and the value is an object, extract the key
-            if (keyName != null && paramValue.ObjectValue != null)
-            {
-                if (paramValue.ObjectValue.TryGetPropertyValue(keyName, out var keyValue) &&
-                    keyValue is JsonValue jsonValue &&
-                    jsonValue.TryGetValue<string>(out var stringValue))
-                {
-                    return stringValue;
-                }
-                return match.Value;
-            }
-
-            // Otherwise return the string value
-            return paramValue.StringValue;
+            var paramKey = match.Groups.Count > 2 && match.Groups[2].Success ? match.Groups[2].Value : null;
+            return (string.IsNullOrEmpty(paramName), string.IsNullOrEmpty(paramKey), parameters.TryGetValue(paramName, out var value)) switch
+			{
+				(false, true, true) when !string.IsNullOrEmpty(value?.StringValue) => value.StringValue,
+                (false, false, true) when value is { ObjectValue: JsonObject objectValue } &&
+                                        objectValue.TryGetPropertyValue(paramKey!, out var compositeValue) &&
+                                        compositeValue is JsonValue jsonValue &&
+                                        jsonValue.TryGetValue<string>(out var compositeStringValue) => compositeStringValue,
+                (_,_, _) => match.Value,
+			};
         });
     }
 
