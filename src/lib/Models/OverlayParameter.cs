@@ -110,7 +110,7 @@ public class OverlayParameter : IOverlaySerializable
             }
 
             writer.WritePropertyName("defaultValues");
-            writer.WriteRaw(DefaultValues.ToJsonString());
+            writer.WriteAny(DefaultValues);
         }
 
         writer.WriteEndObject();

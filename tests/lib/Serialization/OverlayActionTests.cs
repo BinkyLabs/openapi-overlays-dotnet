@@ -1139,7 +1139,7 @@ public class OverlayActionTests
         Assert.NotNull(overlayAction.Parameters);
         Assert.Single(overlayAction.Parameters);
         Assert.Equal("environment", overlayAction.Parameters[0].Name);
-        var defaultValues = overlayAction.Parameters[0].DefaultValues as JsonArray;
+        var defaultValues = Assert.IsType<JsonArray>(overlayAction.Parameters[0].DefaultValues);
         Assert.NotNull(defaultValues);
         Assert.Equal(2, defaultValues.Count);
     }

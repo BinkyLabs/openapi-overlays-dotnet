@@ -94,7 +94,7 @@ public class OverlayParameterTests
         // Assert
         Assert.Equal("environment", parameter.Name);
         Assert.NotNull(parameter.DefaultValues);
-        var array = parameter.DefaultValues as JsonArray;
+        var array = Assert.IsType<JsonArray>(parameter.DefaultValues);
         Assert.NotNull(array);
         Assert.Equal(3, array.Count);
         Assert.Equal("dev", array[0]?.GetValue<string>());
@@ -122,10 +122,10 @@ public class OverlayParameterTests
         // Assert
         Assert.Equal("servers", parameter.Name);
         Assert.NotNull(parameter.DefaultValues);
-        var array = parameter.DefaultValues as JsonArray;
+        var array = Assert.IsType<JsonArray>(parameter.DefaultValues);
         Assert.NotNull(array);
         Assert.Equal(2, array.Count);
-        var obj1 = array[0] as JsonObject;
+        var obj1 = Assert.IsType<JsonObject>(array[0]);
         Assert.NotNull(obj1);
         Assert.Equal("https://api1.example.com", obj1["url"]?.GetValue<string>());
     }
