@@ -274,6 +274,188 @@ public class ParameterProcessorTests
         Assert.Empty(diagnostic.Errors);
         Assert.Equal("API for production", document["info"]?["title"]?.GetValue<string>());
     }
+
+    [Fact]
+    public void ExpandActionWithParameters_EnvironmentVariableWithJsonArray_ValidatesAndExpands()
+    {
+        // Arrange
+        var testEnvVar = "TEST_ENV_VAR_" + Guid.NewGuid().ToString("N");
+        Environment.SetEnvironmentVariable(testEnvVar, """["dev", "staging", "prod"]""");
+
+        try
+        {
+            var action = new OverlayAction
+            {
+                Target = "$.info.title",
+                Update = JsonNode.Parse($"\"API for ${{{testEnvVar}}}\""),
+                Parameters =
+                [
+                    new OverlayParameter
+                    {
+                        Name = testEnvVar
+                    }
+                ]
+            };
+
+            // Act
+            var expanded = ParameterProcessor.ExpandActionWithParameters(action);
+
+            // Assert
+            Assert.Equal(3, expanded.Count);
+            Assert.Equal("API for dev", expanded[0].Update?.GetValue<string>());
+            Assert.Equal("API for staging", expanded[1].Update?.GetValue<string>());
+            Assert.Equal("API for prod", expanded[2].Update?.GetValue<string>());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(testEnvVar, null);
+        }
+    }
+
+    [Fact]
+    public void ExpandActionWithParameters_EnvironmentVariableWithInvalidJson_ThrowsException()
+    {
+        // Arrange
+        var testEnvVar = "TEST_ENV_VAR_" + Guid.NewGuid().ToString("N");
+        Environment.SetEnvironmentVariable(testEnvVar, """[123, 456]"""); // Invalid: numbers instead of strings
+
+        try
+        {
+            var action = new OverlayAction
+            {
+                Target = "$.info.title",
+                Update = JsonNode.Parse($"\"API for ${{{testEnvVar}}}\""),
+                Parameters =
+                [
+                    new OverlayParameter
+                    {
+                        Name = testEnvVar
+                    }
+                ]
+            };
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => ParameterProcessor.ExpandActionWithParameters(action));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(testEnvVar, null);
+        }
+    }
+
+    [Fact]
+    public void ExpandActionWithParameters_DottedNotation_ExtractsObjectProperty()
+    {
+        // Arrange
+        var action = new OverlayAction
+        {
+            Target = "$.info.title",
+            Update = JsonNode.Parse("\"API - ${server.url}\""),
+            Parameters =
+            [
+                new OverlayParameter
+                {
+                    Name = "server",
+                    DefaultValues = JsonNode.Parse("""[{"url": "https://api1.example.com", "name": "Server 1"}, {"url": "https://api2.example.com", "name": "Server 2"}]""")
+                }
+            ]
+        };
+
+        // Act
+        var expanded = ParameterProcessor.ExpandActionWithParameters(action);
+
+        // Assert
+        Assert.Equal(2, expanded.Count);
+        Assert.Equal("API - https://api1.example.com", expanded[0].Update?.GetValue<string>());
+        Assert.Equal("API - https://api2.example.com", expanded[1].Update?.GetValue<string>());
+    }
+
+    [Fact]
+    public void ExpandActionWithParameters_DottedNotationWithMultipleProperties_ExtractsCorrectly()
+    {
+        // Arrange
+        var action = new OverlayAction
+        {
+            Target = "$.info.title",
+            Update = JsonNode.Parse("\"${server.name} at ${server.url}\""),
+            Parameters =
+            [
+                new OverlayParameter
+                {
+                    Name = "server",
+                    DefaultValues = JsonNode.Parse("""[{"url": "https://api.example.com", "name": "Production"}]""")
+                }
+            ]
+        };
+
+        // Act
+        var expanded = ParameterProcessor.ExpandActionWithParameters(action);
+
+        // Assert
+        Assert.Single(expanded);
+        Assert.Equal("Production at https://api.example.com", expanded[0].Update?.GetValue<string>());
+    }
+
+    [Fact]
+    public void ExpandActionWithParameters_DottedNotationWithMissingKey_KeepsPlaceholder()
+    {
+        // Arrange
+        var action = new OverlayAction
+        {
+            Target = "$.info.title",
+            Update = JsonNode.Parse("\"API - ${server.missingKey}\""),
+            Parameters =
+            [
+                new OverlayParameter
+                {
+                    Name = "server",
+                    DefaultValues = JsonNode.Parse("""[{"url": "https://api.example.com"}]""")
+                }
+            ]
+        };
+
+        // Act
+        var expanded = ParameterProcessor.ExpandActionWithParameters(action);
+
+        // Assert
+        Assert.Single(expanded);
+        Assert.Equal("API - ${server.missingKey}", expanded[0].Update?.GetValue<string>());
+    }
+
+    [Fact]
+    public void ExpandActionWithParameters_EnvironmentVariableWithObjects_ValidatesAndSupportsDottedNotation()
+    {
+        // Arrange
+        var testEnvVar = "TEST_ENV_VAR_" + Guid.NewGuid().ToString("N");
+        Environment.SetEnvironmentVariable(testEnvVar, """[{"url": "https://env-api.com", "region": "us-east"}]""");
+
+        try
+        {
+            var action = new OverlayAction
+            {
+                Target = "$.info.title",
+                Update = JsonNode.Parse($"\"API in ${{{testEnvVar}.region}} at ${{{testEnvVar}.url}}\""),
+                Parameters =
+                [
+                    new OverlayParameter
+                    {
+                        Name = testEnvVar
+                    }
+                ]
+            };
+
+            // Act
+            var expanded = ParameterProcessor.ExpandActionWithParameters(action);
+
+            // Assert
+            Assert.Single(expanded);
+            Assert.Equal("API in us-east at https://env-api.com", expanded[0].Update?.GetValue<string>());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(testEnvVar, null);
+        }
+    }
 }
 
 #pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

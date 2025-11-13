@@ -187,6 +187,23 @@ Parameters always try to read from environment variables first. The `name` prope
 }
 ```
 
+Environment variables can contain JSON arrays (validated same as defaultValues - must be array of strings or array of objects with string key/value pairs):
+
+```json
+// Set environment variable:
+// ENVIRONMENTS='["dev", "staging", "prod"]'
+{
+    "target": "$.info.title",
+    "description": "Update title for each environment",
+    "update": "API for ${ENVIRONMENTS}",
+    "x-parameters": [
+        {
+            "name": "ENVIRONMENTS"
+        }
+    ]
+}
+```
+
 You can provide default values that are used when the environment variable is not set. The `defaultValues` can be an array of strings or an array of objects (where each object contains only string key/value pairs):
 
 ```json
@@ -203,20 +220,43 @@ You can provide default values that are used when the environment variable is no
 }
 ```
 
-For complex scenarios, you can use objects in `defaultValues`:
+#### Dotted Notation for Object Properties
+
+When using objects in parameters, you can access individual properties using dotted notation:
 
 ```json
 {
-    "target": "$.servers",
-    "description": "Add servers from parameter",
-    "update": ${servers},
+    "target": "$.info.title",
+    "description": "Update title with server info",
+    "update": "${server.name} at ${server.url}",
     "x-parameters": [
         {
-            "name": "servers",
+            "name": "server",
             "defaultValues": [
-                {"url": "https://api1.example.com"},
-                {"url": "https://api2.example.com"}
+                {"url": "https://api1.example.com", "name": "Server 1"},
+                {"url": "https://api2.example.com", "name": "Server 2"}
             ]
+        }
+    ]
+}
+```
+
+This will expand to 2 actions:
+- "Server 1 at https://api1.example.com"
+- "Server 2 at https://api2.example.com"
+
+Dotted notation also works with environment variables:
+
+```json
+// Set environment variable:
+// SERVER='[{"url": "https://prod-api.com", "region": "us-east"}]'
+{
+    "target": "$.info.title",
+    "description": "Server in region",
+    "update": "API in ${SERVER.region} at ${SERVER.url}",
+    "x-parameters": [
+        {
+            "name": "SERVER"
         }
     ]
 }
