@@ -108,14 +108,21 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         var i = 0;
         var result = true;
+#pragma warning disable BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         foreach (var action in Actions)
         {
-            if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i))
+            // Expand action if it has parameters
+            var expandedActions = ParameterProcessor.ExpandActionWithParameters(action);
+            foreach (var expandedAction in expandedActions)
             {
-                result = false; // If any action fails, the entire application fails
+                if (!expandedAction.ApplyToDocument(jsonNode, overlayDiagnostic, i))
+                {
+                    result = false; // If any action fails, the entire application fails
+                }
             }
             i++;
         }
+#pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         return result;
     }
     /// <summary>
