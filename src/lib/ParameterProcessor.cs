@@ -103,7 +103,7 @@ internal static partial class ParameterProcessor
         {
             if (JsonNode.Parse(value) is JsonArray parsedValue)
             {
-                if (OverlayParameter.ValidateDefaultValues(parsedValue))
+                if (!OverlayParameter.AreDefaultValuesValid(parsedValue))
                     throw new InvalidOperationException("Invalid parameter values format.");
                 parameterValues = parsedValue;
                 return true;
