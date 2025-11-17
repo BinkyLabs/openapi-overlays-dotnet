@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.20](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.19...v1.0.0-preview.20) (2025-11-17)
+
+
+### Bug Fixes
+
+* empty strings should be quoted in yaml ([086c04a](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/086c04a05777c59f3080f1910fac7963c220e879))
+* empty strings should be quoted in yaml ([ae22bb7](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/ae22bb789151ffc4b05293277d20c00ee1fa123b))
+
 ## [1.0.0-preview.19](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.18...v1.0.0-preview.19) (2025-11-10)
 
 
