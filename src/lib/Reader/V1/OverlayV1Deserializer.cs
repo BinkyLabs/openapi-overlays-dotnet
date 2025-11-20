@@ -1,12 +1,10 @@
 using System.Text.Json.Nodes;
 
-using Microsoft.OpenApi;
-
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 internal static partial class OverlayV1Deserializer
 {
-    private static void ParseMap<T>(
+    internal static void ParseMap<T>(
         MapNode? mapNode,
         T domainObject,
         FixedFieldMap<T> fixedFieldMap,
@@ -27,10 +25,10 @@ internal static partial class OverlayV1Deserializer
     {
         return node.CreateAny();
     }
-    private static IOverlayExtension LoadExtension(string name, ParseNode node)
+    private static IOverlayExtension LoadExtension(string name, ParseNode node, OverlaySpecVersion version)
     {
         if (node.Context.ExtensionParsers is not null && node.Context.ExtensionParsers.TryGetValue(name, out var parser) && parser(
-            node.CreateAny(), OverlaySpecVersion.Overlay1_0) is { } result)
+            node.CreateAny(), version) is { } result)
         {
             return result;
         }

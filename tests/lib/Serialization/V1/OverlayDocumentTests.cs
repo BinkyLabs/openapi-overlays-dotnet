@@ -10,7 +10,7 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public sealed class OverlayDocumentTests
+public sealed class OverlayDocumentV1Tests
 {
     [Fact]
     public void SerializeAsV1_ShouldWriteCorrectJson()
@@ -372,7 +372,7 @@ public sealed class OverlayDocumentTests
         }
         """;
 
-        var tempFile = @"./ValidFile.json";
+        var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".json");
         await File.WriteAllTextAsync(tempFile, json);
 
         // Act
