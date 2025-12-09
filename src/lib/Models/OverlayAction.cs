@@ -220,7 +220,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' does not point to a valid JSON node"));
                 return false;
             }
-            if (!currentJsonPointer.GetAncestor(1).TryEvaluate(documentJsonNode, out var parentJsonNode) || parentJsonNode is null)
+            if (currentJsonPointer.GetParent(1) is not { } parentPointer || !parentPointer.TryEvaluate(documentJsonNode, out var parentJsonNode) || parentJsonNode is null)
             {
                 overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Could not find the parent node for '{Target}'"));
                 return false;
