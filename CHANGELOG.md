@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0-preview.21](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.20...v1.0.0-preview.21) (2025-12-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* updates breaking change to latest jsonpointer.net API
+
+### Bug Fixes
+
+* updates breaking change to latest jsonpointer.net API ([70a003c](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/70a003c2d184c97337d48204ab63fcc14b6ff044))
+
 ## [1.0.0-preview.20](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.19...v1.0.0-preview.20) (2025-11-17)
 
 
