@@ -8,11 +8,9 @@ using Microsoft.OpenApi.Reader;
 
 using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
-#pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public class OverlayActionTests
+public class OverlayActionV1Tests
 {
     [Fact]
     public void SerializeAsV1_ShouldWriteCorrectJson()

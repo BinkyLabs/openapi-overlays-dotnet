@@ -7,17 +7,21 @@ internal static partial class OverlayV1Deserializer
     public static readonly FixedFieldMap<OverlayInfo> InfoFixedFields = new()
     {
         { "title", (o, v) => o.Title = v.GetScalarValue() },
-        { "version", (o, v) => o.Version = v.GetScalarValue() }
+        { "version", (o, v) => o.Version = v.GetScalarValue() },
+        { "x-description", (o, v) => o.Description = v.GetScalarValue() }
     };
-    public static readonly PatternFieldMap<OverlayInfo> InfoPatternFields = new()
+    public static PatternFieldMap<OverlayInfo> GetInfoPatternFields(OverlaySpecVersion version) =>
+    new()
     {
-        {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k,LoadExtension(k, n))}
+        {s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase), (o, k, n) => o.AddExtension(k, LoadExtension(k, n, version))}
     };
-    public static OverlayInfo LoadInfo(ParseNode node)
+    public static readonly PatternFieldMap<OverlayInfo> InfoPatternFields = GetInfoPatternFields(OverlaySpecVersion.Overlay1_0);
+    public static OverlayInfo LoadInfo(ParseNode node) => LoadInfoInternal(node, InfoFixedFields, InfoPatternFields);
+    public static OverlayInfo LoadInfoInternal(ParseNode node, FixedFieldMap<OverlayInfo> infoFixedFields, PatternFieldMap<OverlayInfo> infoPatternFields)
     {
         var mapNode = node.CheckMapNode("Info");
         var info = new OverlayInfo();
-        ParseMap(mapNode, info, InfoFixedFields, InfoPatternFields);
+        ParseMap(mapNode, info, infoFixedFields, infoPatternFields);
 
         return info;
     }
