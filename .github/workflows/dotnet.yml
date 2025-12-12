@@ -30,11 +30,11 @@ jobs:
         run: dotnet pack --configuration Release
       - name: Generate coverage report
         run: reportgenerator -reporttypes:MarkdownSummary -reports:**/coverage.cobertura.xml -targetdir:./reports/coverage
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: coverage
           path: reports/coverage
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: packages
           path: src/*/bin/Release/*.*nupkg
