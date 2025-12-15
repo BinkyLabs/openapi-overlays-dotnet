@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.22](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.21...v1.0.0-preview.22) (2025-12-15)
+
+
+### Features
+
+* adds net 9 and net 10 install support ([496f83b](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/496f83b98d50e0a24ed7655bdf3574284ac8901f))
+* adds net 9 and net 10 install support ([12535a4](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/12535a4455f2cf8ebd27e1bac540d583d162b785))
+
 ## [1.0.0-preview.21](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.20...v1.0.0-preview.21) (2025-12-09)
 
 
