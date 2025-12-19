@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  clio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount output directory
+      - ./output:/app/output
+    # Default command using the built-in samples
+    command: apply /app/samples/description.yaml --overlay /app/samples/overlay.yaml -out /app/output/result.yaml
+
+  # Service for custom files
+  clio-custom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount your OpenAPI description file
+      - ./examples/openapi.yaml:/app/openapi.yaml:ro
+      # Mount your overlay file(s)
+      - ./examples/overlay.yaml:/app/overlay.yaml:ro
+      # Mount output directory
+      - ./output:/app/output
+    command: apply /app/openapi.yaml --overlay /app/overlay.yaml -out /app/output/result.yaml
