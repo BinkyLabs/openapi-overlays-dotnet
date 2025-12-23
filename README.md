@@ -16,98 +16,6 @@ The CLI enables developers to apply overlays to an OpenAPI document from their f
 dotnet tool install -g BinkyLabs.OpenApi.Overlays.Tool --prerelease
 ```
 
-### Using Docker
-
-You can run the CLI in a Docker container without installing .NET locally.
-
-#### Using Pre-built Images
-
-Docker images are automatically published to GitHub Container Registry:
-
-```shell
-# Pull and run the latest version
-docker run --rm -v $(pwd)/output:/app/output \
-  ghcr.io/binkylabs/openapi-overlays-dotnet:latest \
-  apply /app/samples/description.yaml \
-  --overlay /app/samples/overlay.yaml \
-  -out /app/output/result.yaml
-```
-
-#### Building the Docker image
-
-```shell
-docker build -t clio:latest .
-```
-
-#### Quick Test with Built-in Samples
-
-The Docker image includes sample files from `debug-samples/`. Run a quick test:
-
-```shell
-# Linux/Mac
-./test-docker.sh
-
-# Windows PowerShell
-.\test-docker.ps1
-```
-
-Or manually:
-
-```shell
-# Create output directory
-mkdir -p output
-
-# Run with built-in samples
-docker run --rm -v $(pwd)/output:/app/output clio:latest \
-  apply /app/samples/description.yaml \
-  --overlay /app/samples/overlay.yaml \
-  -out /app/output/result.yaml
-
-# Check the result
-cat output/result.yaml
-```
-
-Or use docker-compose:
-
-```shell
-# Uses built-in samples by default
-docker-compose run --rm clio
-
-# Check the result
-cat output/result.yaml
-```
-
-#### Running with Docker
-
-```shell
-# Apply an overlay using mounted volumes
-docker run --rm \
-  -v $(pwd)/input:/app/input:ro \
-  -v $(pwd)/output:/app/output \
-  clio:latest apply /app/input/openapi.yaml \
-    --overlay /app/input/overlay.yaml \
-    -out /app/output/result.yaml
-```
-
-#### Using docker-compose
-
-You can also use the included `docker-compose.yml` file:
-
-```shell
-# Run with built-in samples (default)
-docker-compose run --rm clio
-
-# Or run with custom files using clio-custom service
-docker-compose run --rm clio-custom
-
-# Or override the command
-docker-compose run --rm clio apply /app/samples/description.yaml \
-  --overlay /app/samples/overlay.yaml \
-  -out /app/output/custom-result.yaml
-```
-
-> For detailed Docker instructions, see [DOCKER.md](DOCKER.md) or [DOCKER-QUICKSTART.md](DOCKER-QUICKSTART.md)
-
 ### Usage
 
 #### Apply an overlay to an OpenAPI description
@@ -129,6 +37,11 @@ clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverla
 ```
 
 > Note: the overlay argument can be specified multiple times, the order matters.
+
+## Docker Quick Start
+
+Run the CLI in a Docker container without installing .NET:
+Docker images are available at `ghcr.io/binkylabs/openapi-overlays-dotnet:latest`
 
 ## Library
 
@@ -227,4 +140,3 @@ The OpenAPI Overlay Libraries releases notes are available from the [CHANGELOG](
 This project welcomes contributions and suggestions.  Make sure you open an issue before sending any pull request to avoid any misunderstanding.
 
 ## Trademarks
-
