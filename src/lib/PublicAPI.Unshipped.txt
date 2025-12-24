@@ -21,6 +21,8 @@ BinkyLabs.OpenApi.Overlays.OverlayAction.Description.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.OverlayAction() -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.Parameters.get -> System.Collections.Generic.List<BinkyLabs.OpenApi.Overlays.OverlayParameter!>?
+BinkyLabs.OpenApi.Overlays.OverlayAction.Parameters.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
@@ -86,6 +88,13 @@ BinkyLabs.OpenApi.Overlays.OverlayJsonReader
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.OverlayJsonReader() -> void
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.DefaultValues.get -> System.Text.Json.Nodes.JsonNode?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.DefaultValues.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Name.get -> string?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.Name.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.OverlayParameter() -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayParameter.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderException
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message) -> void
