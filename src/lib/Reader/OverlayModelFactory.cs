@@ -9,7 +9,7 @@ using BinkyLabs.OpenApi.Overlays.Reader;
 using Microsoft.OpenApi;
 
 
-namespace BinkyLabs.Overlay.Overlays;
+namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
 /// A factory class for loading Overlay models from various sources.

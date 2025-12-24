@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
-using BinkyLabs.Overlay.Overlays;
+using BinkyLabs.OpenApi.Overlays;
 
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
