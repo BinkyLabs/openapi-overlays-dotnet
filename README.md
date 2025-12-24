@@ -102,8 +102,7 @@ var overlayDocument = new OverlayDocument
 
 using var textWriter = new StringWriter();
 var writer = new OpenApiJsonWriter(textWriter);
-using var textWriter = new StringWriter();
-var writer = new OpenApiJsonWriter(textWriter);
+document.SerializeAsV1(writer);
 var jsonResult = textWriter.ToString();
 // or use flush async if the underlying writer is a stream writer to a file or network stream
 ```
