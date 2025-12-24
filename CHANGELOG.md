@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-preview.23](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.22...v1.0.0-preview.23) (2025-12-24)
+
+
+### Bug Fixes
+
+* extra namespace due to typo ([580ae8f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/580ae8f5917d9793dd59eab886f4157dbe636898))
+* extra namespace due to typo ([86b3262](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/86b32624a4b48521dba79f51da2128646be7d38f))
+
 ## [1.0.0-preview.22](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.21...v1.0.0-preview.22) (2025-12-15)
 
 
