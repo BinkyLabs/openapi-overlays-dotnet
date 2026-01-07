@@ -1,0 +1,65 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+.nuget/
+**/packages/*
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# GitHub
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation - exclude most but keep README.md needed for build
+!README.md
+docs/
+*.md
+!README.md
+
+# CI/CD
+azure-pipelines.yml
+.azure/
+
+# Misc
+LICENSE
+.editorconfig
+.dockerignore
