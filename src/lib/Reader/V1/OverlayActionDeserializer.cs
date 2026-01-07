@@ -20,6 +20,20 @@ internal static partial class OverlayV1Deserializer
 #pragma warning disable BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         { "x-copy", (o, v) => o.Copy = v.GetScalarValue() },
 #pragma warning restore BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        { "x-parameters", (o, v) =>
+            {
+                if (v is ListNode listNode)
+                {
+                    o.Parameters = [];
+                    foreach (var item in listNode)
+                    {
+                        o.Parameters.Add(LoadParameter(item));
+                    }
+                }
+            }
+        },
+#pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     };
     public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = new()
     {
