@@ -1,15 +1,12 @@
 ﻿
 // Licensed under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader;
 
@@ -54,14 +51,14 @@ public class ParsingContext
         Diagnostic = diagnostic;
     }
     private const string OverlayV1Version = "1.0.0";
+    private const string OverlayV1_1Version = "1.1.0";
 
     /// <summary>
     /// Initiates the parsing process.  Not thread safe and should only be called once on a parsing context
     /// </summary>
     /// <param name="jsonNode">Set of Json nodes to parse.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <returns>An OverlayDocument populated based on the passed yamlDocument </returns>
-    public OverlayDocument Parse(JsonNode jsonNode, Uri location)
+    public OverlayDocument Parse(JsonNode jsonNode)
     {
         RootNode = new RootNode(this, jsonNode);
 
@@ -72,9 +69,15 @@ public class ParsingContext
         switch (inputVersion)
         {
             case string version when OverlayV1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
-                VersionService = new OverlayV1VersionService(Diagnostic);
-                doc = VersionService.LoadDocument(RootNode, location);
+                VersionService = new OverlayV1VersionService();
+                doc = VersionService.LoadDocument(RootNode);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_0;
+                ValidateRequiredFields(doc, version);
+                break;
+            case string version when OverlayV1_1Version.Equals(version, StringComparison.OrdinalIgnoreCase):
+                VersionService = new OverlayV1_1VersionService();
+                doc = VersionService.LoadDocument(RootNode);
+                this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_1;
                 ValidateRequiredFields(doc, version);
                 break;
 
@@ -100,7 +103,11 @@ public class ParsingContext
         switch (version)
         {
             case OverlaySpecVersion.Overlay1_0:
-                VersionService = new OverlayV1VersionService(Diagnostic);
+                VersionService = new OverlayV1VersionService();
+                element = this.VersionService.LoadElement<T>(node);
+                break;
+            case OverlaySpecVersion.Overlay1_1:
+                VersionService = new OverlayV1_1VersionService();
                 element = this.VersionService.LoadElement<T>(node);
                 break;
             default:

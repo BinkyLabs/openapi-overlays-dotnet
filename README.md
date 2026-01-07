@@ -2,7 +2,7 @@
 
 # OpenAPI Overlay Library & CLI for dotnet
 
-This project provides a .NET implementation of the [OpenAPI Overlay Specification](https://spec.openapis.org/overlay/latest.html), allowing you to dynamically apply overlays (patches) to existing OpenAPI documents (v3.0+), following the official OpenAPI Overlay 1.0.0 specification.
+This project provides a .NET implementation of the [OpenAPI Overlay Specification](https://spec.openapis.org/overlay/latest.html), allowing you to dynamically apply overlays (patches) to existing OpenAPI documents (v3.0+), following the official OpenAPI Overlay 1.0.0 and 1.1.0 specification.
 
 The library enables developers to programmatically apply overlays, validate them, and generate updated OpenAPI documents without relying on third-party tools like Swagger.
 
@@ -111,17 +111,7 @@ var jsonResult = textWriter.ToString();
 
 This library implements the following experimental features:
 
-### Copy
-
-The [copy proposal](https://github.com/OAI/Overlay-Specification/pull/150) to the Overlay specification works similarly to the update action, except it sources its value from another node. This library adds a property under an experimental flag, serializes and deserializes the value, and applies a copy overlay to an OpenAPI document.
-
-```json
-{
-    "target": "$.info.title",
-    "description": "Copy description to title",
-    "x-copy": "$.info.description"
-}
-```
+No experimental features are implemented at this moment.
 
 ## Release notes
 
