@@ -123,6 +123,144 @@ The [copy proposal](https://github.com/OAI/Overlay-Specification/pull/150) to th
 }
 ```
 
+### Action Parameters
+
+The [action parameters proposal](https://github.com/OAI/Overlay-Specification/pull/238) adds support for parameterized overlay actions. This allows you to define parameters that can be used for string interpolation and to generate multiple actions through matrix expansion.
+
+#### String Interpolation
+
+Parameters can be referenced in action properties using the `${parameterName}` syntax. The parameter name matches an environment variable name, with optional default values as fallback:
+
+```json
+{
+    "target": "$.info.title",
+    "description": "Update title with environment",
+    "update": "API for ${environment}",
+    "x-parameters": [
+        {
+            "name": "environment",
+            "defaultValues": ["development", "staging", "production"]
+        }
+    ]
+}
+```
+
+#### Matrix Expansion
+
+When an action has parameters with multiple values, the action is expanded into multiple actions (one for each combination of parameter values):
+
+```json
+{
+    "target": "$.paths./api/${version}/users.get.summary",
+    "description": "Update summary for each version and environment",
+    "update": "Get users - ${environment} (${version})",
+    "x-parameters": [
+        {
+            "name": "version",
+            "defaultValues": ["v1", "v2"]
+        },
+        {
+            "name": "environment",
+            "defaultValues": ["dev", "prod"]
+        }
+    ]
+}
+```
+
+This single action expands to 4 actions (v1+dev, v1+prod, v2+dev, v2+prod).
+
+#### Environment Variables
+
+Parameters always try to read from environment variables first. The `name` property specifies the environment variable name:
+
+```json
+{
+    "target": "$.servers[0].url",
+    "description": "Set server URL from environment",
+    "update": "https://${API_HOST}/api",
+    "x-parameters": [
+        {
+            "name": "API_HOST"
+        }
+    ]
+}
+```
+
+Environment variables can contain JSON arrays (validated same as defaultValues - must be array of strings or array of objects with string key/value pairs):
+
+```json
+// Set environment variable:
+// ENVIRONMENTS='["dev", "staging", "prod"]'
+{
+    "target": "$.info.title",
+    "description": "Update title for each environment",
+    "update": "API for ${ENVIRONMENTS}",
+    "x-parameters": [
+        {
+            "name": "ENVIRONMENTS"
+        }
+    ]
+}
+```
+
+You can provide default values that are used when the environment variable is not set. The `defaultValues` can be an array of strings or an array of objects (where each object contains only string key/value pairs):
+
+```json
+{
+    "target": "$.info.title",
+    "description": "Update title with environment or default",
+    "update": "API for ${environment}",
+    "x-parameters": [
+        {
+            "name": "environment",
+            "defaultValues": ["production"]
+        }
+    ]
+}
+```
+
+#### Dotted Notation for Object Properties
+
+When using objects in parameters, you can access individual properties using dotted notation:
+
+```json
+{
+    "target": "$.info.title",
+    "description": "Update title with server info",
+    "update": "${server.name} at ${server.url}",
+    "x-parameters": [
+        {
+            "name": "server",
+            "defaultValues": [
+                {"url": "https://api1.example.com", "name": "Server 1"},
+                {"url": "https://api2.example.com", "name": "Server 2"}
+            ]
+        }
+    ]
+}
+```
+
+This will expand to 2 actions:
+- "Server 1 at https://api1.example.com"
+- "Server 2 at https://api2.example.com"
+
+Dotted notation also works with environment variables:
+
+```json
+// Set environment variable:
+// SERVER='[{"url": "https://prod-api.com", "region": "us-east"}]'
+{
+    "target": "$.info.title",
+    "description": "Server in region",
+    "update": "API in ${SERVER.region} at ${SERVER.url}",
+    "x-parameters": [
+        {
+            "name": "SERVER"
+        }
+    ]
+}
+```
+
 ## Release notes
 
 The OpenAPI Overlay Libraries releases notes are available from the [CHANGELOG](CHANGELOG.md)

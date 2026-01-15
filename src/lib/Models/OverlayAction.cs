@@ -46,6 +46,14 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     [Experimental("BOO001", UrlFormat = "https://github.com/OAI/Overlay-Specification/pull/150")]
     public string? Copy { get; set; }
 
+    /// <summary>
+    /// Parameters that can be used for string interpolation within this action.
+    /// This field is experimental and not part of the OpenAPI Overlay specification v1.0.0.
+    /// This field is an implementation of <see href="https://github.com/OAI/Overlay-Specification/pull/238">the action parameters proposal</see>.
+    /// </summary>
+    [Experimental("BOO002", UrlFormat = "https://github.com/OAI/Overlay-Specification/pull/238")]
+    public List<OverlayParameter>? Parameters { get; set; }
+
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
@@ -70,6 +78,19 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             writer.WriteProperty("x-copy", Copy);
         }
 #pragma warning restore BOO001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+#pragma warning disable BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        if (Parameters != null && Parameters.Count > 0)
+        {
+            writer.WritePropertyName("x-parameters");
+            writer.WriteStartArray();
+            foreach (var parameter in Parameters)
+            {
+                parameter.SerializeAsV1(writer);
+            }
+            writer.WriteEndArray();
+        }
+#pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
         writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
         writer.WriteEndObject();

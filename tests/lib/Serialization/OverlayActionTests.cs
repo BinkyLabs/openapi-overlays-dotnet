@@ -1057,4 +1057,92 @@ public class OverlayActionTests
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Equal("API Description", jsonNode["paths"]?["/users"]?["get"]?["summary"]?.GetValue<string>());
     }
+
+#pragma warning disable BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+    [Fact]
+    public void SerializeAsV1_WithParameters_ShouldWriteCorrectJson()
+    {
+        // Arrange
+        var overlayAction = new OverlayAction
+        {
+            Target = "$.paths./users.get",
+            Description = "Update with parameters",
+            Update = JsonNode.Parse("""{"summary": "Get users for ${environment}"}"""),
+            Parameters =
+            [
+                new OverlayParameter
+                {
+                    Name = "environment",
+                    DefaultValues = JsonNode.Parse("""["dev", "prod"]""")
+                }
+            ]
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        var expectedJson =
+"""
+{
+    "target": "$.paths./users.get",
+    "description": "Update with parameters",
+    "update": {
+        "summary": "Get users for ${environment}"
+    },
+    "x-parameters": [
+        {
+            "name": "environment",
+            "defaultValues": ["dev", "prod"]
+        }
+    ]
+}
+""";
+
+        // Act
+        overlayAction.SerializeAsV1(writer);
+        var jsonResult = textWriter.ToString();
+        var jsonResultObject = JsonNode.Parse(jsonResult);
+        var expectedJsonObject = JsonNode.Parse(expectedJson);
+
+        // Assert
+        Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+
+    [Fact]
+    public void Deserialize_WithParameters_ShouldSetPropertiesCorrectly()
+    {
+        // Arrange
+        var json = """
+        {
+            "target": "$.info.title",
+            "description": "Update title with parameter",
+            "update": "API for ${environment}",
+            "x-parameters": [
+                {
+                    "name": "environment",
+                    "defaultValues": ["development", "production"]
+                }
+            ]
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
+
+        // Assert
+        Assert.Equal("$.info.title", overlayAction.Target);
+        Assert.Equal("Update title with parameter", overlayAction.Description);
+        Assert.NotNull(overlayAction.Update);
+        Assert.NotNull(overlayAction.Parameters);
+        Assert.Single(overlayAction.Parameters);
+        Assert.Equal("environment", overlayAction.Parameters[0].Name);
+        var defaultValues = Assert.IsType<JsonArray>(overlayAction.Parameters[0].DefaultValues);
+        Assert.NotNull(defaultValues);
+        Assert.Equal(2, defaultValues.Count);
+    }
+
+#pragma warning restore BOO002 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 }
