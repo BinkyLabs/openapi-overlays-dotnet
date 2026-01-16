@@ -6,9 +6,10 @@ BinkyLabs.OpenApi.Overlays.IOverlayExtension
 BinkyLabs.OpenApi.Overlays.IOverlayExtension.Write(Microsoft.OpenApi.IOpenApiWriter! writer, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
 BinkyLabs.OpenApi.Overlays.IOverlayReader
 BinkyLabs.OpenApi.Overlays.IOverlayReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
-BinkyLabs.OpenApi.Overlays.IOverlayReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+BinkyLabs.OpenApi.Overlays.IOverlayReader.ReadAsync(System.IO.Stream! input, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.JsonNodeExtension(System.Text.Json.Nodes.JsonNode! jsonNode) -> void
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Node.get -> System.Text.Json.Nodes.JsonNode!
@@ -24,6 +25,7 @@ BinkyLabs.OpenApi.Overlays.OverlayAction.OverlayAction() -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
@@ -66,6 +68,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Info.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Overlay.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.OverlayDocument() -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayException
 BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException(string! message) -> void
@@ -74,10 +77,13 @@ BinkyLabs.OpenApi.Overlays.OverlayException.Pointer.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayException.Pointer.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayExtensibleExtensions
 BinkyLabs.OpenApi.Overlays.OverlayInfo
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayInfo.Description.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.OverlayInfo() -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.get -> string?
@@ -85,7 +91,7 @@ BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.OverlayJsonReader() -> void
-BinkyLabs.OpenApi.Overlays.OverlayJsonReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+BinkyLabs.OpenApi.Overlays.OverlayJsonReader.ReadAsync(System.IO.Stream! input, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 BinkyLabs.OpenApi.Overlays.OverlayReaderException
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message) -> void
@@ -104,10 +110,11 @@ BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.Readers.init -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.TryAddReader(string! format, BinkyLabs.OpenApi.Overlays.IOverlayReader! reader) -> bool
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_0 = 1 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_1 = 2 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.OverlayYamlReader() -> void
-BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadAsync(System.IO.Stream! input, System.Uri! location, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadAsync(System.IO.Stream! input, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.get -> System.Collections.Generic.IList<Microsoft.OpenApi.OpenApiError!>!
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.set -> void
@@ -127,7 +134,7 @@ BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ExtensionParsers.get -> System.
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ExtensionParsers.set -> void
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.GetFromTempStorage<T>(string! key, object? scope = null) -> T?
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.GetLocation() -> string!
-BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.Parse(System.Text.Json.Nodes.JsonNode! jsonNode, System.Uri! location) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
+BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.Parse(System.Text.Json.Nodes.JsonNode! jsonNode) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ParseFragment<T>(System.Text.Json.Nodes.JsonNode! jsonNode, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion version) -> T?
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.ParsingContext(BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic! diagnostic) -> void
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.PopLoop(string! loopid) -> void

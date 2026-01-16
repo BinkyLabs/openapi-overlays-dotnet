@@ -11,9 +11,7 @@
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "draft": false,
-  "prerelease": true,
-  "versioning": "prerelease",
-  "prerelease-type": "preview",
+  "prerelease": false,
   "packages": {
     ".": {
       "package-name": "openapi-overlays-dotnet",

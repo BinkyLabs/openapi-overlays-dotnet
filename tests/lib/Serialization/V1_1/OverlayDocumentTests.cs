@@ -1,8 +1,10 @@
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
-using BinkyLabs.OpenApi.Overlays.Reader.V1;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 
 using Microsoft.OpenApi;
 
@@ -10,10 +12,10 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public sealed class OverlayDocumentTests
+public sealed class OverlayDocumentV1_1Tests
 {
     [Fact]
-    public void SerializeAsV1_ShouldWriteCorrectJson()
+    public void SerializeAsV1_1_ShouldWriteCorrectJson()
     {
         // Arrange
         var overlayDocument = new OverlayDocument
@@ -43,7 +45,7 @@ public sealed class OverlayDocumentTests
 
         var expectedJson = """
         {
-            "overlay": "1.0.0",
+            "overlay": "1.1.0",
             "info": {
                 "title": "Test Overlay",
                 "version": "1.0.0"
@@ -63,7 +65,7 @@ public sealed class OverlayDocumentTests
         """;
 
         // Act
-        overlayDocument.SerializeAsV1(writer);
+        overlayDocument.SerializeAsV1_1(writer);
         var jsonResult = textWriter.ToString();
         var jsonResultObject = JsonNode.Parse(jsonResult);
         var expectedJsonObject = JsonNode.Parse(expectedJson);
@@ -106,7 +108,7 @@ public sealed class OverlayDocumentTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+        var overlayDocument = OverlayV1_1Deserializer.LoadDocument(parseNode);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -133,7 +135,7 @@ public sealed class OverlayDocumentTests
     }
 
     [Fact]
-    public void SerializeAsV1_WithUpdate_ShouldWriteCorrectJson()
+    public void SerializeAsV1_1_WithUpdate_ShouldWriteCorrectJson()
     {
         // Arrange
         var updateNode = JsonNode.Parse("""
@@ -167,7 +169,7 @@ public sealed class OverlayDocumentTests
 
         var expectedJson = """
         {
-            "overlay": "1.0.0",
+            "overlay": "1.1.0",
             "info": {
                 "title": "Test Overlay",
                 "version": "1.0.0"
@@ -187,7 +189,7 @@ public sealed class OverlayDocumentTests
         """;
 
         // Act
-        overlayDocument.SerializeAsV1(writer);
+        overlayDocument.SerializeAsV1_1(writer);
         var jsonResult = textWriter.ToString();
         var jsonResultObject = JsonNode.Parse(jsonResult);
         var expectedJsonObject = JsonNode.Parse(expectedJson);
@@ -229,7 +231,7 @@ public sealed class OverlayDocumentTests
         var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+        var overlayDocument = OverlayV1_1Deserializer.LoadDocument(parseNode);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -261,7 +263,6 @@ public sealed class OverlayDocumentTests
         Assert.Equal("tag1", updateArray[0]?.GetValue<string>());
         Assert.Equal("tag2", updateArray[1]?.GetValue<string>());
     }
-
     [Fact]
     public async Task Load_WithValidMemoryStream_ReturnsReadResultAsync()
     {
@@ -372,7 +373,7 @@ public sealed class OverlayDocumentTests
         }
         """;
 
-        var tempFile = @"./ValidFile.json";
+        var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".json");
         await File.WriteAllTextAsync(tempFile, json);
 
         // Act

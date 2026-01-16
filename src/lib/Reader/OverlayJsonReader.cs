@@ -19,11 +19,9 @@ public class OverlayJsonReader : IOverlayReader
     /// Parses the JsonNode input into an Open API document.
     /// </summary>
     /// <param name="jsonNode">The JsonNode input.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <param name="settings">The Reader settings to be used during parsing.</param>
     /// <returns></returns>
     internal ReadResult Read(JsonNode jsonNode,
-                           Uri location,
                            OverlayReaderSettings settings)
     {
         ArgumentNullException.ThrowIfNull(jsonNode);
@@ -41,7 +39,7 @@ public class OverlayJsonReader : IOverlayReader
         try
         {
             // Parse the OpenAPI Document
-            document = context.Parse(jsonNode, location);
+            document = context.Parse(jsonNode);
         }
         catch (OpenApiException ex)
         {
@@ -76,12 +74,10 @@ public class OverlayJsonReader : IOverlayReader
     /// Reads the stream input asynchronously and parses it into an Open API document.
     /// </summary>
     /// <param name="input">Memory stream containing OpenAPI description to parse.</param>
-    /// <param name="location">Location of where the document that is getting loaded is saved</param>
     /// <param name="settings">The Reader settings to be used during parsing.</param>
     /// <param name="cancellationToken">Propagates notifications that operations should be cancelled.</param>
     /// <returns></returns>
     public async Task<ReadResult> ReadAsync(Stream input,
-                                            Uri location,
                                             OverlayReaderSettings settings,
                                             CancellationToken cancellationToken = default)
     {
@@ -107,7 +103,7 @@ public class OverlayJsonReader : IOverlayReader
             };
         }
 
-        return Read(jsonNode, location, settings);
+        return Read(jsonNode, settings);
     }
 
     /// <inheritdoc/>

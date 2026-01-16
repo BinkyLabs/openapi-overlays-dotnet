@@ -19,19 +19,32 @@ public class OverlayInfo : IOverlaySerializable, IOverlayExtensible
     /// </summary>
     public string? Version { get; set; }
 
+    /// <summary>
+    /// Gets or sets the description of the overlay.
+    /// </summary>
+    public string? Description { get; set; }
+
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
-    /// <summary>
-    /// Serializes the info object as an OpenAPI Overlay v1.0.0 JSON object.
-    /// </summary>
-    /// <param name="writer">The OpenAPI writer to use for serialization.</param>
-    public void SerializeAsV1(IOpenApiWriter writer)
+    /// <inheritdoc/>
+    public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0);
+    /// <inheritdoc/>
+    public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1);
+    private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version)
     {
         writer.WriteStartObject();
         writer.WriteProperty("title", Title);
         writer.WriteProperty("version", Version);
-        writer.WriteOverlayExtensions(Extensions, OverlaySpecVersion.Overlay1_0);
+
+        // Handle version-specific description field name
+        if (Description != null)
+        {
+            var descriptionFieldName = version == OverlaySpecVersion.Overlay1_0 ? "x-description" : "description";
+            writer.WriteProperty(descriptionFieldName, Description);
+        }
+
+        writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
 }
