@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-preview.23](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.22...v1.0.0-preview.23) (2025-12-24)
+## [1.0.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0-preview.23...v1.0.0) (2026-01-16)
 
 
 ### Bug Fixes
