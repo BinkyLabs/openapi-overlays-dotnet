@@ -13,7 +13,7 @@ The CLI enables developers to apply overlays to an OpenAPI document from their f
 ### Installing the CLI
 
 ```shell
-dotnet tool install -g BinkyLabs.OpenApi.Overlays.Tool --prerelease
+dotnet tool install -g BinkyLabs.OpenApi.Overlays.Tool
 ```
 
 ### Usage
