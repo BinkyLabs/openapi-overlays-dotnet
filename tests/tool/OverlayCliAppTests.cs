@@ -24,6 +24,10 @@ public sealed class OverlayCliAppTests : IDisposable
     private readonly string _tempInputFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
     private readonly string _tempOverlayFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
     private readonly string _tempOutputFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
+    
+    private readonly string _tempSourceFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempTargetFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempGeneratedOverlayJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
 
     private readonly string _validOpenApiJson =
         """
@@ -102,12 +106,52 @@ x-custom-extension:
   someProperty: someValue
 """;
 
+    private readonly string _sourceOpenApiJson =
+        """
+        {
+            "openapi": "3.1.0",
+            "info": {
+                "title": "Pet Store API",
+                "version": "1.0.0"
+            },
+            "paths": {
+                "/pets": {
+                    "get": {
+                        "summary": "List pets"
+                    }
+                }
+            }
+        }
+        """;
+    private readonly string _targetOpenApiJson =
+        """
+        {
+            "openapi": "3.1.0",
+            "info": {
+                "title": "Pet Store API",
+                "version": "2.0.0",
+                "contact": {
+                    "name": "Support"
+                }
+            },
+            "paths": {
+                "/pets": {
+                    "get": {
+                        "summary": "List all pets"
+                    }
+                }
+            }
+        }
+        """;
+
     public OverlayCliAppTests()
     {
         File.WriteAllText(_tempInputFileJson, _validOpenApiJson); // Minimal valid OpenAPI JSON
         File.WriteAllText(_tempOverlayFileJson, _validOverlayJson); // Minimal valid overlay
         File.WriteAllText(_tempInputFileYaml, _validOpenApiYaml); // Minimal valid OpenAPI YAML
         File.WriteAllText(_tempOverlayFileYaml, _validOverlayYaml); // Minimal valid
+        File.WriteAllText(_tempSourceFileJson, _sourceOpenApiJson);
+        File.WriteAllText(_tempTargetFileJson, _targetOpenApiJson);
     }
 
     public void Dispose()
@@ -118,6 +162,9 @@ x-custom-extension:
         if (File.Exists(_tempInputFileYaml)) File.Delete(_tempInputFileYaml);
         if (File.Exists(_tempOverlayFileYaml)) File.Delete(_tempOverlayFileYaml);
         if (File.Exists(_tempOutputFileYaml)) File.Delete(_tempOutputFileYaml);
+        if (File.Exists(_tempSourceFileJson)) File.Delete(_tempSourceFileJson);
+        if (File.Exists(_tempTargetFileJson)) File.Delete(_tempTargetFileJson);
+        if (File.Exists(_tempGeneratedOverlayJson)) File.Delete(_tempGeneratedOverlayJson);
     }
 
     [Fact]
@@ -203,5 +250,80 @@ x-custom-extension:
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);
+    }
+
+    [Fact]
+    public async Task RunAsync_GenerateCommand_CreatesOverlayFile()
+    {
+        var result = await OverlayCliApp.RunAsync([
+            "generate",
+            _tempSourceFileJson,
+            _tempTargetFileJson,
+            "--output", _tempGeneratedOverlayJson,
+            "--force"
+        ]);
+        
+        Assert.Equal(0, result);
+        Assert.True(File.Exists(_tempGeneratedOverlayJson));
+        
+        var (overlay, diags) = await OverlayDocument.LoadFromUrlAsync(_tempGeneratedOverlayJson);
+        Assert.NotNull(overlay);
+        Assert.NotNull(diags);
+        Assert.Empty(diags.Errors);
+        Assert.NotNull(overlay.Actions);
+        Assert.NotEmpty(overlay.Actions);
+    }
+
+    [Fact]
+    public async Task RunAsync_GenerateCommand_WithMetadata_CreatesOverlayWithInfo()
+    {
+        var result = await OverlayCliApp.RunAsync([
+            "generate",
+            _tempSourceFileJson,
+            _tempTargetFileJson,
+            "--output", _tempGeneratedOverlayJson,
+            "--title", "Test Migration",
+            "--version", "2.0.0",
+            "--description", "Migration from v1 to v2",
+            "--force"
+        ]);
+        
+        Assert.Equal(0, result);
+        
+        var (overlay, diags) = await OverlayDocument.LoadFromUrlAsync(_tempGeneratedOverlayJson);
+        Assert.NotNull(overlay);
+        Assert.NotNull(overlay.Info);
+        Assert.Equal("Test Migration", overlay.Info.Title);
+        Assert.Equal("2.0.0", overlay.Info.Version);
+        Assert.Equal("Migration from v1 to v2", overlay.Info.Description);
+    }
+
+    [Fact]
+    public async Task RunAsync_GenerateCommand_WithYamlFormat_CreatesYamlFile()
+    {
+        var yamlOutput = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
+        
+        try
+        {
+            var result = await OverlayCliApp.RunAsync([
+                "generate",
+                _tempSourceFileJson,
+                _tempTargetFileJson,
+                "--output", yamlOutput,
+                "--format", "yaml",
+                "--force"
+            ]);
+            
+            Assert.Equal(0, result);
+            Assert.True(File.Exists(yamlOutput));
+            
+            var content = await File.ReadAllTextAsync(yamlOutput);
+            Assert.Contains("overlay:", content);
+            Assert.Contains("actions:", content);
+        }
+        finally
+        {
+            if (File.Exists(yamlOutput)) File.Delete(yamlOutput);
+        }
     }
 }

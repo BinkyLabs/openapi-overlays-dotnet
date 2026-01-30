@@ -38,6 +38,26 @@ clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverla
 
 > Note: the overlay argument can be specified multiple times, the order matters.
 
+#### Generate an overlay from two OpenAPI documents
+
+The generate command analyzes two OpenAPI documents and generates an overlay that represents the differences between them.
+
+```shell
+clio generate sourceDocument targetDocument --output pathForOverlayFile
+```
+
+Optional parameters:
+- `--title, -t`: Title for the generated overlay
+- `--version, -v`: Version for the generated overlay (default: "1.0.0")
+- `--description, -d`: Description for the generated overlay
+- `--format, -fmt`: Output format (json or yaml, default: json)
+- `--force, -f`: Overwrite output file without confirmation
+
+Example:
+```shell
+clio generate v1-openapi.json v2-openapi.json --output migration-overlay.json --title "V1 to V2 Migration" --version "1.0.0" --description "Overlay to migrate from V1 to V2" --format json --force
+```
+
 ## Library
 
 ### Installing the library

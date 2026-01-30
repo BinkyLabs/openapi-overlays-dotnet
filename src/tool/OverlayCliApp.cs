@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+using BinkyLabs.OpenApi.Overlays.Extensions;
+using BinkyLabs.OpenApi.Overlays.Generation;
 using BinkyLabs.OpenApi.Overlays.Reader;
 
 using Microsoft.OpenApi;
@@ -22,10 +24,16 @@ internal static class OverlayCliApp
     public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
         var rootCommand = new RootCommand("BinkyLabs OpenAPI Overlays CLI - Apply overlays to OpenAPI documents");
+        
         var applyCommand = CreateApplyCommand("apply", "Apply one or more overlays to an OpenAPI document", ApplyOverlaysAsync);
         rootCommand.Add(applyCommand);
+        
         var applyAndNormalizeCommand = CreateApplyCommand("apply-and-normalize", "Apply one or more overlays to an OpenAPI document, and normalize the output with OpenAPI.net", ApplyOverlaysAndNormalizeAsync);
         rootCommand.Add(applyAndNormalizeCommand);
+        
+        var generateCommand = CreateGenerateCommand();
+        rootCommand.Add(generateCommand);
+        
         return await rootCommand.Parse(args).InvokeAsync(cancellationToken: cancellationToken);
     }
 
@@ -320,6 +328,170 @@ internal static class OverlayCliApp
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new InvalidOperationException($"Failed to apply overlays: {ex.Message}", ex);
+        }
+    }
+
+    private static Command CreateGenerateCommand()
+    {
+        var generateCommand = new Command("generate", "Generate an overlay by comparing two OpenAPI documents");
+
+        var sourceArgument = new Argument<string>("source") { Description = "Path to the source (original) OpenAPI document" };
+        var targetArgument = new Argument<string>("target") { Description = "Path to the target (modified) OpenAPI document" };
+        
+        var outputOption = new Option<string>("--output") { Description = "Path for the output overlay file" };
+        outputOption.Aliases.Add("-out");
+        outputOption.Required = true;
+        
+        var titleOption = new Option<string>("--title") { Description = "Title for the generated overlay" };
+        titleOption.Aliases.Add("-t");
+        
+        var versionOption = new Option<string>("--version") { Description = "Version for the generated overlay" };
+        versionOption.Aliases.Add("-v");
+        
+        var descriptionOption = new Option<string>("--description") { Description = "Description for the generated overlay" };
+        descriptionOption.Aliases.Add("-d");
+        
+        var formatOption = new Option<string>("--format") { Description = "Output format (json or yaml)" };
+        formatOption.Aliases.Add("-fmt");
+        
+        var forceOption = CreateForceOption();
+
+        generateCommand.Add(sourceArgument);
+        generateCommand.Add(targetArgument);
+        generateCommand.Add(outputOption);
+        generateCommand.Add(titleOption);
+        generateCommand.Add(versionOption);
+        generateCommand.Add(descriptionOption);
+        generateCommand.Add(formatOption);
+        generateCommand.Add(forceOption);
+
+        generateCommand.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var source = parseResult.GetValue(sourceArgument);
+            var target = parseResult.GetValue(targetArgument);
+            var output = parseResult.GetValue(outputOption);
+            var title = parseResult.GetValue(titleOption);
+            var version = parseResult.GetValue(versionOption) ?? "1.0.0";
+            var description = parseResult.GetValue(descriptionOption);
+            var format = parseResult.GetValue(formatOption) ?? "json";
+            var force = parseResult.GetValue(forceOption);
+
+            if (string.IsNullOrEmpty(source))
+            {
+                await Console.Error.WriteLineAsync("Error: Source argument is required.");
+                return 1;
+            }
+
+            if (string.IsNullOrEmpty(target))
+            {
+                await Console.Error.WriteLineAsync("Error: Target argument is required.");
+                return 1;
+            }
+
+            if (string.IsNullOrEmpty(output))
+            {
+                await Console.Error.WriteLineAsync("Error: Output option is required.");
+                return 1;
+            }
+
+            await HandleGenerateCommandAsync(source, target, output, title, version, description, format, force, cancellationToken);
+            return 0;
+        });
+
+        return generateCommand;
+    }
+
+    private static async Task HandleGenerateCommandAsync(
+        string sourcePath,
+        string targetPath,
+        string outputPath,
+        string? title,
+        string? version,
+        string? description,
+        string? format,
+        bool force,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Console.Out.WriteLineAsync($"Generating overlay from OpenAPI documents...");
+            await Console.Out.WriteLineAsync($"Source: {sourcePath}");
+            await Console.Out.WriteLineAsync($"Target: {targetPath}");
+            await Console.Out.WriteLineAsync($"Output: {outputPath}");
+
+            if (!File.Exists(sourcePath))
+            {
+                await Console.Error.WriteLineAsync($"Error: Source file '{sourcePath}' does not exist.");
+                Environment.Exit(1);
+                return;
+            }
+
+            if (!File.Exists(targetPath))
+            {
+                await Console.Error.WriteLineAsync($"Error: Target file '{targetPath}' does not exist.");
+                Environment.Exit(1);
+                return;
+            }
+
+            var outputDirectory = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDirectory) && !Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+            else if (File.Exists(outputPath) && !force)
+            {
+                await Console.Out.WriteAsync($"Output file '{outputPath}' already exists. Overwrite? (y/n): ");
+                var response = Console.ReadLine();
+                if (!"y".Equals(response?.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    await Console.Out.WriteLineAsync("Operation cancelled by user.");
+                    Environment.Exit(0);
+                    return;
+                }
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Create overlay info
+            var info = new OverlayInfo
+            {
+                Title = title ?? $"Overlay from {Path.GetFileName(sourcePath)} to {Path.GetFileName(targetPath)}",
+                Version = version ?? "1.0.0",
+                Description = description
+            };
+
+            // Generate the overlay
+            Console.WriteLine("Analyzing differences...");
+            var overlay = await OverlayGenerator.GenerateAsync(sourcePath, targetPath, cancellationToken);
+            overlay.Info = info;
+
+            Console.WriteLine($"Generated {overlay.Actions?.Count ?? 0} action(s)");
+
+            // Write the overlay
+            Console.WriteLine("Writing overlay document...");
+            using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+
+            var overlayVersion = OverlaySpecVersion.Overlay1_1;
+            var outputFormat = format?.ToLowerInvariant() switch
+            {
+                "yaml" or "yml" => OpenApiConstants.Yaml,
+                "json" or _ => OpenApiConstants.Json
+            };
+
+            await overlay.SerializeAsync(outputStream, overlayVersion, outputFormat, cancellationToken);
+            await outputStream.FlushAsync(cancellationToken);
+
+            Console.WriteLine("Overlay generated successfully!");
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Operation was cancelled.");
+            Environment.Exit(130);
+        }
+        catch (Exception ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            Environment.Exit(1);
         }
     }
 }
