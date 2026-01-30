@@ -38,6 +38,11 @@ clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverla
 
 > Note: the overlay argument can be specified multiple times, the order matters.
 
+## Docker Quick Start
+
+Run the CLI in a Docker container without installing .NET:
+Docker images are available at `ghcr.io/binkylabs/openapi-overlays-dotnet:latest`
+
 ## Library
 
 ### Installing the library
@@ -124,4 +129,3 @@ The OpenAPI Overlay Libraries releases notes are available from the [CHANGELOG](
 This project welcomes contributions and suggestions.  Make sure you open an issue before sending any pull request to avoid any misunderstanding.
 
 ## Trademarks
-
