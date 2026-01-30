@@ -52,10 +52,10 @@ runs:
           FORCE_FLAG="--force"
         fi
         
-        # Execute command
-        # Use --workdir to set working directory, mount at /workspace
-        # Set DOTNET_NOLOGO to suppress SDK search messages
+        # Execute command with correct user permissions
+        # Run as current user to avoid permission issues
         docker run --rm \
+          --user "$(id -u):$(id -g)" \
           -v "$GITHUB_WORKSPACE:/workspace" \
           -w /workspace \
           -e DOTNET_NOLOGO=1 \
