@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.0.0...v2.1.0) (2026-01-30)
+
+
+### Features
+
+* add Docker support with pre-built images ([#180](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/180)) ([3c83cd0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3c83cd0d505f110df995958edd83e8c212ff4f38))
+
 ## [2.0.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v1.0.0...v2.0.0) (2026-01-16)
 
 
