@@ -1,4 +1,4 @@
-name: Test GitHub Action
+﻿name: Test GitHub Action
 
 on:
   workflow_dispatch:
@@ -44,8 +44,7 @@ jobs:
           actions:
             - target: $.info.description
               description: Update description
-              update:
-                description: Modified Description
+              update: Modified Description
           EOF
 
       - name: Test Action - Apply
@@ -62,7 +61,7 @@ jobs:
             echo "Error: Output file was not created"
             exit 1
           fi
-          echo "? Output file created successfully"
+          echo "✓ Output file created successfully"
 
       - name: Verify overlay was applied
         run: |
@@ -71,7 +70,7 @@ jobs:
             cat test-data/output-apply.yaml
             exit 1
           fi
-          echo "? Overlay applied correctly"
+          echo "✓ Overlay applied correctly"
 
       - name: Create multiple overlay files
         run: |
@@ -81,12 +80,11 @@ jobs:
             title: Second Overlay
             version: 1.0.0
           actions:
-            - target: $.info
+            - target: $.info.contact
               description: Add contact info
               update:
-                contact:
-                  name: API Support
-                  email: support@example.com
+                name: API Support
+                email: support@example.com
           EOF
 
       - name: Test Action - Multiple Overlays
@@ -109,7 +107,7 @@ jobs:
             echo "Error: Second overlay was not applied"
             exit 1
           fi
-          echo "? Multiple overlays applied correctly"
+          echo "✓ Multiple overlays applied correctly"
 
       - name: Upload test artifacts
         if: always()
