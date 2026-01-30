@@ -41,7 +41,7 @@ runs:
           if [ -n "$line" ]; then
             # Split by spaces if multiple overlays on one line
             for overlay in $line; do
-              OVERLAY_ARGS="$OVERLAY_ARGS --overlay $overlay"
+              OVERLAY_ARGS="$OVERLAY_ARGS --overlay /workspace/$overlay"
             done
           fi
         done <<< "${{ inputs.overlays }}"
@@ -53,12 +53,18 @@ runs:
         fi
         
         # Execute command
+        # Use --workdir to set working directory, mount at /workspace
+        # Set DOTNET_NOLOGO to suppress SDK search messages
         docker run --rm \
           -v "$GITHUB_WORKSPACE:/workspace" \
           -w /workspace \
+          -e DOTNET_NOLOGO=1 \
+          -e DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
+          --entrypoint dotnet \
           ghcr.io/binkylabs/openapi-overlays-dotnet:latest \
+          /app/BinkyLabs.OpenApi.Overlays.Cli.dll \
           ${{ inputs.command }} \
-          ${{ inputs.input }} \
+          /workspace/${{ inputs.input }} \
           $OVERLAY_ARGS \
-          --output ${{ inputs.output }} \
+          --output /workspace/${{ inputs.output }} \
           $FORCE_FLAG
