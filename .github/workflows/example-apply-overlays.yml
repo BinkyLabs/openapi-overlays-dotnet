@@ -1,0 +1,53 @@
+name: Example - Apply OpenAPI Overlays
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'openapi/**'
+      - 'overlays/**'
+
+jobs:
+  apply-single-overlay:
+    runs-on: ubuntu-latest
+    name: Apply Single Overlay
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Apply OpenAPI Overlay
+        uses: BinkyLabs/openapi-overlays-dotnet@v1
+        with:
+          input: 'openapi.yaml'
+          overlays: 'overlay.yaml'
+          output: 'openapi-modified.yaml'
+
+      - name: Upload modified OpenAPI document
+        uses: actions/upload-artifact@v6
+        with:
+          name: openapi-single-overlay
+          path: openapi-modified.yaml
+
+  apply-multiple-overlays:
+    runs-on: ubuntu-latest
+    name: Apply Multiple Overlays
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Apply Multiple OpenAPI Overlays
+        uses: BinkyLabs/openapi-overlays-dotnet@v1
+        with:
+          input: 'openapi.yaml'
+          overlays: |
+            overlays/base.yaml
+            overlays/security.yaml
+            overlays/examples.yaml
+          output: 'openapi-complete.yaml'
+          command: 'apply-and-normalize'
+
+      - name: Upload modified OpenAPI document
+        uses: actions/upload-artifact@v6
+        with:
+          name: openapi-multiple-overlays
+          path: openapi-complete.yaml

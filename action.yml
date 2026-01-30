@@ -1,0 +1,57 @@
+name: 'OpenAPI Overlays'
+description: 'Apply OpenAPI overlays to OpenAPI documents using the BinkyLabs OpenAPI Overlays CLI'
+author: 'BinkyLabs'
+branding:
+  icon: 'layers'
+  color: 'blue'
+
+inputs:
+  input:
+    description: 'Path to the input OpenAPI document (YAML or JSON)'
+    required: true
+  overlays:
+    description: 'Paths to overlay file(s), separated by newlines or spaces. Multiple overlays will be applied in order.'
+    required: true
+  output:
+    description: 'Path for the output file'
+    required: true
+  command:
+    description: 'Command to run: "apply" (preserves field ordering) or "apply-and-normalize" (normalizes with OpenAPI.net rules)'
+    required: false
+    default: 'apply'
+  force:
+    description: 'Overwrite output file without confirmation'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Apply OpenAPI Overlays
+      shell: bash
+      run: |
+        # Parse overlays input (can be newline or space-separated)
+        OVERLAY_ARGS=()
+        while IFS= read -r line; do
+          # Skip empty lines
+          if [ -n "$line" ]; then
+            # Split by spaces if multiple overlays on one line
+            for overlay in $line; do
+              OVERLAY_ARGS+=(--overlay "$overlay")
+            done
+          fi
+        done <<< "${{ inputs.overlays }}"
+        
+        # Build command
+        DOCKER_CMD="docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/binkylabs/openapi-overlays-dotnet:latest"
+        CMD_ARGS=("${{ inputs.command }}" "${{ inputs.input }}")
+        CMD_ARGS+=("${OVERLAY_ARGS[@]}")
+        CMD_ARGS+=(--output "${{ inputs.output }}")
+        
+        if [ "${{ inputs.force }}" = "true" ]; then
+          CMD_ARGS+=(--force)
+        fi
+        
+        # Execute command
+        echo "Running: $DOCKER_CMD ${CMD_ARGS[*]}"
+        $DOCKER_CMD "${CMD_ARGS[@]}"
