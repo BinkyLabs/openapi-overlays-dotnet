@@ -72,7 +72,7 @@ jobs:
           fi
           echo "✓ Overlay applied correctly"
 
-      - name: Create multiple overlay files
+      - name: Create second overlay file
         run: |
           cat > test-data/overlay2.yaml << 'EOF'
           overlay: 1.0.0
@@ -80,11 +80,12 @@ jobs:
             title: Second Overlay
             version: 1.0.0
           actions:
-            - target: $.info.contact
+            - target: $.info
               description: Add contact info
               update:
-                name: API Support
-                email: support@example.com
+                contact:
+                  name: API Support
+                  email: support@example.com
           EOF
 
       - name: Test Action - Multiple Overlays
@@ -99,15 +100,37 @@ jobs:
 
       - name: Verify multiple overlays applied
         run: |
+          echo "=== Output file contents ==="
+          cat test-data/output-multiple.yaml
+          echo "=== End of file ==="
+          
           if ! grep -q "Modified Description" "test-data/output-multiple.yaml"; then
             echo "Error: First overlay was not applied"
             exit 1
           fi
-          if ! grep -q "support@example.com" "test-data/output-multiple.yaml"; then
+          echo "✓ First overlay applied correctly"
+          
+          if ! grep -q "API Support" "test-data/output-multiple.yaml"; then
             echo "Error: Second overlay was not applied"
             exit 1
           fi
-          echo "✓ Multiple overlays applied correctly"
+          echo "✓ Second overlay applied correctly"
+
+      - name: Test Action - Apply and Normalize
+        uses: ./
+        with:
+          input: 'test-data/openapi.yaml'
+          overlays: 'test-data/overlay.yaml'
+          output: 'test-data/output-normalize.yaml'
+          command: 'apply-and-normalize'
+
+      - name: Verify normalized output
+        run: |
+          if [ ! -f "test-data/output-normalize.yaml" ]; then
+            echo "Error: Normalized output file was not created"
+            exit 1
+          fi
+          echo "✓ Normalized output created successfully"
 
       - name: Upload test artifacts
         if: always()
