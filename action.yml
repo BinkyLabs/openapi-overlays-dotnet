@@ -27,31 +27,38 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Pull Docker image
+      shell: bash
+      run: docker pull ghcr.io/binkylabs/openapi-overlays-dotnet:latest
+      
     - name: Apply OpenAPI Overlays
       shell: bash
       run: |
         # Parse overlays input (can be newline or space-separated)
-        OVERLAY_ARGS=()
+        OVERLAY_ARGS=""
         while IFS= read -r line; do
           # Skip empty lines
           if [ -n "$line" ]; then
             # Split by spaces if multiple overlays on one line
             for overlay in $line; do
-              OVERLAY_ARGS+=(--overlay "$overlay")
+              OVERLAY_ARGS="$OVERLAY_ARGS --overlay $overlay"
             done
           fi
         done <<< "${{ inputs.overlays }}"
         
-        # Build command
-        DOCKER_CMD="docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace ghcr.io/binkylabs/openapi-overlays-dotnet:latest"
-        CMD_ARGS=("${{ inputs.command }}" "${{ inputs.input }}")
-        CMD_ARGS+=("${OVERLAY_ARGS[@]}")
-        CMD_ARGS+=(--output "${{ inputs.output }}")
-        
+        # Build force flag
+        FORCE_FLAG=""
         if [ "${{ inputs.force }}" = "true" ]; then
-          CMD_ARGS+=(--force)
+          FORCE_FLAG="--force"
         fi
         
         # Execute command
-        echo "Running: $DOCKER_CMD ${CMD_ARGS[*]}"
-        $DOCKER_CMD "${CMD_ARGS[@]}"
+        docker run --rm \
+          -v "$GITHUB_WORKSPACE:/workspace" \
+          -w /workspace \
+          ghcr.io/binkylabs/openapi-overlays-dotnet:latest \
+          ${{ inputs.command }} \
+          ${{ inputs.input }} \
+          $OVERLAY_ARGS \
+          --output ${{ inputs.output }} \
+          $FORCE_FLAG
