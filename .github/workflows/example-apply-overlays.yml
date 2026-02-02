@@ -1,5 +1,8 @@
 name: Example - Apply OpenAPI Overlays
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   push:
