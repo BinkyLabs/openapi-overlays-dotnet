@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.1.1...v2.2.0) (2026-02-09)
+
+
+### Features
+
+* **lib:** add warning when target matches zero nodes ([41b631f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/41b631fdb2ae6da51d5b7dc0040dc27777ce08c3))
+* **lib:** warn when overlay action target matches zero nodes ([4c32d83](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/4c32d8386418dba6317d98eb8da504ad57743c82))
+
 ## [2.1.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.1.0...v2.1.1) (2026-02-09)
 
 
