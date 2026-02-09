@@ -560,6 +560,63 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Empty(overlayDiagnostic.Warnings);
     }
+
+    [Fact]
+    public void ApplyToDocument_ShouldWarnForZeroMatchesAndSucceedForOthers()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.info.nonexistent",
+                    Description = "Update non-existent field",
+                    Update = new JsonObject
+                    {
+                        ["value"] = "test"
+                    }
+                },
+                new OverlayAction
+                {
+                    Target = "$.info",
+                    Description = "Update existing field",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "Updated Description"
+                    }
+                },
+                new OverlayAction
+                {
+                    Target = "$.paths.nonexistent",
+                    Description = "Remove non-existent path",
+                    Remove = true
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true overall.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal(2, overlayDiagnostic.Warnings.Count);
+        Assert.Contains("Target '$.info.nonexistent' matched 0 nodes", overlayDiagnostic.Warnings[0].Message);
+        Assert.Contains("Target '$.paths.nonexistent' matched 0 nodes", overlayDiagnostic.Warnings[1].Message);
+        // Verify the successful action was applied
+        Assert.Equal("Updated Description", jsonNode["info"]?["description"]?.ToString());
+    }
     public void Dispose()
     {
         // Cleanup
