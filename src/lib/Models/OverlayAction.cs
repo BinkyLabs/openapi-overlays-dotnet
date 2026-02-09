@@ -112,8 +112,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
 
         // Check if the target matches zero nodes and add a warning
-        var matchesCount = parseResult.Matches.Count();
-        if (matchesCount == 0)
+        if (parseResult.Matches.Count == 0)
         {
             overlayDiagnostic.Warnings.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' matched 0 nodes"));
             return true; // Continue processing, but with a warning
