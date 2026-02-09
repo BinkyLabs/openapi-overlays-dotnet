@@ -392,6 +392,174 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Contains("bar", tagsAsArray);
         Assert.Contains("buzz", tagsAsArray);
     }
+    [Fact]
+    public void ApplyToDocument_ShouldWarnWhenRemoveTargetMatchesZeroNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.paths['/nonexistent'].get",
+                    Description = "Remove non-existent path",
+                    Remove = true
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            },
+            ["paths"] = new JsonObject
+            {
+                ["/test"] = new JsonObject
+                {
+                    ["get"] = new JsonObject
+                    {
+                        ["summary"] = "Test endpoint"
+                    }
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true even when no nodes match.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Single(overlayDiagnostic.Warnings);
+        Assert.Contains("Target '$.paths['/nonexistent'].get' matched 0 nodes", overlayDiagnostic.Warnings[0].Message);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldWarnWhenUpdateTargetMatchesZeroNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.info.nonexistentField",
+                    Description = "Update non-existent field",
+                    Update = new JsonObject
+                    {
+                        ["value"] = "test"
+                    }
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true even when no nodes match.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Single(overlayDiagnostic.Warnings);
+        Assert.Contains("Target '$.info.nonexistentField' matched 0 nodes", overlayDiagnostic.Warnings[0].Message);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldWarnWhenCopyTargetMatchesZeroNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.paths['/nonexistent'].get",
+                    Description = "Copy from non-existent path",
+                    Copy = "$.info.title"
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            },
+            ["paths"] = new JsonObject
+            {
+                ["/test"] = new JsonObject
+                {
+                    ["get"] = new JsonObject
+                    {
+                        ["summary"] = "Test endpoint"
+                    }
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true even when no nodes match.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Single(overlayDiagnostic.Warnings);
+        Assert.Contains("Target '$.paths['/nonexistent'].get' matched 0 nodes", overlayDiagnostic.Warnings[0].Message);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldNotWarnWhenTargetMatchesNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.info",
+                    Description = "Update existing info object",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "Updated Description"
+                    }
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true when nodes match.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
     public void Dispose()
     {
         // Cleanup
