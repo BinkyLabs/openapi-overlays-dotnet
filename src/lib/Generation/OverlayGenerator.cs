@@ -2,6 +2,8 @@ using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 
+using Microsoft.OpenApi;
+
 namespace BinkyLabs.OpenApi.Overlays.Generation;
 
 /// <summary>
@@ -14,8 +16,8 @@ public static class OverlayGenerator
     /// </summary>
     /// <param name="sourceDocument">The source (original) document as JsonNode.</param>
     /// <param name="targetDocument">The target (modified) document as JsonNode.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static OverlayDocument Generate(JsonNode sourceDocument, JsonNode targetDocument)
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static OverlayGenerationResult Generate(JsonNode sourceDocument, JsonNode targetDocument)
     {
         return Generate(sourceDocument, targetDocument, null);
     }
@@ -26,16 +28,27 @@ public static class OverlayGenerator
     /// <param name="sourceDocument">The source (original) document as JsonNode.</param>
     /// <param name="targetDocument">The target (modified) document as JsonNode.</param>
     /// <param name="info">Overlay info metadata.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static OverlayDocument Generate(JsonNode sourceDocument, JsonNode targetDocument, OverlayInfo? info)
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static OverlayGenerationResult Generate(JsonNode sourceDocument, JsonNode targetDocument, OverlayInfo? info)
     {
         ArgumentNullException.ThrowIfNull(sourceDocument);
         ArgumentNullException.ThrowIfNull(targetDocument);
 
+        var diagnostic = new OverlayDiagnostic();
+
+        if (!ValidateOpenApiVersions(sourceDocument, targetDocument, diagnostic))
+        {
+            return new OverlayGenerationResult
+            {
+                Document = null,
+                Diagnostic = diagnostic
+            };
+        }
+
         var actions = new List<OverlayAction>();
         GenerateDiff(sourceDocument, targetDocument, "$", actions);
 
-        return new OverlayDocument
+        var document = new OverlayDocument
         {
             Info = info ?? new OverlayInfo
             {
@@ -44,6 +57,12 @@ public static class OverlayGenerator
             },
             Actions = actions
         };
+
+        return new OverlayGenerationResult
+        {
+            Document = document,
+            Diagnostic = diagnostic
+        };
     }
 
     /// <summary>
@@ -51,8 +70,8 @@ public static class OverlayGenerator
     /// </summary>
     /// <param name="sourceStream">Stream containing the source document.</param>
     /// <param name="targetStream">Stream containing the target document.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static Task<OverlayDocument> GenerateFromStreamsAsync(
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static Task<OverlayGenerationResult> GenerateFromStreamsAsync(
         Stream sourceStream,
         Stream targetStream)
     {
@@ -65,8 +84,8 @@ public static class OverlayGenerator
     /// <param name="sourceStream">Stream containing the source document.</param>
     /// <param name="targetStream">Stream containing the target document.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static Task<OverlayDocument> GenerateFromStreamsAsync(
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static Task<OverlayGenerationResult> GenerateFromStreamsAsync(
         Stream sourceStream,
         Stream targetStream,
         CancellationToken cancellationToken)
@@ -83,8 +102,8 @@ public static class OverlayGenerator
     /// <param name="info">Overlay info metadata.</param>
     /// <param name="readerSettings">Reader settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static async Task<OverlayDocument> GenerateFromStreamsAsync(
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static async Task<OverlayGenerationResult> GenerateFromStreamsAsync(
         Stream sourceStream,
         Stream targetStream,
         string? format,
@@ -97,10 +116,9 @@ public static class OverlayGenerator
 
         readerSettings ??= new OverlayReaderSettings();
 
-        // Detect format if not provided
         if (string.IsNullOrEmpty(format))
         {
-            format = "json"; // Default to JSON
+            format = "json";
         }
 
         var reader = readerSettings.GetReader(format) ?? throw new NotSupportedException($"No reader found for format '{format}'.");
@@ -126,8 +144,8 @@ public static class OverlayGenerator
     /// </summary>
     /// <param name="sourcePath">Path or URI to the source document.</param>
     /// <param name="targetPath">Path or URI to the target document.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static Task<OverlayDocument> GenerateAsync(
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static Task<OverlayGenerationResult> GenerateAsync(
         string sourcePath,
         string targetPath)
     {
@@ -140,8 +158,8 @@ public static class OverlayGenerator
     /// <param name="sourcePath">Path or URI to the source document.</param>
     /// <param name="targetPath">Path or URI to the target document.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static Task<OverlayDocument> GenerateAsync(
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static Task<OverlayGenerationResult> GenerateAsync(
         string sourcePath,
         string targetPath,
         CancellationToken cancellationToken)
@@ -158,8 +176,8 @@ public static class OverlayGenerator
     /// <param name="info">Overlay info metadata.</param>
     /// <param name="readerSettings">Reader settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayDocument containing actions to transform the source into the target.</returns>
-    public static async Task<OverlayDocument> GenerateAsync(
+    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
+    public static async Task<OverlayGenerationResult> GenerateAsync(
         string sourcePath,
         string targetPath,
         string? format,
@@ -172,7 +190,6 @@ public static class OverlayGenerator
 
         readerSettings ??= new OverlayReaderSettings();
 
-        // Load source document
         Stream sourceStream;
         if (sourcePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             sourcePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
@@ -186,7 +203,6 @@ public static class OverlayGenerator
             sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
         }
 
-        // Load target document
         Stream targetStream;
         if (targetPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             targetPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
@@ -209,6 +225,45 @@ public static class OverlayGenerator
             await sourceStream.DisposeAsync().ConfigureAwait(false);
             await targetStream.DisposeAsync().ConfigureAwait(false);
         }
+    }
+
+    private static bool ValidateOpenApiVersions(JsonNode sourceDocument, JsonNode targetDocument, OverlayDiagnostic diagnostic)
+    {
+        var sourceVersion = ExtractOpenApiVersion(sourceDocument);
+        var targetVersion = ExtractOpenApiVersion(targetDocument);
+
+        if (sourceVersion is null && targetVersion is null)
+        {
+            return true;
+        }
+
+        if (sourceVersion is null || targetVersion is null)
+        {
+            diagnostic.Errors.Add(new OpenApiError(
+                "#/",
+                "One or both documents are missing the 'openapi' version property."));
+            return false;
+        }
+
+        if (!string.Equals(sourceVersion, targetVersion, StringComparison.Ordinal))
+        {
+            diagnostic.Errors.Add(new OpenApiError(
+                "#/",
+                $"The OpenAPI versions do not match. Source version: '{sourceVersion}', Target version: '{targetVersion}'."));
+            return false;
+        }
+
+        return true;
+    }
+
+    private static string? ExtractOpenApiVersion(JsonNode document)
+    {
+        if (document is not JsonObject jsonObject)
+        {
+            return null;
+        }
+
+        return jsonObject["openapi"]?.GetValue<string>();
     }
 
     private static void GenerateDiff(JsonNode source, JsonNode target, string path, List<OverlayAction> actions)

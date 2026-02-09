@@ -462,10 +462,32 @@ internal static class OverlayCliApp
 
             // Generate the overlay
             Console.WriteLine("Analyzing differences...");
-            var overlay = await OverlayGenerator.GenerateAsync(sourcePath, targetPath, cancellationToken);
-            overlay.Info = info;
+            var result = await OverlayGenerator.GenerateAsync(sourcePath, targetPath, cancellationToken);
+            
+            if (result.Document == null)
+            {
+                await Console.Error.WriteLineAsync("Error: Failed to generate overlay.");
+                foreach (var error in result.Diagnostic.Errors)
+                {
+                    await Console.Error.WriteLineAsync($"  - {error.Message}");
+                }
+                Environment.Exit(1);
+                return;
+            }
+            
+            result.Document.Info = info;
 
-            Console.WriteLine($"Generated {overlay.Actions?.Count ?? 0} action(s)");
+            Console.WriteLine($"Generated {result.Document.Actions?.Count ?? 0} action(s)");
+
+            // Display any warnings
+            if (result.Diagnostic.Warnings.Count > 0)
+            {
+                Console.WriteLine("Warnings:");
+                foreach (var warning in result.Diagnostic.Warnings)
+                {
+                    Console.WriteLine($"  - {warning.Message}");
+                }
+            }
 
             // Write the overlay
             Console.WriteLine("Writing overlay document...");
@@ -478,7 +500,7 @@ internal static class OverlayCliApp
                 "json" or _ => OpenApiConstants.Json
             };
 
-            await overlay.SerializeAsync(outputStream, overlayVersion, outputFormat, cancellationToken);
+            await result.Document.SerializeAsync(outputStream, overlayVersion, outputFormat, cancellationToken);
             await outputStream.FlushAsync(cancellationToken);
 
             Console.WriteLine("Overlay generated successfully!");
