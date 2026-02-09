@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.1.0...v2.1.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* adds funding information ([0895fe9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0895fe9bb8af420fe634db51b2e54ac93a362fde))
+* adds funding information ([c8a8e5d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/c8a8e5d670517f12506abb321c2ccdf392229d39))
+
 ## [2.1.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.0.0...v2.1.0) (2026-01-30)
 
 
