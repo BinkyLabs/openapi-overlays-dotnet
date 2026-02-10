@@ -100,7 +100,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         return (true, jsonPath, parseResult);
     }
 
-    internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
+    internal bool ApplyToDocument(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index, bool strict = false)
     {
         ArgumentNullException.ThrowIfNull(documentJsonNode);
         ArgumentNullException.ThrowIfNull(overlayDiagnostic);
@@ -111,11 +111,21 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
             return false;
         }
 
-        // Check if the target matches zero nodes and add a warning
+        // Check if the target matches zero nodes
         if (parseResult.Matches.Count == 0)
         {
-            overlayDiagnostic.Warnings.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' matched 0 nodes"));
-            return true; // Continue processing, but with a warning
+            if (strict)
+            {
+                // In strict mode, treat zero matches as an error
+                overlayDiagnostic.Errors.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' matched 0 nodes"));
+                return false; // Fail the sequence
+            }
+            else
+            {
+                // In non-strict mode, add a warning and continue
+                overlayDiagnostic.Warnings.Add(new OpenApiError(GetPointer(index), $"Target '{Target}' matched 0 nodes"));
+                return true; // Continue processing
+            }
         }
 
         try

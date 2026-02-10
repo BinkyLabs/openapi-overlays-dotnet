@@ -59,7 +59,14 @@ internal static class OverlayCliApp
         return forceOption;
     }
 
-    private static Command CreateApplyCommand(string name, string description, Func<string, string[], string, CancellationToken, Task> applyAsync)
+    private static Option<bool> CreateStrictOption()
+    {
+        var strictOption = new Option<bool>("--strict") { Description = "Treat targets that match zero nodes as errors instead of warnings" };
+        strictOption.Aliases.Add("-s");
+        return strictOption;
+    }
+
+    private static Command CreateApplyCommand(string name, string description, Func<string, string[], string, bool, CancellationToken, Task> applyAsync)
     {
         var applyCommand = new Command(name, description);
 
@@ -71,10 +78,13 @@ internal static class OverlayCliApp
 
         var forceOption = CreateForceOption();
 
+        var strictOption = CreateStrictOption();
+
         applyCommand.Add(inputArgument);
         applyCommand.Add(overlayOption);
         applyCommand.Add(outputOption);
         applyCommand.Add(forceOption);
+        applyCommand.Add(strictOption);
 
         applyCommand.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -82,6 +92,7 @@ internal static class OverlayCliApp
             var overlays = parseResult.GetValue(overlayOption);
             var output = parseResult.GetValue(outputOption);
             var force = parseResult.GetValue(forceOption);
+            var strict = parseResult.GetValue(strictOption);
 
             if (string.IsNullOrEmpty(input))
             {
@@ -95,7 +106,7 @@ internal static class OverlayCliApp
                 return 1;
             }
 
-            await HandleCommandAsync(input, overlays ?? [], output, force, applyAsync, cancellationToken);
+            await HandleCommandAsync(input, overlays ?? [], output, force, strict, applyAsync, cancellationToken);
             return 0;
         });
 
@@ -107,7 +118,8 @@ internal static class OverlayCliApp
         string[] overlays,
         string output,
         bool force,
-        Func<string, string[], string, CancellationToken, Task> applyAsync,
+        bool strict,
+        Func<string, string[], string, bool, CancellationToken, Task> applyAsync,
         CancellationToken cancellationToken)
     {
         try
@@ -155,7 +167,7 @@ internal static class OverlayCliApp
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            await applyAsync(input, overlays, output, cancellationToken).ConfigureAwait(false);
+            await applyAsync(input, overlays, output, strict, cancellationToken).ConfigureAwait(false);
 
             Console.WriteLine("Overlays applied successfully!");
         }
@@ -245,13 +257,14 @@ internal static class OverlayCliApp
         string inputPath,
         string[] overlayPaths,
         string outputPath,
+        bool strict,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var (combinedOverlay, allDiagnostics) = await LoadAndCombineOverlaysAsync(overlayPaths, cancellationToken);
 
-            var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAndLoadAsync(inputPath, cancellationToken: cancellationToken);
+            var (openApiDocument, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAndLoadAsync(inputPath, strict: strict, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
             if (openApiDocument is null)
@@ -278,13 +291,14 @@ internal static class OverlayCliApp
         string inputPath,
         string[] overlayPaths,
         string outputPath,
+        bool strict,
         CancellationToken cancellationToken = default)
     {
         try
         {
             var (combinedOverlay, allDiagnostics) = await LoadAndCombineOverlaysAsync(overlayPaths, cancellationToken);
 
-            var (jsonNode, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, cancellationToken: cancellationToken);
+            var (jsonNode, applyOverlayDiagnostic, openApiDocumentDiagnostic, _) = await combinedOverlay.ApplyToDocumentAsync(inputPath, strict: strict, cancellationToken: cancellationToken);
             allDiagnostics.Add(applyOverlayDiagnostic);
 
             if (jsonNode is null)
