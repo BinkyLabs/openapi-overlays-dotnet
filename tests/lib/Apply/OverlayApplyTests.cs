@@ -617,6 +617,240 @@ public sealed class OverlayApplyTests : IDisposable
         // Verify the successful action was applied
         Assert.Equal("Updated Description", jsonNode["info"]?["description"]?.ToString());
     }
+    [Fact]
+    public void ApplyToDocument_StrictMode_ShouldErrorWhenRemoveTargetMatchesZeroNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.paths['/nonexistent'].get",
+                    Description = "Remove non-existent path",
+                    Remove = true
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            },
+            ["paths"] = new JsonObject
+            {
+                ["/test"] = new JsonObject
+                {
+                    ["get"] = new JsonObject
+                    {
+                        ["summary"] = "Test endpoint"
+                    }
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic, strict: true);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false in strict mode when no nodes match.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Contains("Target '$.paths['/nonexistent'].get' matched 0 nodes", overlayDiagnostic.Errors[0].Message);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void ApplyToDocument_StrictMode_ShouldErrorWhenUpdateTargetMatchesZeroNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.info.nonexistentField",
+                    Description = "Update non-existent field",
+                    Update = new JsonObject
+                    {
+                        ["value"] = "test"
+                    }
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic, strict: true);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false in strict mode when no nodes match.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Contains("Target '$.info.nonexistentField' matched 0 nodes", overlayDiagnostic.Errors[0].Message);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void ApplyToDocument_StrictMode_ShouldErrorWhenCopyTargetMatchesZeroNodes()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.paths['/nonexistent'].get",
+                    Description = "Copy from non-existent path",
+                    Copy = "$.info.title"
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            },
+            ["paths"] = new JsonObject
+            {
+                ["/test"] = new JsonObject
+                {
+                    ["get"] = new JsonObject
+                    {
+                        ["summary"] = "Test endpoint"
+                    }
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic, strict: true);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false in strict mode when no nodes match.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Contains("Target '$.paths['/nonexistent'].get' matched 0 nodes", overlayDiagnostic.Errors[0].Message);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void ApplyToDocument_StrictModeDisabled_ShouldWarnWhenTargetMatchesZeroNodes()
+    {
+        // Arrange - same scenario as strict mode, but with strict=false (default)
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.paths['/nonexistent'].get",
+                    Description = "Remove non-existent path",
+                    Remove = true
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            },
+            ["paths"] = new JsonObject
+            {
+                ["/test"] = new JsonObject
+                {
+                    ["get"] = new JsonObject
+                    {
+                        ["summary"] = "Test endpoint"
+                    }
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic, strict: false);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true when strict mode is disabled.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Single(overlayDiagnostic.Warnings);
+        Assert.Contains("Target '$.paths['/nonexistent'].get' matched 0 nodes", overlayDiagnostic.Warnings[0].Message);
+    }
+
+    [Fact]
+    public void ApplyToDocument_StrictMode_ShouldStopAtFirstErrorButContinueOtherActions()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.info.nonexistent",
+                    Description = "Update non-existent field",
+                    Update = new JsonObject
+                    {
+                        ["value"] = "test"
+                    }
+                },
+                new OverlayAction
+                {
+                    Target = "$.info",
+                    Description = "Update existing field",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "Updated Description"
+                    }
+                },
+                new OverlayAction
+                {
+                    Target = "$.paths.nonexistent",
+                    Description = "Remove non-existent path",
+                    Remove = true
+                }
+            ]
+        };
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test Title",
+                ["version"] = "1.0.0"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic, strict: true);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false in strict mode when any action has zero matches.");
+        Assert.Equal(2, overlayDiagnostic.Errors.Count);
+        Assert.Contains("Target '$.info.nonexistent' matched 0 nodes", overlayDiagnostic.Errors[0].Message);
+        Assert.Contains("Target '$.paths.nonexistent' matched 0 nodes", overlayDiagnostic.Errors[1].Message);
+        Assert.Empty(overlayDiagnostic.Warnings);
+        // Verify the successful action was still applied
+        Assert.Equal("Updated Description", jsonNode["info"]?["description"]?.ToString());
+    }
+
     public void Dispose()
     {
         // Cleanup

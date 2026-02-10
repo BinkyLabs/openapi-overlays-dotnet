@@ -103,7 +103,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return OverlayModelFactory.ParseAsync(input, format, settings);
     }
 
-    internal bool ApplyToDocument(JsonNode jsonNode, OverlayDiagnostic overlayDiagnostic)
+    internal bool ApplyToDocument(JsonNode jsonNode, OverlayDiagnostic overlayDiagnostic, bool strict = false)
     {
         ArgumentNullException.ThrowIfNull(jsonNode);
         ArgumentNullException.ThrowIfNull(overlayDiagnostic);
@@ -115,7 +115,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var result = true;
         foreach (var action in Actions)
         {
-            if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i))
+            if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
             {
                 result = false; // If any action fails, the entire application fails
             }
