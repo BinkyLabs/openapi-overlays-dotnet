@@ -275,7 +275,7 @@ public static class OverlayGenerator
             {
                 if (!targetObject.ContainsKey(sourceProp.Key))
                 {
-                    var propPath = JsonPathBuilder.BuildPath(path, sourceProp.Key);
+                    var propPath = BuildJsonPath(path, sourceProp.Key);
                     actions.Add(new OverlayAction
                     {
                         Target = propPath,
@@ -288,7 +288,7 @@ public static class OverlayGenerator
             // Find added or modified properties
             foreach (var targetProp in targetObject)
             {
-                var propPath = JsonPathBuilder.BuildPath(path, targetProp.Key);
+                var propPath = BuildJsonPath(path, targetProp.Key);
 
                 if (!sourceObject.ContainsKey(targetProp.Key))
                 {
@@ -387,5 +387,14 @@ public static class OverlayGenerator
                 });
             }
         }
+    }
+
+    private static string BuildJsonPath(string basePath, string propertyName)
+    {
+        if (string.IsNullOrEmpty(basePath) || basePath == "$")
+        {
+            return $"$.{propertyName}";
+        }
+        return $"{basePath}.{propertyName}";
     }
 }
