@@ -16,8 +16,8 @@ public static class OverlayGenerator
     /// </summary>
     /// <param name="sourceDocument">The source (original) document as JsonNode.</param>
     /// <param name="targetDocument">The target (modified) document as JsonNode.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static OverlayGenerationResult Generate(JsonNode sourceDocument, JsonNode targetDocument)
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static ReadResult Generate(JsonNode sourceDocument, JsonNode targetDocument)
     {
         return Generate(sourceDocument, targetDocument, null);
     }
@@ -28,8 +28,8 @@ public static class OverlayGenerator
     /// <param name="sourceDocument">The source (original) document as JsonNode.</param>
     /// <param name="targetDocument">The target (modified) document as JsonNode.</param>
     /// <param name="info">Overlay info metadata.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static OverlayGenerationResult Generate(JsonNode sourceDocument, JsonNode targetDocument, OverlayInfo? info)
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static ReadResult Generate(JsonNode sourceDocument, JsonNode targetDocument, OverlayInfo? info)
     {
         ArgumentNullException.ThrowIfNull(sourceDocument);
         ArgumentNullException.ThrowIfNull(targetDocument);
@@ -38,7 +38,7 @@ public static class OverlayGenerator
 
         if (!ValidateOpenApiVersions(sourceDocument, targetDocument, diagnostic))
         {
-            return new OverlayGenerationResult
+            return new ReadResult
             {
                 Document = null,
                 Diagnostic = diagnostic
@@ -58,7 +58,7 @@ public static class OverlayGenerator
             Actions = actions
         };
 
-        return new OverlayGenerationResult
+        return new ReadResult
         {
             Document = document,
             Diagnostic = diagnostic
@@ -70,8 +70,8 @@ public static class OverlayGenerator
     /// </summary>
     /// <param name="sourceStream">Stream containing the source document.</param>
     /// <param name="targetStream">Stream containing the target document.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static Task<OverlayGenerationResult> GenerateFromStreamsAsync(
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static Task<ReadResult> GenerateFromStreamsAsync(
         Stream sourceStream,
         Stream targetStream)
     {
@@ -84,8 +84,8 @@ public static class OverlayGenerator
     /// <param name="sourceStream">Stream containing the source document.</param>
     /// <param name="targetStream">Stream containing the target document.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static Task<OverlayGenerationResult> GenerateFromStreamsAsync(
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static Task<ReadResult> GenerateFromStreamsAsync(
         Stream sourceStream,
         Stream targetStream,
         CancellationToken cancellationToken)
@@ -102,8 +102,8 @@ public static class OverlayGenerator
     /// <param name="info">Overlay info metadata.</param>
     /// <param name="readerSettings">Reader settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static async Task<OverlayGenerationResult> GenerateFromStreamsAsync(
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static async Task<ReadResult> GenerateFromStreamsAsync(
         Stream sourceStream,
         Stream targetStream,
         string? format,
@@ -144,8 +144,8 @@ public static class OverlayGenerator
     /// </summary>
     /// <param name="sourcePath">Path or URI to the source document.</param>
     /// <param name="targetPath">Path or URI to the target document.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static Task<OverlayGenerationResult> GenerateAsync(
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static Task<ReadResult> GenerateAsync(
         string sourcePath,
         string targetPath)
     {
@@ -158,8 +158,8 @@ public static class OverlayGenerator
     /// <param name="sourcePath">Path or URI to the source document.</param>
     /// <param name="targetPath">Path or URI to the target document.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static Task<OverlayGenerationResult> GenerateAsync(
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static Task<ReadResult> GenerateAsync(
         string sourcePath,
         string targetPath,
         CancellationToken cancellationToken)
@@ -176,8 +176,8 @@ public static class OverlayGenerator
     /// <param name="info">Overlay info metadata.</param>
     /// <param name="readerSettings">Reader settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An OverlayGenerationResult containing the overlay document and any diagnostics.</returns>
-    public static async Task<OverlayGenerationResult> GenerateAsync(
+    /// <returns>A ReadResult containing the overlay document and any diagnostics.</returns>
+    public static async Task<ReadResult> GenerateAsync(
         string sourcePath,
         string targetPath,
         string? format,

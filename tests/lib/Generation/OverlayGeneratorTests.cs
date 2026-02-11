@@ -14,6 +14,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
         Assert.Single(result.Document.Actions);
@@ -30,6 +31,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
         var removeAction = result.Document.Actions.FirstOrDefault(a => a.Remove == true);
@@ -46,6 +48,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
         var addAction = result.Document.Actions.FirstOrDefault(a => a.Update != null && a.Target == "$.info");
@@ -61,6 +64,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
         Assert.Empty(result.Document.Actions);
@@ -75,6 +79,7 @@ public class OverlayGeneratorTests
         var result = await OverlayGenerator.GenerateAsync(sourcePath, targetPath);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
         Assert.NotEmpty(result.Document.Actions);
@@ -97,6 +102,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
     }
@@ -118,6 +124,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.Null(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.NotEmpty(result.Diagnostic.Errors);
         Assert.Single(result.Diagnostic.Errors);
         Assert.Contains("3.0.0", result.Diagnostic.Errors[0].Message);
@@ -140,6 +147,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.Null(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.NotEmpty(result.Diagnostic.Errors);
         Assert.Single(result.Diagnostic.Errors);
         Assert.Contains("missing", result.Diagnostic.Errors[0].Message);
@@ -161,6 +169,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.Null(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.NotEmpty(result.Diagnostic.Errors);
         Assert.Single(result.Diagnostic.Errors);
         Assert.Contains("missing", result.Diagnostic.Errors[0].Message);
@@ -181,6 +190,7 @@ public class OverlayGeneratorTests
         var result = OverlayGenerator.Generate(source, target);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
     }
 
@@ -193,6 +203,7 @@ public class OverlayGeneratorTests
         var result = await OverlayGenerator.GenerateAsync(sourcePath, targetPath);
 
         Assert.Null(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.NotEmpty(result.Diagnostic.Errors);
         Assert.Contains("3.0.0", result.Diagnostic.Errors[0].Message);
         Assert.Contains("3.1.0", result.Diagnostic.Errors[0].Message);
@@ -207,6 +218,7 @@ public class OverlayGeneratorTests
         var result = await OverlayGenerator.GenerateAsync(sourcePath, targetPath);
 
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
     }
