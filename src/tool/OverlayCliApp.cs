@@ -229,7 +229,7 @@ internal static class OverlayCliApp
         var allWarnings = allDiagnostics.SelectMany(static d => d.Warnings).ToArray();
         if (allWarnings.Length > 0)
         {
-            Console.WriteLine($"Warnings during processing:");
+            Console.WriteLine($"{allWarnings.Length} Warnings during processing:");
             foreach (var warning in allWarnings)
             {
                 Console.WriteLine($"  - {warning.Message}");
