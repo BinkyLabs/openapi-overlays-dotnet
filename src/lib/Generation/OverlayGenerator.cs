@@ -313,19 +313,27 @@ public static class OverlayGenerator
                     {
                         if (!JsonNode.DeepEquals(sourceValue, targetValue))
                         {
-                            // Values differ, recurse or generate update
+                            // Values differ
                             if (sourceValue is JsonObject && targetValue is JsonObject)
                             {
+                                // Recurse into objects
                                 GenerateDiff(sourceValue, targetValue, propPath, actions);
                             }
                             else if (sourceValue is JsonArray && targetValue is JsonArray)
                             {
-                                // For arrays, generate a replacement action
+                                // For arrays, generate remove + add to replace completely
+                                // This ensures the target array matches exactly
                                 actions.Add(new OverlayAction
                                 {
                                     Target = propPath,
-                                    Description = $"Update array at '{targetProp.Key}'",
-                                    Update = targetValue.DeepClone()
+                                    Description = $"Remove array '{targetProp.Key}'",
+                                    Remove = true
+                                });
+                                actions.Add(new OverlayAction
+                                {
+                                    Target = path,
+                                    Description = $"Add array '{targetProp.Key}'",
+                                    Update = new JsonObject { [targetProp.Key] = targetValue.DeepClone() }
                                 });
                             }
                             else
@@ -393,8 +401,38 @@ public static class OverlayGenerator
     {
         if (string.IsNullOrEmpty(basePath) || basePath == "$")
         {
+            // Check if property name needs bracket notation
+            if (NeedsJsonPathEscaping(propertyName))
+            {
+                return $"$['{propertyName}']";
+            }
             return $"$.{propertyName}";
         }
+        
+        // Check if property name needs bracket notation
+        if (NeedsJsonPathEscaping(propertyName))
+        {
+            return $"{basePath}['{propertyName}']";
+        }
         return $"{basePath}.{propertyName}";
+    }
+
+    private static bool NeedsJsonPathEscaping(string propertyName)
+    {
+        if (string.IsNullOrEmpty(propertyName))
+        {
+            return true;
+        }
+
+        // Property names that start with special characters or contain certain characters need bracket notation
+        return propertyName.StartsWith('/') ||
+               propertyName.StartsWith('~') ||
+               propertyName.Contains(' ') ||
+               propertyName.Contains('.') ||
+               propertyName.Contains('[') ||
+               propertyName.Contains(']') ||
+               propertyName.Contains('\'') ||
+               propertyName.Contains('"') ||
+               !char.IsLetter(propertyName[0]);
     }
 }

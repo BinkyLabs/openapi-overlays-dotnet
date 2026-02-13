@@ -488,3 +488,7 @@ debug-samples/updated.yaml
 
 # Test files
 test-api.json
+
+# Generation test data - exclude generated results but keep source overlays
+tests/lib/Generation/TestData/test-result*.json
+tests/lib/Generation/TestData/test-simple-result.json

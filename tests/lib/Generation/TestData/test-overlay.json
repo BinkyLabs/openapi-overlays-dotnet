@@ -1,0 +1,110 @@
+{
+  "overlay": "1.1.0",
+  "info": {
+    "title": "Test Overlay",
+    "version": "1.0.0",
+    "description": "Generated for testing"
+  },
+  "actions": [
+    {
+      "target": "$.info.version",
+      "description": "Update property 'version'",
+      "update": "2.0.0"
+    },
+    {
+      "target": "$.info.description",
+      "description": "Update property 'description'",
+      "update": "An enhanced API for a pet store with additional features"
+    },
+    {
+      "target": "$.info",
+      "description": "Add property 'contact'",
+      "update": {
+        "contact": {
+          "name": "API Support",
+          "email": "support@example.com"
+        }
+      }
+    },
+    {
+      "target": "$.servers",
+      "description": "Update array at 'servers'",
+      "update": [
+        {
+          "url": "https://api.example.com/v2",
+          "description": "Production server"
+        }
+      ]
+    },
+    {
+      "target": "$.paths./pets.get.summary",
+      "description": "Update property 'summary'",
+      "update": "List all pets with pagination"
+    },
+    {
+      "target": "$.paths./pets.get.parameters",
+      "description": "Update array at 'parameters'",
+      "update": [
+        {
+          "name": "limit",
+          "in": "query",
+          "description": "Maximum number of items to return",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 20
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "description": "Number of items to skip",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        }
+      ]
+    },
+    {
+      "target": "$.paths./pets.get.responses",
+      "description": "Add property '400'",
+      "update": {
+        "400": {
+          "description": "Bad request"
+        }
+      }
+    },
+    {
+      "target": "$.components.schemas.Pet.properties.name",
+      "description": "Add property 'minLength'",
+      "update": {
+        "minLength": 1
+      }
+    },
+    {
+      "target": "$.components.schemas.Pet.properties.name",
+      "description": "Add property 'maxLength'",
+      "update": {
+        "maxLength": 100
+      }
+    },
+    {
+      "target": "$.components.schemas.Pet.properties",
+      "description": "Add property 'status'",
+      "update": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "available",
+            "pending",
+            "sold"
+          ]
+        }
+      }
+    }
+  ]
+}

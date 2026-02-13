@@ -288,6 +288,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
         else if (target is JsonArray targetArray && update is JsonArray updateArray)
         {
+            // Per the Overlay spec, updating an array appends items (concatenates)
             foreach (var item in updateArray)
             {
                 targetArray.Add(item?.DeepClone());
@@ -297,13 +298,10 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         {
             specificTargetArray.Add(update.DeepClone());
         }
-        else if (target is JsonValue && update is JsonValue)
-        {
-            ReplaceValueInParent(target, update);
-        }
         else
         {
-            overlayDiagnostic.Errors.Add(new OpenApiError("Update", "Cannot merge incompatible types"));
+            // For all other cases (scalar values, type mismatches), replace in parent
+            ReplaceValueInParent(target, update);
         }
     }
 
