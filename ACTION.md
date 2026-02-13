@@ -62,6 +62,20 @@ The `apply-and-normalize` command applies overlays and then normalizes the OpenA
     command: 'apply-and-normalize'
 ```
 
+### Using Strict Mode
+
+Enable strict mode to treat targets that match zero nodes as errors instead of warnings. This is useful for catching configuration issues in CI/CD:
+
+```yaml
+- name: Apply with Strict Mode
+  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  with:
+    input: 'openapi.yaml'
+    overlays: 'overlay.yaml'
+    output: 'openapi-modified.yaml'
+    strict: 'true'
+```
+
 ## Inputs
 
 | Input | Description | Required | Default |
@@ -71,6 +85,7 @@ The `apply-and-normalize` command applies overlays and then normalizes the OpenA
 | `output` | Path for the output file | Yes | - |
 | `command` | Command to run: `apply` (preserves field ordering) or `apply-and-normalize` (normalizes with OpenAPI.net rules) | No | `apply` |
 | `force` | Overwrite output file without confirmation | No | `true` |
+| `strict` | Treat targets that match zero nodes as errors instead of warnings | No | `false` |
 
 ## Complete Workflow Example
 
