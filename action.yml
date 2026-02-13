@@ -23,6 +23,10 @@ inputs:
     description: 'Overwrite output file without confirmation'
     required: false
     default: 'true'
+  strict:
+    description: 'Treat targets that match zero nodes as errors instead of warnings'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -52,6 +56,12 @@ runs:
           FORCE_FLAG="--force"
         fi
         
+        # Build strict flag
+        STRICT_FLAG=""
+        if [ "${{ inputs.strict }}" = "true" ]; then
+          STRICT_FLAG="--strict"
+        fi
+        
         # Execute command with correct user permissions
         # Run as current user to avoid permission issues
         docker run --rm \
@@ -67,4 +77,5 @@ runs:
           /workspace/${{ inputs.input }} \
           $OVERLAY_ARGS \
           --output /workspace/${{ inputs.output }} \
-          $FORCE_FLAG
+          $FORCE_FLAG \
+          $STRICT_FLAG
