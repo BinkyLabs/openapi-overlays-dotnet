@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.3.0...v2.4.0) (2026-02-18)
+
+
+### Features
+
+* adds GitHub action definition ([#203](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/203)) ([6ffc3a0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6ffc3a0a2aae13d98bd32673e90fbd621f0b839f))
+
 ## [2.3.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.2.0...v2.3.0) (2026-02-11)
 
 
