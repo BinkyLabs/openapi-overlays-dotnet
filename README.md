@@ -58,7 +58,7 @@ Use the OpenAPI Overlays CLI as a GitHub Action in your workflows. For complete 
 
 ```yaml
 - name: Apply OpenAPI Overlays
-  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: 'overlay.yaml'
@@ -77,7 +77,7 @@ Use the OpenAPI Overlays CLI as a GitHub Action in your workflows. For complete 
 
 ```yaml
 - name: Apply Multiple OpenAPI Overlays
-  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: |

@@ -33,7 +33,8 @@ runs:
   steps:
     - name: Pull Docker image
       shell: bash
-      run: docker pull ghcr.io/binkylabs/openapi-overlays-dotnet:latest
+      # it's important not to use latest but instead a specific major version that aligns to avoid breaking changes. The CLI image will be updated with minor and patch versions but the major version will only change when there are breaking changes.
+      run: docker pull ghcr.io/binkylabs/openapi-overlays-dotnet:2
       
     - name: Apply OpenAPI Overlays
       shell: bash

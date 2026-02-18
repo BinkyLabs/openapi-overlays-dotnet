@@ -5,7 +5,7 @@ This GitHub Action allows you to apply OpenAPI overlays to OpenAPI documents in 
 ## Quick Start
 
 ```yaml
-- uses: BinkyLabs/openapi-overlays-dotnet@v1
+- uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: 'overlay.yaml'
@@ -25,7 +25,7 @@ This GitHub Action allows you to apply OpenAPI overlays to OpenAPI documents in 
 
 ```yaml
 - name: Apply OpenAPI Overlays
-  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: 'overlay.yaml'
@@ -38,7 +38,7 @@ You can apply multiple overlays in sequence. The order matters - overlays are ap
 
 ```yaml
 - name: Apply Multiple Overlays
-  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: |
@@ -54,7 +54,7 @@ The `apply-and-normalize` command applies overlays and then normalizes the OpenA
 
 ```yaml
 - name: Apply and Normalize
-  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: 'overlay.yaml'
@@ -68,7 +68,7 @@ Enable strict mode to treat targets that match zero nodes as errors instead of w
 
 ```yaml
 - name: Apply with Strict Mode
-  uses: BinkyLabs/openapi-overlays-dotnet@v1
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
   with:
     input: 'openapi.yaml'
     overlays: 'overlay.yaml'
@@ -111,7 +111,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Apply OpenAPI Overlays
-        uses: BinkyLabs/openapi-overlays-dotnet@v1
+        uses: BinkyLabs/openapi-overlays-dotnet@v2
         with:
           input: 'specs/openapi.yaml'
           overlays: |
@@ -145,7 +145,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: BinkyLabs/openapi-overlays-dotnet@v1
+      - uses: BinkyLabs/openapi-overlays-dotnet@v2
         with:
           input: 'openapi.yaml'
           overlays: |
@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: BinkyLabs/openapi-overlays-dotnet@v1
+      - uses: BinkyLabs/openapi-overlays-dotnet@v2
         with:
           input: 'openapi.yaml'
           overlays: |
@@ -177,7 +177,7 @@ jobs:
         environment: [dev, staging, production]
     steps:
       - uses: actions/checkout@v6
-      - uses: BinkyLabs/openapi-overlays-dotnet@v1
+      - uses: BinkyLabs/openapi-overlays-dotnet@v2
         with:
           input: 'openapi.yaml'
           overlays: |
