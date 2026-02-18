@@ -52,6 +52,41 @@ clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverla
 - `--force` or `-f`: Overwrite output file without confirmation.
 - `--strict` or `-s`: Treat targets that match zero nodes as errors instead of warnings. Useful in CI scenarios to ensure overlays stay in sync with the source description.
 
+## GitHub Action
+
+Use the OpenAPI Overlays CLI as a GitHub Action in your workflows. For complete documentation, see [ACTION.md](ACTION.md).
+
+```yaml
+- name: Apply OpenAPI Overlays
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
+  with:
+    input: 'openapi.yaml'
+    overlays: 'overlay.yaml'
+    output: 'openapi-modified.yaml'
+```
+
+### Inputs
+
+- `input` (required): Path to the input OpenAPI document (YAML or JSON)
+- `overlays` (required): Paths to overlay file(s), separated by newlines or spaces. Multiple overlays will be applied in order.
+- `output` (required): Path for the output file
+- `command` (optional): Command to run - `apply` (default, preserves field ordering) or `apply-and-normalize` (normalizes with OpenAPI.net rules)
+- `force` (optional): Overwrite output file without confirmation (default: `true`)
+
+### Example with Multiple Overlays
+
+```yaml
+- name: Apply Multiple OpenAPI Overlays
+  uses: BinkyLabs/openapi-overlays-dotnet@v2
+  with:
+    input: 'openapi.yaml'
+    overlays: |
+      overlay1.yaml
+      overlay2.yaml
+      overlay3.yaml
+    output: 'openapi-modified.yaml'
+    command: 'apply-and-normalize'
+```
 
 ## Docker Quick Start
 

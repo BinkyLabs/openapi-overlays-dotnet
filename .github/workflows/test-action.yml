@@ -1,0 +1,143 @@
+﻿name: Test GitHub Action
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'action.yml'
+      - 'Dockerfile'
+      - '.github/workflows/test-action.yml'
+
+jobs:
+  test-action:
+    runs-on: ubuntu-latest
+    name: Test OpenAPI Overlays Action
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Create test OpenAPI file
+        run: |
+          mkdir -p test-data
+          cat > test-data/openapi.yaml << 'EOF'
+          openapi: 3.1.0
+          info:
+            title: Test API
+            version: 1.0.0
+            description: Original Description
+          paths:
+            /test:
+              get:
+                summary: Test endpoint
+                responses:
+                  '200':
+                    description: OK
+          EOF
+
+      - name: Create test overlay file
+        run: |
+          cat > test-data/overlay.yaml << 'EOF'
+          overlay: 1.0.0
+          info:
+            title: Test Overlay
+            version: 1.0.0
+          actions:
+            - target: $.info.description
+              description: Update description
+              update: Modified Description
+          EOF
+
+      - name: Test Action - Apply
+        uses: ./
+        with:
+          input: 'test-data/openapi.yaml'
+          overlays: 'test-data/overlay.yaml'
+          output: 'test-data/output-apply.yaml'
+          command: 'apply'
+
+      - name: Verify output file exists
+        run: |
+          if [ ! -f "test-data/output-apply.yaml" ]; then
+            echo "Error: Output file was not created"
+            exit 1
+          fi
+          echo "✓ Output file created successfully"
+
+      - name: Verify overlay was applied
+        run: |
+          if ! grep -q "Modified Description" "test-data/output-apply.yaml"; then
+            echo "Error: Overlay was not applied correctly"
+            cat test-data/output-apply.yaml
+            exit 1
+          fi
+          echo "✓ Overlay applied correctly"
+
+      - name: Create second overlay file
+        run: |
+          cat > test-data/overlay2.yaml << 'EOF'
+          overlay: 1.0.0
+          info:
+            title: Second Overlay
+            version: 1.0.0
+          actions:
+            - target: $.info
+              description: Add contact info
+              update:
+                contact:
+                  name: API Support
+                  email: support@example.com
+          EOF
+
+      - name: Test Action - Multiple Overlays
+        uses: ./
+        with:
+          input: 'test-data/openapi.yaml'
+          overlays: |
+            test-data/overlay.yaml
+            test-data/overlay2.yaml
+          output: 'test-data/output-multiple.yaml'
+          command: 'apply-and-normalize'
+
+      - name: Verify multiple overlays applied
+        run: |
+          echo "=== Output file contents ==="
+          cat test-data/output-multiple.yaml
+          echo "=== End of file ==="
+          
+          if ! grep -q "Modified Description" "test-data/output-multiple.yaml"; then
+            echo "Error: First overlay was not applied"
+            exit 1
+          fi
+          echo "✓ First overlay applied correctly"
+          
+          if ! grep -q "API Support" "test-data/output-multiple.yaml"; then
+            echo "Error: Second overlay was not applied"
+            exit 1
+          fi
+          echo "✓ Second overlay applied correctly"
+
+      - name: Test Action - Apply and Normalize
+        uses: ./
+        with:
+          input: 'test-data/openapi.yaml'
+          overlays: 'test-data/overlay.yaml'
+          output: 'test-data/output-normalize.yaml'
+          command: 'apply-and-normalize'
+
+      - name: Verify normalized output
+        run: |
+          if [ ! -f "test-data/output-normalize.yaml" ]; then
+            echo "Error: Normalized output file was not created"
+            exit 1
+          fi
+          echo "✓ Normalized output created successfully"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results
+          path: test-data/

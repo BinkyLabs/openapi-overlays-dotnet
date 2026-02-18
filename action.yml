@@ -1,0 +1,82 @@
+name: 'OpenAPI Overlays'
+description: 'Apply OpenAPI overlays to OpenAPI documents using the BinkyLabs OpenAPI Overlays CLI'
+author: 'BinkyLabs'
+branding:
+  icon: 'layers'
+  color: 'blue'
+
+inputs:
+  input:
+    description: 'Path to the input OpenAPI document (YAML or JSON)'
+    required: true
+  overlays:
+    description: 'Paths to overlay file(s), separated by newlines or spaces. Multiple overlays will be applied in order.'
+    required: true
+  output:
+    description: 'Path for the output file'
+    required: true
+  command:
+    description: 'Command to run: "apply" (preserves field ordering) or "apply-and-normalize" (normalizes with OpenAPI.net rules)'
+    required: false
+    default: 'apply'
+  force:
+    description: 'Overwrite output file without confirmation'
+    required: false
+    default: 'true'
+  strict:
+    description: 'Treat targets that match zero nodes as errors instead of warnings'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Pull Docker image
+      shell: bash
+      # it's important not to use latest but instead a specific major version that aligns to avoid breaking changes. The CLI image will be updated with minor and patch versions but the major version will only change when there are breaking changes.
+      run: docker pull ghcr.io/binkylabs/openapi-overlays-dotnet:2
+      
+    - name: Apply OpenAPI Overlays
+      shell: bash
+      run: |
+        # Parse overlays input (can be newline or space-separated)
+        OVERLAY_ARGS=""
+        while IFS= read -r line; do
+          # Skip empty lines
+          if [ -n "$line" ]; then
+            # Split by spaces if multiple overlays on one line
+            for overlay in $line; do
+              OVERLAY_ARGS="$OVERLAY_ARGS --overlay /workspace/$overlay"
+            done
+          fi
+        done <<< "${{ inputs.overlays }}"
+        
+        # Build force flag
+        FORCE_FLAG=""
+        if [ "${{ inputs.force }}" = "true" ]; then
+          FORCE_FLAG="--force"
+        fi
+        
+        # Build strict flag
+        STRICT_FLAG=""
+        if [ "${{ inputs.strict }}" = "true" ]; then
+          STRICT_FLAG="--strict"
+        fi
+        
+        # Execute command with correct user permissions
+        # Run as current user to avoid permission issues
+        docker run --rm \
+          --user "$(id -u):$(id -g)" \
+          -v "$GITHUB_WORKSPACE:/workspace" \
+          -w /workspace \
+          -e DOTNET_NOLOGO=1 \
+          -e DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 \
+          --entrypoint dotnet \
+          ghcr.io/binkylabs/openapi-overlays-dotnet:latest \
+          /app/BinkyLabs.OpenApi.Overlays.Cli.dll \
+          ${{ inputs.command }} \
+          /workspace/${{ inputs.input }} \
+          $OVERLAY_ARGS \
+          --output /workspace/${{ inputs.output }} \
+          $FORCE_FLAG \
+          $STRICT_FLAG
