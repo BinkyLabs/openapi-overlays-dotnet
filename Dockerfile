@@ -32,3 +32,5 @@ ENTRYPOINT ["dotnet", "BinkyLabs.OpenApi.Overlays.Cli.dll"]
 LABEL description="# Welcome to OpenAPI Overlays CLI \
     To start applying overlays to OpenAPI documents checkout [the documentation](https://github.com/BinkyLabs/openapi-overlays-dotnet)  \
     [Source dockerfile](https://github.com/BinkyLabs/openapi-overlays-dotnet/blob/main/Dockerfile)"
+LABEL org.opencontainers.image.funding="https://github.com/sponsors/baywet"
+

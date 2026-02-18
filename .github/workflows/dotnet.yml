@@ -124,7 +124,7 @@ jobs:
 
       - name: Build Docker image
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -136,7 +136,7 @@ jobs:
 
       - name: Push Docker image
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -147,7 +147,7 @@ jobs:
 
       - name: Generate artifact attestation
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') 
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v3
         with:
           subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.build.outputs.digest }}

@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.3.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.2.0...v2.3.0) (2026-02-11)
+
+
+### Features
+
+* adds warnings count to the heading ([b15fd74](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/b15fd747c60a8a2012433c9c353679f40c34cc94))
+* adds warnings count to the heading ([735e9e2](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/735e9e265f7f777b0d656d1220000ccec4d732aa))
+* **lib:** add strict parameter to overlay application methods ([3fac2be](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3fac2be644a89719257c848379f2a03332b4f52c))
+
+
+### Bug Fixes
+
+* format detection for non seekable streams ([ffcb1d3](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/ffcb1d3f79684b621f3890c8fa5c4e7d3f58734b))
+* format detection for non seekable streams ([d3fc9ee](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d3fc9eeb048996dae3ff47513e864f51acc0c4fb))
+
+## [2.2.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.1.1...v2.2.0) (2026-02-09)
+
+
+### Features
+
+* **lib:** add warning when target matches zero nodes ([41b631f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/41b631fdb2ae6da51d5b7dc0040dc27777ce08c3))
+* **lib:** warn when overlay action target matches zero nodes ([4c32d83](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/4c32d8386418dba6317d98eb8da504ad57743c82))
+
+## [2.1.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.1.0...v2.1.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* adds funding information ([0895fe9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0895fe9bb8af420fe634db51b2e54ac93a362fde))
+* adds funding information ([c8a8e5d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/c8a8e5d670517f12506abb321c2ccdf392229d39))
+
 ## [2.1.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.0.0...v2.1.0) (2026-01-30)
 
 

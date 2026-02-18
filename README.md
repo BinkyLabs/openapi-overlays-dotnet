@@ -28,6 +28,13 @@ clio apply pathOrUrlToInputDescription --overlay pathOrUrlToOverlay -out pathFor
 
 > Note: the overlay argument can be specified multiple times, the order matters.
 
+##### Options
+
+- `--overlay` or `-o`: Path to overlay file(s). Can be specified multiple times. (Required)
+- `--output` or `-out`: Path for the output file. (Required)
+- `--force` or `-f`: Overwrite output file without confirmation.
+- `--strict` or `-s`: Treat targets that match zero nodes as errors instead of warnings. Useful in CI scenarios to ensure overlays stay in sync with the source description.
+
 #### Apply and normalize
 
 The apply command applies the overlay actions to an OpenAPI description and normalizes the description based on OpenAPI.net rules and fields ordering.
@@ -37,6 +44,13 @@ clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverla
 ```
 
 > Note: the overlay argument can be specified multiple times, the order matters.
+
+##### Options
+
+- `--overlay` or `-o`: Path to overlay file(s). Can be specified multiple times. (Required)
+- `--output` or `-out`: Path for the output file. (Required)
+- `--force` or `-f`: Overwrite output file without confirmation.
+- `--strict` or `-s`: Treat targets that match zero nodes as errors instead of warnings. Useful in CI scenarios to ensure overlays stay in sync with the source description.
 
 ## GitHub Action
 
