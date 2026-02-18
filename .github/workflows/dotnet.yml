@@ -135,6 +135,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Push Docker image
+        id: push
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         uses: docker/build-push-action@v6
         with:
@@ -150,5 +151,5 @@ jobs:
         uses: actions/attest-build-provenance@v3
         with:
           subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
