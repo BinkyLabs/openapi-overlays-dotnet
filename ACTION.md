@@ -223,4 +223,5 @@ The action uses `ghcr.io/binkylabs/openapi-overlays-dotnet:latest`. If you encou
 
 ## License
 
-This action uses the BinkyLabs OpenAPI Overlays tool. See the [project repository](https://github.com/BinkyLabs/openapi-overlays-dotnet) for license information.
+This action uses the BinkyLabs OpenAPI Overlays tool.
+See the [project repository](https://github.com/BinkyLabs/openapi-overlays-dotnet) for license information.
