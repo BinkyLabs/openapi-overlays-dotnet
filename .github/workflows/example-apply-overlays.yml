@@ -26,7 +26,7 @@ jobs:
           output: 'openapi-modified.yaml'
 
       - name: Upload modified OpenAPI document
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: openapi-single-overlay
           path: openapi-modified.yaml
@@ -50,7 +50,7 @@ jobs:
           command: 'apply-and-normalize'
 
       - name: Upload modified OpenAPI document
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: openapi-multiple-overlays
           path: openapi-complete.yaml
