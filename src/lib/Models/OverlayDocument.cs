@@ -330,6 +330,37 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         return mergedDocument;
     }
+
+    /// <summary>
+    /// Combines overlay documents into a single overlay document.
+    /// The returned document will be a new document, and its metadata (info, etc.) will be the one from the last document.
+    /// The actions from all documents will be merged. The actions from earlier documents will be first, and the ones from later documents will be next.
+    /// </summary>
+    /// <param name="others">Documents to combine.</param>
+    /// <returns>The merged overlay document.</returns>
+    public static OverlayDocument Combine(params OverlayDocument[] others)
+    {
+        if (others is not { Length: > 0 })
+        {
+            throw new ArgumentException("At least one other document must be provided.", nameof(others));
+        }
+
+        var lastDocument = others[^1];
+        var actions = new List<OverlayAction>();
+        // Merge actions from all documents
+        foreach (var doc in others)
+            if (doc.Actions is { } otherActions)
+                actions.AddRange(otherActions);
+        
+        return new OverlayDocument
+        {
+            Info = lastDocument.Info,
+            Extensions = lastDocument.Extensions?.ToDictionary(),
+            Extends = lastDocument.Extends,
+            Actions = actions,
+        };
+    }
+
     private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, CancellationToken token = default)
     {
         Stream preparedStream = input;
