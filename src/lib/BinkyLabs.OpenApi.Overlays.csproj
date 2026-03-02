@@ -54,6 +54,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="SharpYaml" Version="2.1.4"/>
+    <PackageReference Include="SharpYaml" Version="3.0.0"/>
   </ItemGroup>
 </Project>
