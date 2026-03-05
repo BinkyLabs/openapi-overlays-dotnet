@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Generation;
+using BinkyLabs.OpenApi.Overlays.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
@@ -196,7 +197,7 @@ public class OverlayGeneratorJsonPathTests
 
         // Act - Apply
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert - Application successful
@@ -209,3 +210,4 @@ public class OverlayGeneratorJsonPathTests
         Assert.Equal("Get user by ID", resultGet["summary"]!.GetValue<string>());
     }
 }
+

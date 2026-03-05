@@ -317,7 +317,8 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         }
         else
         {
-            // For all other cases (scalar values, type mismatches), replace in parent
+            // Type mismatch or different types - replace the value in parent
+            // This handles cases like JsonValue to JsonValue, JsonValue to JsonObject, etc.
             ReplaceValueInParent(target, update);
         }
     }

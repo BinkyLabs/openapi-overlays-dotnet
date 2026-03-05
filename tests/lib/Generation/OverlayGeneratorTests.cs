@@ -51,8 +51,19 @@ public class OverlayGeneratorTests
         Assert.NotNull(result.Diagnostic);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.NotNull(result.Document.Actions);
-        var addAction = result.Document.Actions.FirstOrDefault(a => a.Update != null && a.Target == "$.info");
+        
+        // With the optimized generator, adding a property to an existing object
+        // results in a single update action that includes the complete target object
+        var addAction = result.Document.Actions.FirstOrDefault(a => a.Update != null);
         Assert.NotNull(addAction);
+        Assert.Equal("$", addAction.Target);
+        
+        // Verify the update contains the info object with both properties
+        var updateObj = addAction.Update!.AsObject();
+        Assert.True(updateObj.ContainsKey("info"));
+        var infoObj = updateObj["info"]!.AsObject();
+        Assert.Equal("API", infoObj["title"]!.GetValue<string>());
+        Assert.Equal("1.0.0", infoObj["version"]!.GetValue<string>());
     }
 
     [Fact]

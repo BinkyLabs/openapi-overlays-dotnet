@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Generation;
+using BinkyLabs.OpenApi.Overlays.Reader;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
@@ -39,7 +40,7 @@ public class OverlayGeneratorEndToEndTests
 
         // Apply overlay to source
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert - Application successful
@@ -85,7 +86,7 @@ public class OverlayGeneratorEndToEndTests
 
         // Apply overlay
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert - Values were replaced
@@ -142,7 +143,7 @@ public class OverlayGeneratorEndToEndTests
 
         // Apply overlay
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert - Summary was updated
@@ -216,7 +217,7 @@ public class OverlayGeneratorEndToEndTests
         Assert.Empty(generateResult.Diagnostic!.Errors);
 
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert
@@ -266,7 +267,7 @@ public class OverlayGeneratorEndToEndTests
         Assert.NotNull(generateResult.Document);
 
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert
@@ -320,7 +321,7 @@ public class OverlayGeneratorEndToEndTests
         Assert.NotNull(generateResult.Document);
 
         var sourceForApply = source.DeepClone();
-        var applyDiagnostic = new Reader.OverlayDiagnostic();
+        var applyDiagnostic = new OverlayDiagnostic();
         var applied = generateResult.Document.ApplyToDocument(sourceForApply, applyDiagnostic);
 
         // Assert
@@ -354,3 +355,4 @@ public class OverlayGeneratorEndToEndTests
             e.Message.Contains("3.0.0") && e.Message.Contains("3.1.0"));
     }
 }
+

@@ -285,22 +285,21 @@ public static class OverlayGenerator
                 }
             }
 
+            // Group additions and modifications
+            var addedProperties = new Dictionary<string, JsonNode>();
+            var updatedProperties = new Dictionary<string, JsonNode>();
+            var modifiedProperties = new List<(string Key, JsonNode SourceValue, JsonNode TargetValue)>();
+            var arrayChanges = new List<(string Key, JsonArray SourceArray, JsonArray TargetArray)>();
+
             // Find added or modified properties
             foreach (var targetProp in targetObject)
             {
-                var propPath = BuildJsonPath(path, targetProp.Key);
-
                 if (!sourceObject.ContainsKey(targetProp.Key))
                 {
                     // Property added
                     if (targetProp.Value is not null)
                     {
-                        actions.Add(new OverlayAction
-                        {
-                            Target = path,
-                            Description = $"Add property '{targetProp.Key}'",
-                            Update = new JsonObject { [targetProp.Key] = targetProp.Value.DeepClone() }
-                        });
+                        addedProperties[targetProp.Key] = targetProp.Value;
                     }
                 }
                 else
@@ -313,52 +312,71 @@ public static class OverlayGenerator
                     {
                         if (!JsonNode.DeepEquals(sourceValue, targetValue))
                         {
-                            // Values differ
-                            if (sourceValue is JsonObject && targetValue is JsonObject)
+                            // Check if both are objects with nested changes
+                            if (sourceValue is JsonObject srcObj && targetValue is JsonObject tgtObj)
                             {
-                                // Recurse into objects
-                                GenerateDiff(sourceValue, targetValue, propPath, actions);
-                            }
-                            else if (sourceValue is JsonArray && targetValue is JsonArray)
-                            {
-                                // For arrays, generate remove + add to replace completely
-                                // This ensures the target array matches exactly
-                                actions.Add(new OverlayAction
+                                // Check if this object contains array changes that need special handling
+                                var hasNestedArrayChanges = HasNestedArrayChanges(srcObj, tgtObj, out var nestedArrayPaths);
+                                
+                                // Check if this is adding properties to an existing object
+                                var hasAddedProps = false;
+                                foreach (var prop in tgtObj)
                                 {
-                                    Target = propPath,
-                                    Description = $"Remove array '{targetProp.Key}'",
-                                    Remove = true
-                                });
-                                actions.Add(new OverlayAction
+                                    if (!srcObj.ContainsKey(prop.Key))
+                                    {
+                                        hasAddedProps = true;
+                                        break;
+                                    }
+                                }
+
+                                if (hasAddedProps || hasNestedArrayChanges)
                                 {
-                                    Target = path,
-                                    Description = $"Add array '{targetProp.Key}'",
-                                    Update = new JsonObject { [targetProp.Key] = targetValue.DeepClone() }
-                                });
+                                    // This object has new properties added or nested array changes
+                                    // We'll update the whole object, but first handle nested array changes
+                                    if (hasNestedArrayChanges)
+                                    {
+                                        // Generate remove actions for each nested array before updating the parent
+                                        var objPath = BuildJsonPath(path, targetProp.Key);
+                                        foreach (var arrayPath in nestedArrayPaths)
+                                        {
+                                            // Build the full path for the nested array using proper JSONPath syntax
+                                            // arrayPath might be like "get.parameters" so we need to split and build properly
+                                            var pathSegments = arrayPath.Split('.');
+                                            var currentPath = objPath;
+                                            foreach (var segment in pathSegments)
+                                            {
+                                                currentPath = BuildJsonPath(currentPath, segment);
+                                            }
+                                            actions.Add(new OverlayAction
+                                            {
+                                                Target = currentPath,
+                                                Description = $"Remove array at '{arrayPath}'",
+                                                Remove = true
+                                            });
+                                        }
+                                    }
+                                    
+                                    updatedProperties[targetProp.Key] = targetValue;
+                                }
+                                else
+                                {
+                                    // Just modifications, recurse
+                                    modifiedProperties.Add((targetProp.Key, sourceValue, targetValue));
+                                }
                             }
                             else
                             {
-                                // Simple value change
-                                actions.Add(new OverlayAction
-                                {
-                                    Target = propPath,
-                                    Description = $"Update property '{targetProp.Key}'",
-                                    Update = targetValue.DeepClone()
-                                });
+                                modifiedProperties.Add((targetProp.Key, sourceValue, targetValue));
                             }
                         }
                     }
                     else if (sourceValue is null && targetValue is not null)
                     {
-                        actions.Add(new OverlayAction
-                        {
-                            Target = path,
-                            Description = $"Set property '{targetProp.Key}'",
-                            Update = new JsonObject { [targetProp.Key] = targetValue.DeepClone() }
-                        });
+                        addedProperties[targetProp.Key] = targetValue;
                     }
                     else if (sourceValue is not null && targetValue is null)
                     {
+                        var propPath = BuildJsonPath(path, targetProp.Key);
                         actions.Add(new OverlayAction
                         {
                             Target = propPath,
@@ -366,6 +384,89 @@ public static class OverlayGenerator
                             Remove = true
                         });
                     }
+                }
+            }
+
+            // Combine added and updated properties into one action if there are multiple
+            var allNewOrUpdated = addedProperties.Concat(updatedProperties).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            
+            if (allNewOrUpdated.Count > 1)
+            {
+                var updateObject = new JsonObject();
+                foreach (var kvp in allNewOrUpdated)
+                {
+                    updateObject[kvp.Key] = kvp.Value.DeepClone();
+                }
+
+                var addedKeys = addedProperties.Keys.ToList();
+                var updatedKeys = updatedProperties.Keys.ToList();
+                var description = new List<string>();
+                if (addedKeys.Any())
+                {
+                    description.Add($"add {string.Join(", ", addedKeys.Select(k => $"'{k}'"))}");
+                }
+                if (updatedKeys.Any())
+                {
+                    description.Add($"update {string.Join(", ", updatedKeys.Select(k => $"'{k}'"))}");
+                }
+
+                actions.Add(new OverlayAction
+                {
+                    Target = path,
+                    Description = $"Update properties: {string.Join(" and ", description)}",
+                    Update = updateObject
+                });
+            }
+            else if (allNewOrUpdated.Count == 1)
+            {
+                var kvp = allNewOrUpdated.First();
+                var isAdded = addedProperties.ContainsKey(kvp.Key);
+                var verb = isAdded ? "Add" : "Update";
+                
+                actions.Add(new OverlayAction
+                {
+                    Target = path,
+                    Description = $"{verb} property '{kvp.Key}'",
+                    Update = new JsonObject { [kvp.Key] = kvp.Value.DeepClone() }
+                });
+            }
+
+            // Process modifications that need recursion
+            foreach (var (key, sourceValue, targetValue) in modifiedProperties)
+            {
+                var propPath = BuildJsonPath(path, key);
+
+                // Values differ
+                if (sourceValue is JsonObject && targetValue is JsonObject)
+                {
+                    // Recurse into objects
+                    GenerateDiff(sourceValue, targetValue, propPath, actions);
+                }
+                else if (sourceValue is JsonArray && targetValue is JsonArray)
+                {
+                    // For arrays, generate remove + add to replace completely
+                    actions.Add(new OverlayAction
+                    {
+                        Target = propPath,
+                        Description = $"Remove array '{key}'",
+                        Remove = true
+                    });
+                    actions.Add(new OverlayAction
+                    {
+                        Target = path,
+                        Description = $"Add array '{key}'",
+                        Update = new JsonObject { [key] = targetValue.DeepClone() }
+                    });
+                }
+                else
+                {
+                    // Simple value change
+                    actions.Add(new OverlayAction
+                    {
+                        Target = propPath,
+                        Description = $"Update property '{key}'",
+                        Update = targetValue.DeepClone()
+                    });
                 }
             }
         }
@@ -395,6 +496,44 @@ public static class OverlayGenerator
                 });
             }
         }
+    }
+
+    /// <summary>
+    /// Detects if an object has nested arrays that have changed between source and target.
+    /// </summary>
+    private static bool HasNestedArrayChanges(JsonObject sourceObj, JsonObject targetObj, out List<string> arrayPaths)
+    {
+        arrayPaths = new List<string>();
+        
+        foreach (var targetProp in targetObj)
+        {
+            if (sourceObj.TryGetPropertyValue(targetProp.Key, out var sourcePropValue) && 
+                targetProp.Value is not null)
+            {
+                if (sourcePropValue is JsonArray sourceArray && targetProp.Value is JsonArray targetArray)
+                {
+                    // Direct array property that changed
+                    if (!JsonNode.DeepEquals(sourceArray, targetArray))
+                    {
+                        arrayPaths.Add(targetProp.Key);
+                    }
+                }
+                else if (sourcePropValue is JsonObject srcNestedObj && targetProp.Value is JsonObject tgtNestedObj)
+                {
+                    // Recursively check nested objects for array changes
+                    if (HasNestedArrayChanges(srcNestedObj, tgtNestedObj, out var nestedPaths))
+                    {
+                        // Prepend current property to nested paths
+                        foreach (var nestedPath in nestedPaths)
+                        {
+                            arrayPaths.Add($"{targetProp.Key}.{nestedPath}");
+                        }
+                    }
+                }
+            }
+        }
+
+        return arrayPaths.Count > 0;
     }
 
     private static string BuildJsonPath(string basePath, string propertyName)
