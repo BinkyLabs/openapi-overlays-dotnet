@@ -124,7 +124,7 @@ jobs:
 
       - name: Build Docker image
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -137,7 +137,7 @@ jobs:
       - name: Push Docker image
         id: push
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
