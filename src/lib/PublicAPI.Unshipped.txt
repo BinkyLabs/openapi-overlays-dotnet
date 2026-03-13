@@ -1,1 +1,2 @@
 #nullable enable
+static BinkyLabs.OpenApi.Overlays.OverlayDocument.Combine(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! others) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
