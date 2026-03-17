@@ -84,7 +84,7 @@ public sealed class SpecificationTests
     public async Task ValidateSpecificationExample(string inputFileName)
     {
         var overlayPath = Path.Combine(SpecificationsBasePath.Value, ExamplesPathSegment, inputFileName.Replace(InputSuffix, OverlaySuffix));
-        var (overlayDocument, diags) = await OverlayDocument.LoadFromUrlAsync(overlayPath);
+        var (overlayDocument, diags) = await OverlayDocument.LoadFromUrlAsync(overlayPath, token: TestContext.Current.CancellationToken);
         Assert.NotNull(overlayDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);

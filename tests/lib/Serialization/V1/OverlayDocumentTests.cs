@@ -297,7 +297,7 @@ public sealed class OverlayDocumentTests
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.LoadFromStreamAsync(stream);
+        var (overlayDocument, _) = await OverlayDocument.LoadFromStreamAsync(stream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -373,10 +373,10 @@ public sealed class OverlayDocumentTests
         """;
 
         var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".json");
-        await File.WriteAllTextAsync(tempFile, json);
+        await File.WriteAllTextAsync(tempFile, json, TestContext.Current.CancellationToken);
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.LoadFromUrlAsync(tempFile);
+        var (overlayDocument, _) = await OverlayDocument.LoadFromUrlAsync(tempFile, token: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);

@@ -35,11 +35,12 @@ public sealed class OverlayModelFactoryTests
         using var nonSeekableStream = new NonSeekableStream(memoryStream);
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -51,11 +52,12 @@ public sealed class OverlayModelFactoryTests
         using var nonSeekableStream = new NonSeekableStream(memoryStream);
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -67,11 +69,12 @@ public sealed class OverlayModelFactoryTests
         await using var asyncOnlyStream = new AsyncOnlyStream(memoryStream);
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(asyncOnlyStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(asyncOnlyStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -83,11 +86,12 @@ public sealed class OverlayModelFactoryTests
         await using var asyncOnlyStream = new AsyncOnlyStream(memoryStream);
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(asyncOnlyStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(asyncOnlyStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -99,11 +103,12 @@ public sealed class OverlayModelFactoryTests
         using var nonSeekableStream = new NonSeekableStream(memoryStream);
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -116,6 +121,7 @@ public sealed class OverlayModelFactoryTests
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -127,11 +133,12 @@ public sealed class OverlayModelFactoryTests
         using var nonSeekableStream = new NonSeekableStream(memoryStream);
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(nonSeekableStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -142,11 +149,12 @@ public sealed class OverlayModelFactoryTests
         using var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(documentJson));
 
         // When
-        var result = await OverlayModelFactory.LoadFromStreamAsync(memoryStream);
+        var result = await OverlayModelFactory.LoadFromStreamAsync(memoryStream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);
         Assert.NotNull(result.Document);
+        Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
@@ -173,7 +181,7 @@ public sealed class OverlayModelFactoryTests
 
         public override long Length => _innerStream.Length;
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object? state)
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
             return _innerStream.BeginRead(buffer, offset, count, callback, state);
         }
@@ -221,7 +229,7 @@ public sealed class OverlayModelFactoryTests
 
         public override bool CanTimeout => _innerStream.CanTimeout;
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object? state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
             return _innerStream.BeginWrite(buffer, offset, count, callback, state);
         }
@@ -327,7 +335,7 @@ public sealed class OverlayModelFactoryTests
 
         public override long Length => _innerStream.Length;
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object? state)
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
             return _innerStream.BeginRead(buffer, offset, count, callback, state);
         }
@@ -376,7 +384,7 @@ public sealed class OverlayModelFactoryTests
 
         public override bool CanTimeout => _innerStream.CanTimeout;
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object? state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
             return _innerStream.BeginWrite(buffer, offset, count, callback, state);
         }

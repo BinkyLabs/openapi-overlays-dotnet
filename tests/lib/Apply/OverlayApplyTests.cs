@@ -94,7 +94,7 @@ public sealed class OverlayApplyTests : IDisposable
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
         await writer.WriteAsync(yamlDocument);
-        await writer.FlushAsync();
+        await writer.FlushAsync(TestContext.Current.CancellationToken);
         documentStream.Seek(0, SeekOrigin.Begin);
         var overlayDocument = new OverlayDocument
         {
@@ -124,7 +124,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
@@ -163,7 +163,7 @@ public sealed class OverlayApplyTests : IDisposable
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
         await writer.WriteAsync(json);
-        await writer.FlushAsync();
+        await writer.FlushAsync(TestContext.Current.CancellationToken);
         documentStream.Seek(0, SeekOrigin.Begin);
         var overlayDocument = new OverlayDocument
         {
@@ -193,7 +193,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
@@ -248,10 +248,10 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         // Create a temporary file with a relative path
-        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument, TestContext.Current.CancellationToken);
 
         // Act
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result, "Overlay application should succeed.");
@@ -289,7 +289,7 @@ public sealed class OverlayApplyTests : IDisposable
         """;
 
         // Create a temporary file with a relative path
-        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument, TestContext.Current.CancellationToken);
 
         var overlayDocument = new OverlayDocument
         {
@@ -318,7 +318,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         // Act
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath, cancellationToken: TestContext.Current.CancellationToken);
         // Assert
         Assert.False(result, "Overlay application should fail.");
         Assert.NotNull(document);
@@ -357,7 +357,7 @@ public sealed class OverlayApplyTests : IDisposable
         """;
 
         // Create a temporary file with a relative path
-        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument, TestContext.Current.CancellationToken);
         var overlayDocument = new OverlayDocument
         {
             Actions =
@@ -375,7 +375,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         // When
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.True(result, "Overlay application should succeed.");
