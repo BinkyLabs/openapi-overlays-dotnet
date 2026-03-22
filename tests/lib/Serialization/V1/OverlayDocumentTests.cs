@@ -557,4 +557,171 @@ public sealed class OverlayDocumentTests
         Assert.Equal("Description3", result.Actions[2].Description);
         Assert.False(result.Actions[2].Remove);
     }
+    [Fact]
+    public void CombineThrowsOnEmptyInput()
+    {
+        Assert.Throws<ArgumentException>(() => OverlayDocument.Combine());
+    }
+    [Fact]
+    public void CombineThrowsOnNullInput()
+    {
+        Assert.Throws<ArgumentException>(() => OverlayDocument.Combine(null!));
+    }
+    [Fact]
+    public void CombineUsesMetadataFromLastDocument()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Overlay 1",
+                Version = "1.0.0"
+            },
+            Extends = "base.yaml"
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Overlay 2",
+                Version = "1.0.1"
+            },
+            Extends = "base2.yaml"
+        };
+
+        // When
+        var result = OverlayDocument.Combine(overlayDocument1, overlayDocument2);
+
+        // Then
+        Assert.Equal("Overlay 2", result.Info?.Title);
+        Assert.Equal("1.0.1", result.Info?.Version);
+        Assert.Equal("base2.yaml", result.Extends);
+        Assert.NotNull(result.Actions);
+        Assert.Empty(result.Actions);
+    }
+    [Fact]
+    public void CombineReturnsActionsInOrder()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction { Target = "Target1", Description = "Description1", Remove = false },
+                new OverlayAction { Target = "Target2", Description = "Description2", Remove = true }
+            ]
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction { Target = "Target3", Description = "Description3", Remove = false }
+            ]
+        };
+
+        // When
+        var result = OverlayDocument.Combine(overlayDocument1, overlayDocument2);
+
+        // Then
+        Assert.NotNull(result.Actions);
+        Assert.Equal(3, result.Actions.Count);
+        Assert.Equal("Target1", result.Actions[0].Target);
+        Assert.Equal("Description1", result.Actions[0].Description);
+        Assert.False(result.Actions[0].Remove);
+        Assert.Equal("Target2", result.Actions[1].Target);
+        Assert.Equal("Description2", result.Actions[1].Description);
+        Assert.True(result.Actions[1].Remove);
+        Assert.Equal("Target3", result.Actions[2].Target);
+        Assert.Equal("Description3", result.Actions[2].Description);
+        Assert.False(result.Actions[2].Remove);
+    }
+    [Fact]
+    public void CombineWithSingleDocument()
+    {
+        // Given
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Only Overlay",
+                Version = "1.0.0"
+            },
+            Extends = "base.yaml",
+            Actions =
+            [
+                new OverlayAction { Target = "Target1", Description = "Description1", Remove = false }
+            ]
+        };
+
+        // When
+        var result = OverlayDocument.Combine(overlayDocument);
+
+        // Then
+        Assert.Equal("Only Overlay", result.Info?.Title);
+        Assert.Equal("1.0.0", result.Info?.Version);
+        Assert.Equal("base.yaml", result.Extends);
+        Assert.NotNull(result.Actions);
+        Assert.Single(result.Actions);
+        Assert.Equal("Target1", result.Actions[0].Target);
+    }
+    [Fact]
+    public void CombineSkipsDocumentsWithNullActions()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction { Target = "Target1", Description = "Description1", Remove = false }
+            ]
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Actions = null
+        };
+        var overlayDocument3 = new OverlayDocument
+        {
+            Actions =
+            [
+                new OverlayAction { Target = "Target2", Description = "Description2", Remove = true }
+            ]
+        };
+
+        // When
+        var result = OverlayDocument.Combine(overlayDocument1, overlayDocument2, overlayDocument3);
+
+        // Then
+        Assert.NotNull(result.Actions);
+        Assert.Equal(2, result.Actions.Count);
+        Assert.Equal("Target1", result.Actions[0].Target);
+        Assert.Equal("Target2", result.Actions[1].Target);
+    }
+    [Fact]
+    public void CombineCopiesExtensionsFromLastDocument()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Extensions = new Dictionary<string, IOverlayExtension>
+            {
+                { "x-ext1", new JsonNodeExtension(JsonValue.Create("value1")) }
+            }
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Extensions = new Dictionary<string, IOverlayExtension>
+            {
+                { "x-ext2", new JsonNodeExtension(JsonValue.Create("value2")) }
+            }
+        };
+
+        // When
+        var result = OverlayDocument.Combine(overlayDocument1, overlayDocument2);
+
+        // Then
+        Assert.NotNull(result.Extensions);
+        Assert.Single(result.Extensions);
+        Assert.True(result.Extensions.ContainsKey("x-ext2"));
+    }
 }
