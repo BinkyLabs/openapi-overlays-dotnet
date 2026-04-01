@@ -44,15 +44,15 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
         writer.WriteStartObject();
-        writer.WriteRequiredProperty("overlay", SpecVersionToStringMap[version]);
+        writer.WriteRequiredProperty(OverlayConstants.DocumentOverlayFieldName, SpecVersionToStringMap[version]);
         if (Info != null)
         {
-            writer.WriteRequiredObject("info", Info, serializeAction);
+            writer.WriteRequiredObject(OverlayConstants.DocumentInfoFieldName, Info, serializeAction);
         }
-        writer.WriteProperty("extends", Extends);
+        writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
         if (Actions != null)
         {
-            writer.WriteRequiredCollection<OverlayAction>("actions", Actions, serializeAction);
+            writer.WriteRequiredCollection<OverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
         }
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();

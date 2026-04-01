@@ -6,9 +6,9 @@ internal static partial class OverlayV1Deserializer
 {
     public static readonly FixedFieldMap<OverlayAction> ActionFixedFields = new()
     {
-        { "target", (o, v) => o.Target = v.GetScalarValue() },
-        { "description", (o, v) => o.Description = v.GetScalarValue() },
-        { "remove", (o, v) =>
+        { OverlayConstants.ActionTargetFieldName, (o, v) => o.Target = v.GetScalarValue() },
+        { OverlayConstants.ActionDescriptionFieldName, (o, v) => o.Description = v.GetScalarValue() },
+        { OverlayConstants.ActionRemoveFieldName, (o, v) =>
             {
                 if (v.GetScalarValue() is string removeValue && bool.TryParse(removeValue, out var removeBool))
                 {
@@ -16,8 +16,8 @@ internal static partial class OverlayV1Deserializer
                 }
             }
         },
-        { "update", (o, v) => o.Update = v.CreateAny() },
-        { "x-copy", (o, v) => o.Copy = v.GetScalarValue() },
+        { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
+        { OverlayConstants.ActionXCopyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
     };
     public static PatternFieldMap<OverlayAction> GetActionPatternFields(OverlaySpecVersion version) =>
     new()
