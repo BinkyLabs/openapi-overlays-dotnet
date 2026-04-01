@@ -1,16 +1,1 @@
 #nullable enable
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionCopyFieldName = "copy" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionDescriptionFieldName = "description" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionRemoveFieldName = "remove" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionTargetFieldName = "target" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionUpdateFieldName = "update" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionXCopyFieldName = "x-copy" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentActionsFieldName = "actions" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentExtendsFieldName = "extends" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentInfoFieldName = "info" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentOverlayFieldName = "overlay" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoDescriptionFieldName = "description" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoTitleFieldName = "title" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoVersionFieldName = "version" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoXDescriptionFieldName = "x-description" -> string!
-
