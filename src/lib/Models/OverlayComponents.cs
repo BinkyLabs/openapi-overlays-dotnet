@@ -6,6 +6,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
 /// Represents a Components object as defined in the OpenAPI Overlay specification.
+/// See: https://spec.openapis.org/overlay/v1.2.0.html#components-object
 /// </summary>
 [Experimental("BOO002")]
 public class OverlayComponents : IOverlaySerializable

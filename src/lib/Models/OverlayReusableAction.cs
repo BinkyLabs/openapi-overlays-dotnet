@@ -7,6 +7,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
 /// Represents a reusable Action Object as defined in the OpenAPI Overlay specification.
+/// See: https://spec.openapis.org/overlay/v1.2.0.html#reusable-action-object
 /// </summary>
 [Experimental("BOO002")]
 public class OverlayReusableAction : IOverlayAction
