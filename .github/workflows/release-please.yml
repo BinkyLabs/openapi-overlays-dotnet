@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+      - support/v2
   workflow_dispatch:
 
 permissions:
