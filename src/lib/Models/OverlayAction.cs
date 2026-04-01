@@ -11,7 +11,7 @@ using Microsoft.OpenApi;
 namespace BinkyLabs.OpenApi.Overlays;
 /// <summary>
 /// Represents an Action Object as defined in the OpenAPI Overlay specification v1.0.0.
-/// See: https://spec.openapis.org/overlay/v1.0.0.html#action-object
+/// See: https://spec.openapis.org/overlay/v1.1.0.html#action-object
 /// </summary>
 public class OverlayAction : IOverlaySerializable, IOverlayExtensible
 {
