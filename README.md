@@ -144,7 +144,7 @@ var overlayDocument = new OverlayDocument
         Version = "1.0.0"
     },
     Extends = "foo/myDescription.json",
-    Actions = new List<OverlayAction>
+    Actions = new List<IOverlayAction>
     {
         new OverlayAction
         {

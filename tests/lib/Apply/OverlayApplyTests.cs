@@ -233,7 +233,7 @@ public sealed class OverlayApplyTests : IDisposable
         var overlayDocument = new OverlayDocument
         {
             Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
-            Actions = new List<OverlayAction>
+            Actions = new List<IOverlayAction>
             {
                 new OverlayAction
                 {
@@ -294,7 +294,7 @@ public sealed class OverlayApplyTests : IDisposable
         var overlayDocument = new OverlayDocument
         {
             Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
-            Actions = new List<OverlayAction>
+            Actions = new List<IOverlayAction>
             {
                 new OverlayAction
                 {

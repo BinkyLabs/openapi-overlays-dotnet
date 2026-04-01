@@ -32,7 +32,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the list of actions for the overlay.
     /// </summary>
-    public IList<OverlayAction>? Actions { get; set; }
+    public IList<IOverlayAction>? Actions { get; set; }
 
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
@@ -52,7 +52,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
         if (Actions != null)
         {
-            writer.WriteRequiredCollection<OverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
+            writer.WriteRequiredCollection<IOverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
         }
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
@@ -115,7 +115,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var result = true;
         foreach (var action in Actions)
         {
-            if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
+            if (action is not OverlayAction overlayAction)
+            {
+                throw new NotSupportedException($"Only {nameof(OverlayAction)} instances are supported in {nameof(Actions)}.");
+            }
+            if (!overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
             {
                 result = false; // If any action fails, the entire application fails
             }
@@ -313,7 +317,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
 
         var lastDocument = others[^1];
-        var actions = new List<OverlayAction>(Actions ?? []);
+        var actions = new List<IOverlayAction>(Actions ?? []);
         var mergedDocument = new OverlayDocument
         {
             Info = lastDocument.Info,

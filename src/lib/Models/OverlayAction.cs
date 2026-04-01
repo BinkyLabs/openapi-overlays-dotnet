@@ -11,51 +11,39 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// Represents an Action Object as defined in the OpenAPI Overlay specification v1.0.0.
 /// See: https://spec.openapis.org/overlay/v1.1.0.html#action-object
 /// </summary>
-public class OverlayAction : IOverlaySerializable, IOverlayExtensible
+public class OverlayAction : IOverlayAction
 {
     private readonly OverlayCommonAction _common = new();
 
-    /// <summary>
-    /// REQUIRED. The target of the action (JSON Pointer or similar).
-    /// </summary>
+    /// <inheritdoc/>
     public string? Target
     {
         get => _common.Target;
         set => _common.Target = value;
     }
 
-    /// <summary>
-    /// The description of the action.
-    /// </summary>
+    /// <inheritdoc/>
     public string? Description
     {
         get => _common.Description;
         set => _common.Description = value;
     }
 
-    /// <summary>
-    /// A boolean value that indicates that the target object or array MUST be removed from the the map or array it is contained in.
-    /// The default value is false.
-    /// </summary>
+    /// <inheritdoc/>
     public bool? Remove
     {
         get => _common.Remove;
         set => _common.Remove = value;
     }
 
-    /// <summary>
-    /// The update value to be applied to the target.
-    /// </summary>
+    /// <inheritdoc/>
     public JsonNode? Update
     {
         get => _common.Update;
         set => _common.Update = value;
     }
 
-    /// <summary>
-    /// A string value that indicates that the target object or array MUST be copied to the location indicated by this string, which MUST be a JSON Pointer.
-    /// This field is mutually exclusive with the <see cref="Remove"/> and <see cref="Update"/> fields.
-    /// </summary>
+    /// <inheritdoc/>
     public string? Copy
     {
         get => _common.Copy;

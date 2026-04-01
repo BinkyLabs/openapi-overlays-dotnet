@@ -9,7 +9,7 @@ internal static partial class OverlayV1Deserializer
         { OverlayConstants.DocumentOverlayFieldName, (o, v) => o.Overlay = v.GetScalarValue() },
         { OverlayConstants.DocumentExtendsFieldName, (o, v) => o.Extends = v.GetScalarValue() },
         { OverlayConstants.DocumentInfoFieldName, (o, v) => o.Info = LoadInfo(v) },
-        { OverlayConstants.DocumentActionsFieldName, (o, v) => o.Actions = v.CreateList<OverlayAction>(LoadAction) }
+        { OverlayConstants.DocumentActionsFieldName, (o, v) => o.Actions = v.CreateList<IOverlayAction>(n => LoadAction(n)) }
     };
     public static PatternFieldMap<OverlayDocument> GetDocumentPatternFields(OverlaySpecVersion version) =>
     new()

@@ -1,4 +1,12 @@
 #nullable enable
+BinkyLabs.OpenApi.Overlays.IOverlayAction
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Copy.get -> string?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Remove.get -> bool?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Target.get -> string?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
+*REMOVED*BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayAction!>?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.IOverlayAction!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.get -> System.Text.Json.Nodes.JsonNode?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.set -> void
