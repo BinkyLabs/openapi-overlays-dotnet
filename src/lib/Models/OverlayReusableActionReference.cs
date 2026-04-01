@@ -13,16 +13,19 @@ namespace BinkyLabs.OpenApi.Overlays;
 [Experimental("BOO002")]
 public class OverlayReusableActionReference : IOverlayAction
 {
-    private OverlayReusableActionReferenceItem? _reference;
+    /// <summary>
+    /// Creates a reusable action reference action.
+    /// </summary>
+    [SetsRequiredMembers]
+    public OverlayReusableActionReference()
+    {
+        Reference = new OverlayReusableActionReferenceItem();
+    }
 
     /// <summary>
     /// Gets the reusable action reference data item.
     /// </summary>
-    public OverlayReusableActionReferenceItem? Reference
-    {
-        get => _reference;
-        init => _reference = value;
-    }
+    public required OverlayReusableActionReferenceItem Reference { get; init; }
 
     /// <summary>
     /// Gets the referenced target action if it has been resolved.
@@ -32,40 +35,44 @@ public class OverlayReusableActionReference : IOverlayAction
     /// <inheritdoc/>
     public string? Target
     {
-        get => Reference?.Target ?? TargetAction?.Target;
-        set => EnsureReference().Target = value;
+        get => Reference.Target ?? TargetAction?.Target;
+        set => Reference.Target = value;
     }
 
     /// <inheritdoc/>
     public string? Description
     {
-        get => Reference?.Description ?? TargetAction?.Description;
-        set => EnsureReference().Description = value;
+        get => Reference.Description ?? TargetAction?.Description;
+        set => Reference.Description = value;
     }
 
     /// <inheritdoc/>
     public bool? Remove
     {
-        get => Reference?.Remove ?? TargetAction?.Remove;
-        set => EnsureReference().Remove = value;
+        get => Reference.Remove ?? TargetAction?.Remove;
+        set => Reference.Remove = value;
     }
 
     /// <inheritdoc/>
     public JsonNode? Update
     {
-        get => Reference?.Update ?? TargetAction?.Update;
-        set => EnsureReference().Update = value;
+        get => Reference.Update ?? TargetAction?.Update;
+        set => Reference.Update = value;
     }
 
     /// <inheritdoc/>
     public string? Copy
     {
-        get => Reference?.Copy ?? TargetAction?.Copy;
-        set => EnsureReference().Copy = value;
+        get => Reference.Copy ?? TargetAction?.Copy;
+        set => Reference.Copy = value;
     }
 
     /// <inheritdoc/>
-    public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
+    public IDictionary<string, IOverlayExtension>? Extensions
+    {
+        get => Reference.Extensions ?? TargetAction?.Extensions;
+        set => Reference.Extensions = value;
+    }
 
     /// <inheritdoc/>
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(
@@ -79,15 +86,6 @@ public class OverlayReusableActionReference : IOverlayAction
         OverlaySpecVersion.Overlay1_1,
         OverlayConstants.ActionCopyFieldName);
 
-    internal void SetReferenceId(string? id) => EnsureReference().Id = id;
-    internal void SetReferenceParameterValues(IDictionary<string, JsonNode>? parameterValues) => EnsureReference().ParameterValues = parameterValues;
-
-    private OverlayReusableActionReferenceItem EnsureReference()
-    {
-        _reference ??= new OverlayReusableActionReferenceItem();
-        return _reference;
-    }
-
     private void SerializeInternal(
         IOpenApiWriter writer,
         OverlaySpecVersion version,
@@ -97,12 +95,12 @@ public class OverlayReusableActionReference : IOverlayAction
 
         writer.WriteStartObject();
 
-        if (Reference?.Reference != null)
+        if (!string.IsNullOrEmpty(Reference.Reference))
         {
             writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
         }
 
-        if (Reference?.ParameterValues != null)
+        if (Reference.ParameterValues != null)
         {
             writer.WriteOptionalMap(
                 OverlayConstants.ReusableActionReferenceXParameterValuesFieldName,
@@ -110,32 +108,32 @@ public class OverlayReusableActionReference : IOverlayAction
                 static (w, n) => w.WriteAny(n));
         }
 
-        if (Reference?.Target != null)
+        if (!string.IsNullOrEmpty(Reference.Target))
         {
             writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Reference.Target);
         }
 
-        if (Reference?.Description != null)
+        if (!string.IsNullOrEmpty(Reference.Description))
         {
             writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Reference.Description);
         }
 
-        if (Reference?.Remove.HasValue == true)
+        if (Reference.Remove.HasValue)
         {
             writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, Reference.Remove, false);
         }
 
-        if (Reference?.Update != null)
+        if (Reference.Update != null)
         {
             writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, Reference.Update, static (w, s) => w.WriteAny(s));
         }
 
-        if (Reference?.Copy != null)
+        if (!string.IsNullOrEmpty(Reference.Copy))
         {
             writer.WriteProperty(copyFieldName, Reference.Copy);
         }
 
-        writer.WriteOverlayExtensions(Extensions, version);
+        writer.WriteOverlayExtensions(Reference.Extensions, version);
         writer.WriteEndObject();
     }
 }

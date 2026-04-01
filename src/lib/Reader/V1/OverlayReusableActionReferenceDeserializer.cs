@@ -21,8 +21,8 @@ internal static partial class OverlayV1Deserializer
         },
         { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
         { OverlayConstants.ActionXCopyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
-        { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v) => o.SetReferenceId(ParseReusableActionReferenceId(v.GetScalarValue())) },
-        { OverlayConstants.ReusableActionReferenceXParameterValuesFieldName, (o, v) => o.SetReferenceParameterValues(LoadReusableActionReferenceParameterValues(v)) },
+        { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v) => o.Reference.Id = ParseReusableActionReferenceId(v.GetScalarValue()) },
+        { OverlayConstants.ReusableActionReferenceXParameterValuesFieldName, (o, v) => o.Reference.ParameterValues = LoadReusableActionReferenceParameterValues(v) },
     };
 
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =

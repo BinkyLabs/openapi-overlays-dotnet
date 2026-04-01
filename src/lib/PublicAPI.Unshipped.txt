@@ -51,7 +51,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Gen
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Extensions.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.OverlayReusableActionReference() -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.get -> BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.get -> BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem!
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.init -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Remove.get -> bool?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Remove.set -> void
@@ -67,6 +67,8 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Gen
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Copy.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Description.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Description.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Extensions.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.OverlayReusableActionReferenceItem() -> void

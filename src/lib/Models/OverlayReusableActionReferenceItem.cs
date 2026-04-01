@@ -1,13 +1,15 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
+using Microsoft.OpenApi;
+
 namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
 /// Represents the serialized reusable Action Reference payload fields.
 /// </summary>
 [Experimental("BOO002")]
-public class OverlayReusableActionReferenceItem
+public class OverlayReusableActionReferenceItem : IOverlayExtensible
 {
     /// <summary>
     /// Gets the referenced reusable action identifier.
@@ -49,4 +51,7 @@ public class OverlayReusableActionReferenceItem
     /// The copy override.
     /// </summary>
     public string? Copy { get; set; }
+
+    /// <inheritdoc/>
+    public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 }
