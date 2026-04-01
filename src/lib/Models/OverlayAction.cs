@@ -47,19 +47,19 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
     /// <inheritdoc/>
-    public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, "x-copy");
+    public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName);
     /// <inheritdoc/>
-    public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, "copy");
+    public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName);
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, string copyFieldName)
     {
         writer.WriteStartObject();
-        writer.WriteRequiredProperty("target", Target);
-        writer.WriteProperty("description", Description);
-        writer.WriteProperty("remove", Remove, false);
+        writer.WriteRequiredProperty(OverlayConstants.ActionTargetFieldName, Target);
+        writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Description);
+        writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, Remove, false);
 
         if (Update != null)
         {
-            writer.WriteOptionalObject("update", Update, (w, s) => w.WriteAny(s));
+            writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, Update, (w, s) => w.WriteAny(s));
         }
         if (Copy != null)
         {
