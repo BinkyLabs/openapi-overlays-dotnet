@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays;
@@ -33,6 +34,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// Gets or sets the list of actions for the overlay.
     /// </summary>
     public IList<IOverlayAction>? Actions { get; set; }
+    /// <summary>
+    /// Gets or sets the reusable components available to this overlay document.
+    /// </summary>
+    [Experimental("BOO002")]
+    public OverlayComponents? Components { get; set; }
 
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
@@ -41,6 +47,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, (w, obj) => obj.SerializeAsV1(w));
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, (w, obj) => obj.SerializeAsV1_1(w));
+#pragma warning disable BOO002
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
         writer.WriteStartObject();
@@ -54,9 +61,14 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             writer.WriteRequiredCollection<IOverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
         }
+        if (Components != null)
+        {
+            writer.WriteRequiredObject(OverlayConstants.DocumentXComponentsFieldName, Components, serializeAction);
+        }
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
+#pragma warning restore BOO002
     private static readonly Dictionary<OverlaySpecVersion, string> SpecVersionToStringMap = new()
     {
         { OverlaySpecVersion.Overlay1_0, "1.0.0" },
@@ -309,6 +321,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// </summary>
     /// <param name="others"></param>
     /// <returns>The merged overlay document.</returns>
+#pragma warning disable BOO002
     public OverlayDocument CombineWith(params OverlayDocument[] others)
     {
         if (others is not { Length: > 0 })
@@ -326,6 +339,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                 : null,
             Extends = lastDocument.Extends,
             Actions = actions,
+            Components = lastDocument.Components,
         };
 
         // Merge actions from all documents
@@ -334,6 +348,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         return mergedDocument;
     }
+#pragma warning restore BOO002
     private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, CancellationToken token = default)
     {
         Stream preparedStream = input;

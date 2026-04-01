@@ -12,6 +12,28 @@ namespace BinkyLabs.OpenApi.Overlays;
 public class OverlayReusableActionReferenceItem : IOverlayExtensible
 {
     /// <summary>
+    /// Internal constructor used for deserialization
+    /// </summary>
+    internal OverlayReusableActionReferenceItem()
+    {
+
+    }
+    /// <summary>
+    /// Creates a reusable action reference item with the specified reusable action identifier and optional overlay document context for validation.
+    /// </summary>
+    /// <param name="reusableActionIdentifier">The identifier of the reusable action.</param>
+    /// <param name="overlayDocument">The optional overlay document reference resolution.</param>
+    public OverlayReusableActionReferenceItem(string reusableActionIdentifier, OverlayDocument? overlayDocument = null)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(reusableActionIdentifier);
+        Id = reusableActionIdentifier;
+        HostDocument = overlayDocument;
+    }
+    /// <summary>
+    /// Gets the optional overlay document context for validation and reference resolution.
+    /// </summary>
+    public OverlayDocument? HostDocument { get; init; }
+    /// <summary>
     /// Gets the referenced reusable action identifier.
     /// </summary>
     public string? Id { get; set; }

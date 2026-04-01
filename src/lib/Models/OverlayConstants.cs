@@ -82,6 +82,10 @@ public static class OverlayConstants
     /// Field: OverlayDocument.Actions
     /// </summary>
     public const string DocumentActionsFieldName = "actions";
+    /// <summary>
+    /// Field: OverlayDocument.Components (serialized as extension for v1/v1.1 compatibility)
+    /// </summary>
+    public const string DocumentXComponentsFieldName = "x-components";
 
     /// <summary>
     /// Field: OverlayComponents.Actions

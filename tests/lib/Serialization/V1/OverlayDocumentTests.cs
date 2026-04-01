@@ -13,6 +13,124 @@ namespace BinkyLabs.OpenApi.Overlays.Tests;
 public sealed class OverlayDocumentTests
 {
     [Fact]
+#pragma warning disable BOO002
+    public void SerializeAsV1_WithComponents_ShouldWriteCorrectJson()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    {
+                        "setServerUrl",
+                        new OverlayReusableAction
+                        {
+                            Target = "$.servers[0]",
+                            Update = JsonNode.Parse("""
+                            {
+                                "url": "https://api.example.com"
+                            }
+                            """)
+                        }
+                    }
+                }
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        var expectedJson = """
+        {
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "setServerUrl": {
+                        "target": "$.servers[0]",
+                        "update": {
+                            "url": "https://api.example.com"
+                        }
+                    }
+                }
+            }
+        }
+        """;
+
+        // Act
+        overlayDocument.SerializeAsV1(writer);
+        var jsonResult = textWriter.ToString();
+        var jsonResultObject = JsonNode.Parse(jsonResult);
+        var expectedJsonObject = JsonNode.Parse(expectedJson);
+
+        // Assert
+        Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+#pragma warning disable BOO002
+    public void Deserialize_WithComponents_ShouldSetPropertiesCorrectly()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "setServerUrl": {
+                        "target": "$.servers[0]",
+                        "update": {
+                            "url": "https://api.example.com"
+                        },
+                        "parameters": [
+                            {
+                                "name": "region",
+                                "default": "us"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+
+        // Assert
+        Assert.NotNull(overlayDocument.Components);
+        Assert.NotNull(overlayDocument.Components.Actions);
+        Assert.Single(overlayDocument.Components.Actions);
+        Assert.True(overlayDocument.Components.Actions.ContainsKey("setServerUrl"));
+        var action = overlayDocument.Components.Actions["setServerUrl"];
+        Assert.Equal("$.servers[0]", action.Target);
+        Assert.NotNull(action.Update);
+        Assert.Equal("https://api.example.com", action.Update["url"]?.GetValue<string>());
+        Assert.NotNull(action.Parameters);
+        Assert.Single(action.Parameters);
+        Assert.Equal("region", action.Parameters[0].Name);
+        Assert.Equal("us", action.Parameters[0].Default?.GetValue<string>());
+    }
+#pragma warning restore BOO002
+
+    [Fact]
     public void SerializeAsV1_ShouldWriteCorrectJson()
     {
         // Arrange
