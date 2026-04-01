@@ -1,1 +1,13 @@
 #nullable enable
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.get -> System.Text.Json.Nodes.JsonNode?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Extensions.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Name.get -> string?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Name.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.OverlayReusableActionParameter() -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterDefaultFieldName = "default" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterNameFieldName = "name" -> string!

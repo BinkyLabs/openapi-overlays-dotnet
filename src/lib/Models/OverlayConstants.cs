@@ -10,4 +10,14 @@ public static class OverlayConstants
     /// Field: ExtensionFieldNamePrefix
     /// </summary>
     public const string ExtensionFieldNamePrefix = "x-";
+
+    /// <summary>
+    /// Field: ReusableActionParameter.Name
+    /// </summary>
+    public const string ReusableActionParameterNameFieldName = "name";
+
+    /// <summary>
+    /// Field: ReusableActionParameter.Default
+    /// </summary>
+    public const string ReusableActionParameterDefaultFieldName = "default";
 }
