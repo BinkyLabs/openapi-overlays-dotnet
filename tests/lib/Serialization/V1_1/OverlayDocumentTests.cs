@@ -592,10 +592,11 @@ public sealed class OverlayDocumentV1_1Tests
         // Assert
         Assert.NotNull(overlayDocument.Actions);
         var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
-        Assert.Equal("errorResponse", reference.Id);
-        Assert.Equal("#/components/actions/errorResponse", reference.Reference);
-        Assert.NotNull(reference.ParametersValue);
-        Assert.Equal("us", reference.ParametersValue["region"].GetValue<string>());
+        Assert.NotNull(reference.Reference);
+        Assert.Equal("errorResponse", reference.Reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.NotNull(reference.Reference.ParameterValues);
+        Assert.Equal("us", reference.Reference.ParameterValues["region"].GetValue<string>());
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
     }
 #pragma warning restore BOO002

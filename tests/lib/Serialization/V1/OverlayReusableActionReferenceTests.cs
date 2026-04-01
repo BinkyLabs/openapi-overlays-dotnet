@@ -18,10 +18,13 @@ public class OverlayReusableActionReferenceV1Tests
         // Arrange
         var reference = new OverlayReusableActionReference
         {
-            Id = "errorResponse",
-            ParametersValue = new Dictionary<string, JsonNode>
+            Reference = new OverlayReusableActionReferenceItem
             {
-                { "region", JsonValue.Create("us")! }
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    { "region", JsonValue.Create("us")! }
+                }
             },
             Description = "Override Description",
             Remove = false,
@@ -65,7 +68,10 @@ public class OverlayReusableActionReferenceV1Tests
         // Arrange
         var reference = new OverlayReusableActionReference
         {
-            Id = "errorResponse",
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse"
+            },
             TargetAction = new OverlayAction
             {
                 Target = "$.info",
@@ -109,12 +115,16 @@ public class OverlayReusableActionReferenceV1Tests
         };
         var reference = new OverlayReusableActionReference
         {
-            Id = "errorResponse",
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse"
+            },
             TargetAction = targetAction
         };
 
         // Assert
-        Assert.Equal("#/components/actions/errorResponse", reference.Reference);
+        Assert.NotNull(reference.Reference);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
         Assert.Equal("$.paths", reference.Target);
         Assert.Equal("Target Description", reference.Description);
         Assert.True(reference.Remove);
@@ -136,12 +146,15 @@ public class OverlayReusableActionReferenceV1Tests
         };
         var reference = new OverlayReusableActionReference
         {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Target = "$.overridden",
+                Description = "Local Description",
+                Remove = true,
+                Update = JsonNode.Parse("""{ "x": 2 }"""),
+                Copy = "$.localCopy"
+            },
             TargetAction = targetAction,
-            Target = "$.overridden",
-            Description = "Local Description",
-            Remove = true,
-            Update = JsonNode.Parse("""{ "x": 2 }"""),
-            Copy = "$.localCopy"
         };
 
         // Assert
@@ -184,11 +197,12 @@ public class OverlayReusableActionReferenceV1Tests
         var reference = OverlayV1Deserializer.LoadReusableActionReference(parseNode);
 
         // Assert
-        Assert.Equal("errorResponse", reference.Id);
-        Assert.Equal("#/components/actions/errorResponse", reference.Reference);
-        Assert.NotNull(reference.ParametersValue);
-        Assert.Equal("us", reference.ParametersValue["region"].GetValue<string>());
-        Assert.Equal("dev", reference.ParametersValue["stage"]["name"]?.GetValue<string>());
+        Assert.NotNull(reference.Reference);
+        Assert.Equal("errorResponse", reference.Reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.NotNull(reference.Reference.ParameterValues);
+        Assert.Equal("us", reference.Reference.ParameterValues["region"].GetValue<string>());
+        Assert.Equal("dev", reference.Reference.ParameterValues["stage"]["name"]?.GetValue<string>());
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
         Assert.Equal("Override Description", reference.Description);
         Assert.False(reference.Remove);

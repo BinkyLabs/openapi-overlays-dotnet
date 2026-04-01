@@ -8,82 +8,60 @@ using Microsoft.OpenApi;
 namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
-/// Represents a reusable Action Reference Object as defined in the OpenAPI Overlay specification.
-/// See: https://spec.openapis.org/overlay/v1.2.0.html#reusable-action-reference-object
+/// Represents a reusable action reference action with local overrides.
 /// </summary>
 [Experimental("BOO002")]
 public class OverlayReusableActionReference : IOverlayAction
 {
-    private string? _id;
-    private IDictionary<string, JsonNode>? _parametersValue;
-    private string? _target;
-    private string? _description;
-    private bool? _remove;
-    private JsonNode? _update;
-    private string? _copy;
+    private OverlayReusableActionReferenceItem? _reference;
 
     /// <summary>
-    /// Gets the referenced reusable action identifier.
+    /// Gets the reusable action reference data item.
     /// </summary>
-    public string? Id
+    public OverlayReusableActionReferenceItem? Reference
     {
-        get => _id;
-        init => _id = value;
+        get => _reference;
+        init => _reference = value;
     }
 
     /// <summary>
-    /// Gets the map of parameter values for the reusable action reference.
-    /// </summary>
-    public IDictionary<string, JsonNode>? ParametersValue
-    {
-        get => _parametersValue;
-        init => _parametersValue = value;
-    }
-
-    /// <summary>
-    /// Gets the referenced target reusable action if it has been resolved.
+    /// Gets the referenced target action if it has been resolved.
     /// </summary>
     public OverlayAction? TargetAction { get; internal set; }
-
-    /// <summary>
-    /// Gets the computed reusable-action reference pointer.
-    /// </summary>
-    public string? Reference =>
-        string.IsNullOrEmpty(Id) ? null : $"{OverlayConstants.ReusableActionReferencePrefix}{Id}";
 
     /// <inheritdoc/>
     public string? Target
     {
-        get => _target ?? TargetAction?.Target;
-        set => _target = value;
+        get => Reference?.Target ?? TargetAction?.Target;
+        set => EnsureReference().Target = value;
     }
 
     /// <inheritdoc/>
     public string? Description
     {
-        get => _description ?? TargetAction?.Description;
-        set => _description = value;
+        get => Reference?.Description ?? TargetAction?.Description;
+        set => EnsureReference().Description = value;
     }
 
     /// <inheritdoc/>
     public bool? Remove
     {
-        get => _remove ?? TargetAction?.Remove;
-        set => _remove = value;
+        get => Reference?.Remove ?? TargetAction?.Remove;
+        set => EnsureReference().Remove = value;
     }
 
     /// <inheritdoc/>
     public JsonNode? Update
     {
-        get => _update ?? TargetAction?.Update;
-        set => _update = value;
+        get => Reference?.Update ?? TargetAction?.Update;
+        set => EnsureReference().Update = value;
     }
 
     /// <inheritdoc/>
     public string? Copy
     {
-        get => _copy ?? TargetAction?.Copy;
-        set => _copy = value;
+        get => Reference?.Copy ?? TargetAction?.Copy;
+        set => EnsureReference().Copy = value;
     }
 
     /// <inheritdoc/>
@@ -101,13 +79,14 @@ public class OverlayReusableActionReference : IOverlayAction
         OverlaySpecVersion.Overlay1_1,
         OverlayConstants.ActionCopyFieldName);
 
-    internal bool IsTargetSet => _target != null;
-    internal bool IsDescriptionSet => _description != null;
-    internal bool IsRemoveSet => _remove.HasValue;
-    internal bool IsUpdateSet => _update != null;
-    internal bool IsCopySet => _copy != null;
-    internal void SetId(string? id) => _id = id;
-    internal void SetParametersValue(IDictionary<string, JsonNode>? parametersValue) => _parametersValue = parametersValue;
+    internal void SetReferenceId(string? id) => EnsureReference().Id = id;
+    internal void SetReferenceParameterValues(IDictionary<string, JsonNode>? parameterValues) => EnsureReference().ParameterValues = parameterValues;
+
+    private OverlayReusableActionReferenceItem EnsureReference()
+    {
+        _reference ??= new OverlayReusableActionReferenceItem();
+        return _reference;
+    }
 
     private void SerializeInternal(
         IOpenApiWriter writer,
@@ -118,42 +97,42 @@ public class OverlayReusableActionReference : IOverlayAction
 
         writer.WriteStartObject();
 
-        if (Reference != null)
+        if (Reference?.Reference != null)
         {
-            writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference);
+            writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
         }
 
-        if (ParametersValue != null)
+        if (Reference?.ParameterValues != null)
         {
             writer.WriteOptionalMap(
                 OverlayConstants.ReusableActionReferenceXParameterValuesFieldName,
-                ParametersValue,
+                Reference.ParameterValues,
                 static (w, n) => w.WriteAny(n));
         }
 
-        if (IsTargetSet)
+        if (Reference?.Target != null)
         {
-            writer.WriteProperty(OverlayConstants.ActionTargetFieldName, _target);
+            writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Reference.Target);
         }
 
-        if (IsDescriptionSet)
+        if (Reference?.Description != null)
         {
-            writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, _description);
+            writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Reference.Description);
         }
 
-        if (IsRemoveSet)
+        if (Reference?.Remove.HasValue == true)
         {
-            writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, _remove, false);
+            writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, Reference.Remove, false);
         }
 
-        if (IsUpdateSet)
+        if (Reference?.Update != null)
         {
-            writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, _update, static (w, s) => w.WriteAny(s));
+            writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, Reference.Update, static (w, s) => w.WriteAny(s));
         }
 
-        if (IsCopySet)
+        if (Reference?.Copy != null)
         {
-            writer.WriteProperty(copyFieldName, _copy);
+            writer.WriteProperty(copyFieldName, Reference.Copy);
         }
 
         writer.WriteOverlayExtensions(Extensions, version);
