@@ -20,6 +20,14 @@ public static class OverlayConstants
     /// Field: ReusableActionParameter.Default
     /// </summary>
     public const string ReusableActionParameterDefaultFieldName = "default";
+    /// <summary>
+    /// Field: OverlayReusableAction.Parameters
+    /// </summary>
+    public const string ReusableActionParametersFieldName = "parameters";
+    /// <summary>
+    /// Field: OverlayReusableAction.EnvironmentVariables
+    /// </summary>
+    public const string ReusableActionEnvironmentVariablesFieldName = "environmentVariables";
 
     /// <summary>
     /// Field: OverlayAction.Target
