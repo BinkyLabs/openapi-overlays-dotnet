@@ -37,6 +37,12 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Gen
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.OverlayReusableActionParameter() -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.OverlayReusableAction!>?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.OverlayComponents() -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterDefaultFieldName = "default" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterNameFieldName = "name" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionCopyFieldName = "copy" -> string!
@@ -49,6 +55,7 @@ const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentActionsFieldName = "ac
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentExtendsFieldName = "extends" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentInfoFieldName = "info" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentOverlayFieldName = "overlay" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoDescriptionFieldName = "description" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoTitleFieldName = "title" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoVersionFieldName = "version" -> string!

@@ -72,6 +72,11 @@ public static class OverlayConstants
     public const string DocumentActionsFieldName = "actions";
 
     /// <summary>
+    /// Field: OverlayComponents.Actions
+    /// </summary>
+    public const string ComponentsActionsFieldName = "actions";
+
+    /// <summary>
     /// Field: OverlayInfo.Title
     /// </summary>
     public const string InfoTitleFieldName = "title";
