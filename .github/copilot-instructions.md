@@ -47,3 +47,16 @@ feat(identity-emitter)!: change output format for models
 
 BREAKING CHANGE: The emitter now generates TypeScript interfaces instead of types
 ```
+
+## Pre-Commit Checks
+
+Before creating any commit, run the following commands from the repository root and address any failures:
+
+```bash
+dotnet test
+dotnet format
+```
+
+## Public API Changes
+
+If a change modifies public API surface area, add the corresponding API entries to `src/lib/PublicAPI.Unshipped.txt` as part of the same change.
