@@ -9,7 +9,7 @@ internal static partial class OverlayV1Deserializer
         { OverlayConstants.DocumentOverlayFieldName, (o, v) => o.Overlay = v.GetScalarValue() },
         { OverlayConstants.DocumentExtendsFieldName, (o, v) => o.Extends = v.GetScalarValue() },
         { OverlayConstants.DocumentInfoFieldName, (o, v) => o.Info = LoadInfo(v) },
-        { OverlayConstants.DocumentActionsFieldName, (o, v) => o.Actions = v.CreateList<IOverlayAction>(n => LoadAction(n)) }
+        { OverlayConstants.DocumentActionsFieldName, (o, v) => o.Actions = v.CreateList<IOverlayAction>(n => LoadActionOrReference(n)) }
     };
     public static PatternFieldMap<OverlayDocument> GetDocumentPatternFields(OverlaySpecVersion version) =>
     new()
@@ -25,5 +25,12 @@ internal static partial class OverlayV1Deserializer
         ParseMap(mapNode, document, documentFixedFields, documentPatternFields);
 
         return document;
+    }
+
+    private static IOverlayAction LoadActionOrReference(MapNode node)
+    {
+        return node[OverlayConstants.ReusableActionReferenceXReferenceFieldName] != null
+            ? LoadReusableActionReference(node)
+            : LoadAction(node);
     }
 }

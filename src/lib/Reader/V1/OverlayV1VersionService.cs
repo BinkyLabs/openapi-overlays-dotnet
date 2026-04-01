@@ -17,6 +17,7 @@ internal class OverlayV1VersionService : BaseOverlayVersionService
         [typeof(OverlayAction)] = OverlayV1Deserializer.LoadAction,
         [typeof(OverlayComponents)] = OverlayV1Deserializer.LoadComponents,
         [typeof(OverlayReusableAction)] = OverlayV1Deserializer.LoadReusableAction,
+        [typeof(OverlayReusableActionReference)] = OverlayV1Deserializer.LoadReusableActionReference,
         [typeof(OverlayDocument)] = OverlayV1Deserializer.LoadDocument,
         [typeof(OverlayInfo)] = OverlayV1Deserializer.LoadInfo,
         [typeof(OverlayReusableActionParameter)] = OverlayV1Deserializer.LoadReusableActionParameter,

@@ -28,6 +28,18 @@ public static class OverlayConstants
     /// Field: OverlayReusableAction.EnvironmentVariables
     /// </summary>
     public const string ReusableActionEnvironmentVariablesFieldName = "environmentVariables";
+    /// <summary>
+    /// Field: OverlayReusableActionReference.$ref (serialized as extension for v1/v1.1 compatibility)
+    /// </summary>
+    public const string ReusableActionReferenceXReferenceFieldName = "x-$ref";
+    /// <summary>
+    /// Field: OverlayReusableActionReference.parameterValues (serialized as extension for v1/v1.1 compatibility)
+    /// </summary>
+    public const string ReusableActionReferenceXParameterValuesFieldName = "x-parameterValues";
+    /// <summary>
+    /// Prefix used to build OverlayReusableActionReference.Reference
+    /// </summary>
+    public const string ReusableActionReferencePrefix = "#/components/actions/";
 
     /// <summary>
     /// Field: OverlayAction.Target

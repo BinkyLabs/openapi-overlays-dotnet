@@ -558,4 +558,45 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("Description3", result.Actions[2].Description);
         Assert.False(result.Actions[2].Remove);
     }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void Deserialize_WithReusableActionReference_ShouldCreateReferenceAction()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/errorResponse",
+                    "x-parameterValues": {
+                        "region": "us"
+                    },
+                    "target": "$.paths['/pets'].get.responses"
+                }
+            ]
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var overlayDocument = OverlayV1_1Deserializer.LoadDocument(parseNode);
+
+        // Assert
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Equal("errorResponse", reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference);
+        Assert.NotNull(reference.ParametersValue);
+        Assert.Equal("us", reference.ParametersValue["region"].GetValue<string>());
+        Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
+    }
+#pragma warning restore BOO002
 }
