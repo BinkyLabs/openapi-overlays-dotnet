@@ -679,6 +679,47 @@ public sealed class OverlayDocumentV1_1Tests
 
     [Fact]
 #pragma warning disable BOO002
+    public void CombineWith_MergesComponents()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    { "setTitle", new OverlayReusableAction { Target = "$.info.title", Update = JsonNode.Parse("\"A\"") } },
+                    { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"1.0.0\"") } }
+                }
+            }
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"2.0.0\"") } },
+                    { "setDescription", new OverlayReusableAction { Target = "$.info.description", Update = JsonNode.Parse("\"desc\"") } }
+                }
+            }
+        };
+
+        // When
+        var result = overlayDocument1.CombineWith(overlayDocument2);
+
+        // Then
+        Assert.NotNull(result.Components);
+        Assert.NotNull(result.Components.Actions);
+        Assert.Equal(3, result.Components.Actions.Count);
+        Assert.Equal("$.info.title", result.Components.Actions["setTitle"].Target);
+        Assert.Equal("2.0.0", result.Components.Actions["setVersion"].Update?.GetValue<string>());
+        Assert.Equal("$.info.description", result.Components.Actions["setDescription"].Target);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+#pragma warning disable BOO002
     public void Deserialize_WithReusableActionReference_ShouldCreateReferenceAction()
     {
         // Arrange

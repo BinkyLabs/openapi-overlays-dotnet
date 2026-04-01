@@ -117,5 +117,37 @@ public class OverlayComponentsV1_1Tests
         Assert.Equal("region", action.Parameters[0].Name);
         Assert.Equal("us", action.Parameters[0].Default?.GetValue<string>());
     }
+
+    [Fact]
+    public void CombineWith_ShouldMergeActions_AndPreferLaterOnConflicts()
+    {
+        // Arrange
+        var first = new OverlayComponents
+        {
+            Actions = new Dictionary<string, OverlayReusableAction>
+            {
+                { "setTitle", new OverlayReusableAction { Target = "$.info.title", Update = JsonNode.Parse("\"A\"") } },
+                { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"1.0.0\"") } }
+            }
+        };
+        var second = new OverlayComponents
+        {
+            Actions = new Dictionary<string, OverlayReusableAction>
+            {
+                { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"2.0.0\"") } },
+                { "setDescription", new OverlayReusableAction { Target = "$.info.description", Update = JsonNode.Parse("\"desc\"") } }
+            }
+        };
+
+        // Act
+        var result = first.CombineWith(second);
+
+        // Assert
+        Assert.NotNull(result.Actions);
+        Assert.Equal(3, result.Actions.Count);
+        Assert.Equal("$.info.title", result.Actions["setTitle"].Target);
+        Assert.Equal("2.0.0", result.Actions["setVersion"].Update?.GetValue<string>());
+        Assert.Equal("$.info.description", result.Actions["setDescription"].Target);
+    }
 }
 #pragma warning restore BOO002

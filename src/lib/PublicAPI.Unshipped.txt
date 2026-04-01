@@ -42,6 +42,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.OverlayReusableAction!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.CombineWith(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! others) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.OverlayComponents() -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void

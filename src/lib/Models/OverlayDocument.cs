@@ -339,7 +339,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                 : null,
             Extends = lastDocument.Extends,
             Actions = actions,
-            Components = lastDocument.Components,
+            Components = (Components, others.Where(static x => x.Components is not null).Select(static x => x.Components!)) switch
+            {
+                (null, var otherComponents) => otherComponents.Any() ? new OverlayComponents().CombineWith(otherComponents.ToArray()) : null,
+                (var current, var otherComponents) => current.CombineWith(otherComponents.ToArray())
+            },
         };
 
         // Merge actions from all documents

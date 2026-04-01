@@ -22,6 +22,40 @@ public class OverlayComponents : IOverlaySerializable
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, static (w, a) => a.SerializeAsV1_1(w));
 
+    /// <summary>
+    /// Combines this components object with other components objects.
+    /// Actions with the same key are overwritten by later components objects.
+    /// </summary>
+    /// <param name="others">The other components objects to merge.</param>
+    /// <returns>A new components object containing merged actions.</returns>
+    public OverlayComponents CombineWith(params OverlayComponents[] others)
+    {
+        var actions = Actions is not null
+            ? new Dictionary<string, OverlayReusableAction>(Actions)
+            : [];
+
+        if (others is { Length: > 0 })
+        {
+            foreach (var other in others)
+            {
+                if (other.Actions is null)
+                {
+                    continue;
+                }
+
+                foreach (var action in other.Actions)
+                {
+                    actions[action.Key] = action.Value;
+                }
+            }
+        }
+
+        return new OverlayComponents
+        {
+            Actions = actions
+        };
+    }
+
     private void SerializeInternal(IOpenApiWriter writer, Action<IOpenApiWriter, OverlayReusableAction> serializeAction)
     {
         ArgumentNullException.ThrowIfNull(writer);
