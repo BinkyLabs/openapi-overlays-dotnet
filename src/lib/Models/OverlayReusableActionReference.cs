@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
+using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
@@ -180,6 +181,71 @@ public class OverlayReusableActionReference : IOverlayAction
         }
 
         return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
+    }
+
+    internal OverlayAction? GetResolvedAction(OverlayDiagnostic overlayDiagnostic, IDictionary<string, string> environmentVariableValues)
+    {
+        ArgumentNullException.ThrowIfNull(overlayDiagnostic);
+        ArgumentNullException.ThrowIfNull(environmentVariableValues);
+
+        var pointer = Reference.Reference;
+        try
+        {
+            var (_, undefinedParameterValues, missingRequiredParameterValues) = ResolveParameterValues();
+            var hasErrors = false;
+
+            if (undefinedParameterValues.Count > 0)
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(
+                    pointer,
+                    $"Reusable action reference contains undefined parameter values: {GetOrderedNames(undefinedParameterValues)}."));
+                hasErrors = true;
+            }
+
+            if (missingRequiredParameterValues.Count > 0)
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(
+                    pointer,
+                    $"Reusable action reference is missing required parameter values: {GetOrderedNames(missingRequiredParameterValues)}."));
+                hasErrors = true;
+            }
+
+            var (_, missingRequiredEnvironmentVariableValues) = TargetAction!.ResolveEnvironmentVariableValues(environmentVariableValues);
+            if (missingRequiredEnvironmentVariableValues.Count > 0)
+            {
+                overlayDiagnostic.Errors.Add(new OpenApiError(
+                    pointer,
+                    $"Reusable action reference is missing required environment variable values: {GetOrderedNames(missingRequiredEnvironmentVariableValues)}."));
+                hasErrors = true;
+            }
+
+            if (hasErrors)
+            {
+                return null;
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            overlayDiagnostic.Errors.Add(new OpenApiError(pointer, ex.Message));
+            return null;
+        }
+
+        return new OverlayAction
+        {
+            Target = Target,
+            Description = Description,
+            Remove = Remove,
+            Update = Update,
+            Copy = Copy,
+            Extensions = Extensions
+        };
+    }
+
+    private static string GetOrderedNames(HashSet<string> names)
+    {
+        var ordered = names.ToArray();
+        Array.Sort(ordered, StringComparer.Ordinal);
+        return string.Join(", ", ordered);
     }
 
     /// <inheritdoc/>

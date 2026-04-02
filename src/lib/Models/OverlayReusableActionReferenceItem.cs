@@ -46,8 +46,8 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
     /// <summary>
     /// Gets the computed reusable-action reference pointer.
     /// </summary>
-    public string? Reference =>
-        string.IsNullOrEmpty(Id) ? null : $"{OverlayConstants.ReusableActionReferencePrefix}{Id}";
+    public string Reference =>
+        string.IsNullOrEmpty(Id) ? string.Empty : $"{OverlayConstants.ReusableActionReferencePrefix}{Id}";
 
     /// <summary>
     /// The target override.

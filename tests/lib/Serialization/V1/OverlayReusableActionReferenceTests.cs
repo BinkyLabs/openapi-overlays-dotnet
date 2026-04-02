@@ -299,6 +299,123 @@ public class OverlayReusableActionReferenceV1Tests
     }
 
     [Fact]
+    public void GetResolvedAction_WithAllValuesResolved_ShouldReturnOverlayActionAndNoDiagnostics()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["region"] = JsonValue.Create("us")!
+                },
+                Target = "$.paths['/pets'].get.responses"
+            },
+            Description = "Resolved reusable action",
+            Remove = false,
+            Update = JsonNode.Parse("""{ "x-region": "overridden" }"""),
+            Copy = "$.paths['/pets'].post.responses",
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" }
+                ],
+                EnvironmentVariables =
+                [
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+        var environmentVariableValues = new Dictionary<string, string>
+        {
+            ["STAGE"] = "prod"
+        };
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, environmentVariableValues);
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("$.paths['/pets'].get.responses", resolvedAction.Target);
+        Assert.Equal("Resolved reusable action", resolvedAction.Description);
+        Assert.False(resolvedAction.Remove);
+        Assert.Equal("overridden", resolvedAction.Update?["x-region"]?.GetValue<string>());
+        Assert.Equal("$.paths['/pets'].post.responses", resolvedAction.Copy);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+
+    [Fact]
+    public void GetResolvedAction_WithUndefinedParameterValues_ShouldAddDiagnosticAndReturnNull()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["unknown"] = JsonValue.Create("x")!
+                }
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.Null(resolvedAction);
+        Assert.Contains(overlayDiagnostic.Errors, static e => e.Message.Contains("undefined parameter values", StringComparison.Ordinal));
+        Assert.Contains(overlayDiagnostic.Errors, static e => e.Message.Contains("missing required parameter values", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void GetResolvedAction_WithMissingRequiredEnvironmentVariableValues_ShouldAddDiagnosticAndReturnNull()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse"
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region", Default = JsonValue.Create("us")! }
+                ],
+                EnvironmentVariables =
+                [
+                    new OverlayReusableActionParameter { Name = "STAGE" }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.Null(resolvedAction);
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Contains("missing required environment variable values", overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Equal("#/components/actions/errorResponse", overlayDiagnostic.Errors[0].Pointer);
+    }
+
+    [Fact]
     public void Deserialize_ShouldSetPropertiesCorrectly()
     {
         // Arrange
