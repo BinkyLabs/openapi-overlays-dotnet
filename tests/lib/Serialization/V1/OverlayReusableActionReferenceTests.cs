@@ -72,7 +72,7 @@ public class OverlayReusableActionReferenceV1Tests
             {
                 Id = "errorResponse"
             },
-            TargetAction = new OverlayAction
+            TargetAction = new OverlayReusableAction
             {
                 Target = "$.info",
                 Description = "from target action",
@@ -105,7 +105,7 @@ public class OverlayReusableActionReferenceV1Tests
     public void ReferenceAndGetters_ShouldFallbackToTargetAction_WhenBackingFieldNotSet()
     {
         // Arrange
-        var targetAction = new OverlayAction
+        var targetAction = new OverlayReusableAction
         {
             Target = "$.paths",
             Description = "Target Description",
@@ -136,7 +136,7 @@ public class OverlayReusableActionReferenceV1Tests
     public void Getters_ShouldPreferBackingFieldsOverTargetAction()
     {
         // Arrange
-        var targetAction = new OverlayAction
+        var targetAction = new OverlayReusableAction
         {
             Target = "$.paths",
             Description = "Target Description",
@@ -163,6 +163,51 @@ public class OverlayReusableActionReferenceV1Tests
         Assert.True(reference.Remove);
         Assert.Equal(2, reference.Update?["x"]?.GetValue<int>());
         Assert.Equal("$.localCopy", reference.Copy);
+    }
+
+    [Fact]
+    public void ConstructorWithHostDocument_ShouldResolveTargetActionAndApplyFallbackRules()
+    {
+        // Arrange
+        var resolvedAction = new OverlayReusableAction
+        {
+            Target = "$.paths['/pets'].get.responses",
+            Description = "Resolved reusable action",
+            Remove = false,
+            Update = JsonNode.Parse("""
+            {
+                "404": {
+                    "description": "Not found"
+                }
+            }
+            """),
+            Copy = "$.paths['/pets'].post.responses"
+        };
+
+        var hostDocument = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    ["errorResponse"] = resolvedAction
+                }
+            }
+        };
+
+        var reference = new OverlayReusableActionReference("errorResponse", hostDocument)
+        {
+            Remove = true
+        };
+
+        // Assert
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.Same(resolvedAction, reference.TargetAction);
+        Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
+        Assert.Equal("Resolved reusable action", reference.Description);
+        Assert.True(reference.Remove);
+        Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
+        Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
     }
 
     [Fact]

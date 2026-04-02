@@ -133,8 +133,6 @@ Or add the suppression to your project file to enable it project-wide:
 
 Use `OverlayComponents` to build a reusable actions map:
 
-> **Note:** Attaching `OverlayComponents` to `OverlayDocument` (via a `Components` property) is not yet available in v3-preview1 — it will be wired up in a subsequent preview. The snippet below shows the object construction; the assignment to the document will be documented once that property ships.
-
 ```csharp
 #pragma warning disable BOO002
 
@@ -160,7 +158,7 @@ var components = new OverlayComponents
     }
 };
 
-// overlay.Components = components; // coming in a later preview
+overlay.Components = components;
 
 #pragma warning restore BOO002
 ```
@@ -172,6 +170,21 @@ Add `OverlayReusableActionReference` items to `OverlayDocument.Actions` to invok
 ```csharp
 #pragma warning disable BOO002
 
+var overlay = new OverlayDocument
+{
+    Components = new OverlayComponents
+    {
+        Actions = new Dictionary<string, OverlayReusableAction>
+        {
+            ["setServer"] = new()
+            {
+                Target = "$.servers[0]",
+                Update = JsonNode.Parse("""{"url":"https://prod.example.com"}""")
+            }
+        }
+    }
+};
+
 overlay.Actions =
 [
     // Inline action — unchanged from v2
@@ -181,13 +194,16 @@ overlay.Actions =
         Update = JsonNode.Parse("\"Production API\"")
     },
 
-    // Reference to the reusable action, with a concrete parameter value
-    new OverlayReusableActionReference
+    // Reference to the reusable action, with a concrete parameter value.
+    // Passing the host document enables target action resolution.
+    new OverlayReusableActionReference("setServer", overlay)
     {
-        Id = "setServer",
-        ParametersValue = new Dictionary<string, JsonNode>
+        Reference = new OverlayReusableActionReferenceItem("setServer", overlay)
         {
-            ["serverUrl"] = JsonValue.Create("https://prod.example.com")!
+            ParameterValues = new Dictionary<string, JsonNode>
+            {
+                ["serverUrl"] = JsonValue.Create("https://prod.example.com")!
+            }
         }
     }
 ];
@@ -195,7 +211,8 @@ overlay.Actions =
 #pragma warning restore BOO002
 ```
 
-The resolved `Reference` property on `OverlayReusableActionReference` returns the canonical pointer `#/components/actions/{Id}`, which the library uses internally when serializing to YAML/JSON.
+`OverlayReusableActionReference.Reference.Reference` returns the canonical pointer `#/components/actions/{id}`.
+When a host `OverlayDocument` is provided, `TargetAction` resolves from `overlay.Components.Actions[id]`, and unset interface fields on the reference fall back to values from the resolved target action.
 
 #### Reusable action with environment variables
 

@@ -14,6 +14,24 @@ namespace BinkyLabs.OpenApi.Overlays;
 public class OverlayReusableActionReference : IOverlayAction
 {
     /// <summary>
+    /// Creates a reusable action reference action with the specified reusable action identifier and overlay document context for validation.
+    /// </summary>
+    /// <param name="referenceId">The reference identifier of the reusable action.</param>
+    /// <param name="hostDocument">The overlay document context for reference resolution.</param>
+    /// <throws cref="ArgumentException">Thrown when the referenceId is null or empty.</throws>
+    /// <throws cref="ArgumentNullException">Thrown when the hostDocument is null.</throws>
+    [SetsRequiredMembers]
+    public OverlayReusableActionReference(string referenceId, OverlayDocument hostDocument)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(referenceId);
+        ArgumentNullException.ThrowIfNull(hostDocument);
+        Reference = new OverlayReusableActionReferenceItem
+        {
+            Id = referenceId,
+            HostDocument = hostDocument
+        };
+    }
+    /// <summary>
     /// Creates a reusable action reference action.
     /// </summary>
     [SetsRequiredMembers]
@@ -27,10 +45,19 @@ public class OverlayReusableActionReference : IOverlayAction
     /// </summary>
     public required OverlayReusableActionReferenceItem Reference { get; init; }
 
+    private OverlayReusableAction? targetAction;
     /// <summary>
     /// Gets the referenced target action if it has been resolved.
     /// </summary>
-    public OverlayAction? TargetAction { get; internal set; }
+    public OverlayReusableAction? TargetAction
+    {
+        get => targetAction ??
+        (!string.IsNullOrEmpty(Reference.Id) &&
+        (Reference.HostDocument?.Components?.Actions?.TryGetValue(Reference.Id, out var action) ?? false) ?
+            action :
+            null);
+        internal set => targetAction = value;
+    }
 
     /// <inheritdoc/>
     public string? Target

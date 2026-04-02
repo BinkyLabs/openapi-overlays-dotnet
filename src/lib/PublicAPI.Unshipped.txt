@@ -54,6 +54,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Extensions.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.OverlayReusableActionReference() -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.OverlayReusableActionReference(string! referenceId, BinkyLabs.OpenApi.Overlays.OverlayDocument! hostDocument) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.get -> BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem!
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.init -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Remove.get -> bool?
@@ -62,7 +63,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Target.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Target.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.TargetAction.get -> BinkyLabs.OpenApi.Overlays.OverlayAction?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.TargetAction.get -> BinkyLabs.OpenApi.Overlays.OverlayReusableAction?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Update.get -> System.Text.Json.Nodes.JsonNode?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Update.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem

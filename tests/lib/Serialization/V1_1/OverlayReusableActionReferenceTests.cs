@@ -74,7 +74,7 @@ public class OverlayReusableActionReferenceV1_1Tests
             {
                 Id = "errorResponse"
             },
-            TargetAction = new OverlayAction
+            TargetAction = new OverlayReusableAction
             {
                 Target = "$.info",
                 Description = "from target action",
@@ -146,6 +146,51 @@ public class OverlayReusableActionReferenceV1_1Tests
         Assert.False(reference.Remove);
         Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
         Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public void ConstructorWithHostDocument_ShouldResolveTargetActionAndApplyFallbackRules()
+    {
+        // Arrange
+        var resolvedAction = new OverlayReusableAction
+        {
+            Target = "$.paths['/pets'].get.responses",
+            Description = "Resolved reusable action",
+            Remove = false,
+            Update = JsonNode.Parse("""
+            {
+                "404": {
+                    "description": "Not found"
+                }
+            }
+            """),
+            Copy = "$.paths['/pets'].post.responses"
+        };
+
+        var hostDocument = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    ["errorResponse"] = resolvedAction
+                }
+            }
+        };
+
+        var reference = new OverlayReusableActionReference("errorResponse", hostDocument)
+        {
+            Remove = true
+        };
+
+        // Assert
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.Same(resolvedAction, reference.TargetAction);
+        Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
+        Assert.Equal("Resolved reusable action", reference.Description);
+        Assert.True(reference.Remove);
+        Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
+        Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
     }
 }
 #pragma warning restore BOO002
