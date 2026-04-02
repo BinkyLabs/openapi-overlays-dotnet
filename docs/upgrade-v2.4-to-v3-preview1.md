@@ -9,6 +9,8 @@ This guide covers the breaking changes and new experimental APIs introduced in v
 - [New APIs](#new-apis)
   - [`IOverlayAction` interface](#ioverlayaction-interface)
   - [Reusable Actions (Experimental — BOO002)](#reusable-actions-experimental--boo002)
+    - [Resolution helper APIs](#resolution-helper-apis)
+    - [Validation and apply-time behavior updates](#validation-and-apply-time-behavior-updates)
 
 ---
 
@@ -59,7 +61,7 @@ foreach (IOverlayAction action in overlay.Actions!)
 }
 ```
 
-4. If you build the `Actions` list yourself and assign it to the document, change the collection type:
+1. If you build the `Actions` list yourself and assign it to the document, change the collection type:
 
 ```csharp
 // Before
@@ -143,7 +145,7 @@ using System.Text.Json.Nodes;
 var setServerAction = new OverlayReusableAction
 {
     Target = "$.servers[0]",
-    Update = JsonNode.Parse("""{"url": "{{serverUrl}}"}"""),
+    Update = JsonNode.Parse("""{"url":"%param.serverUrl%"}"""),
     Parameters =
     [
         new OverlayReusableActionParameter { Name = "serverUrl", Default = JsonValue.Create("https://api.example.com") }
@@ -224,7 +226,7 @@ A reusable action can also declare environment-variable bindings via `Environmen
 var deployAction = new OverlayReusableAction
 {
     Target = "$.info",
-    Update = JsonNode.Parse("""{"x-deploy-region": "{{region}}"}"""),
+    Update = JsonNode.Parse("""{"x-deploy-region":"%param.region%"}"""),
     Parameters =
     [
         new OverlayReusableActionParameter { Name = "region" }
@@ -238,6 +240,33 @@ var deployAction = new OverlayReusableAction
 #pragma warning restore BOO002
 ```
 
+#### Resolution helper APIs
+
+Two new experimental helper APIs were added to support explicit reusable-action resolution workflows:
+
+| API | Description |
+|---|---|
+| `OverlayReusableActionReference.ResolveParameterValues()` | Resolves final parameter values for a reusable reference (provided values + defaults), and returns unresolved sets for undefined parameter values and missing required parameter values |
+| `OverlayReusableAction.ResolveEnvironmentVariableValues(IDictionary<string, string>)` | Resolves environment variables from plain string inputs into `JsonNode` values (including defaults) and returns the missing-required environment variable set |
+
+Notes:
+
+- Reusable parameter/environment-variable definition names are validated and must match `ALPHA *( ALPHA / DIGIT )` (`[A-Za-z][A-Za-z0-9]*`).
+- Invalid names, duplicate definition names, null definitions, or unresolved target-action resolution preconditions raise `InvalidOperationException`.
+
+#### Validation and apply-time behavior updates
+
+Reusable action handling now includes additional runtime validation and interpolation behavior:
+
+- Unresolved reusable references are now reported as diagnostics during parsing and before serialization.
+- `OverlayDocument.ApplyToDocument*` now supports `OverlayReusableActionReference` entries directly by resolving them into concrete `OverlayAction` instances before apply.
+- During apply, reusable resolution reads environment variable values from the current process environment.
+- String interpolation is supported for `%param.name%` and `%env.name%` placeholders in inherited `target`, `description`, and `copy` values (only when that field is not overridden on the reference).
+- `update` interpolation traverses recursively:
+  - if a string node is exactly `%param.name%` or `%env.name%`, the referenced `JsonNode` value is injected (type-preserving via clone),
+  - otherwise placeholder replacement is applied within the string value.
+- Unresolved placeholders generate warnings; unresolved required values/invalid mappings generate errors and prevent action resolution.
+
 ---
 
 ## Summary of Changes
@@ -250,3 +279,8 @@ var deployAction = new OverlayReusableAction
 | `OverlayReusableAction` added | Experimental (BOO002) | Opt in with `#pragma warning disable BOO002` |
 | `OverlayReusableActionParameter` added | Experimental (BOO002) | Opt in with `#pragma warning disable BOO002` |
 | `OverlayReusableActionReference` added | Experimental (BOO002) | Opt in with `#pragma warning disable BOO002` |
+| `OverlayReusableActionReference.ResolveParameterValues()` added | Experimental (BOO002) | Optional: use for explicit parameter/default resolution and validation diagnostics |
+| `OverlayReusableAction.ResolveEnvironmentVariableValues(IDictionary<string, string>)` added | Experimental (BOO002) | Optional: use for explicit env/default resolution from non-structured inputs |
+| Unresolved reusable references now emit parse/serialize diagnostics | Behavioral | Ensure each `#/components/actions/{id}` target exists |
+| Reusable references now resolve during apply (with process env values) | Behavioral | Ensure required env vars are present in the process when applying |
+| `%param.*%` / `%env.*%` interpolation added for reusable references | Behavioral | Use `%param.name%` and `%env.name%` syntax in reusable action values |
