@@ -475,6 +475,146 @@ public class OverlayReusableActionReferenceV1Tests
     }
 
     [Fact]
+    public void GetResolvedAction_WithInheritedUpdatePlaceholders_ShouldReplaceValuesRecursively()
+    {
+        // Arrange
+        var regionNode = JsonObject.Parse("""{ "name": "eu" }""")!;
+        var replicasNode = JsonValue.Create(3)!;
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["region"] = regionNode
+                }
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Update = JsonNode.Parse("""
+                {
+                    "config": {
+                        "regionObject": "%param.region%",
+                        "stageValue": "%env.STAGE%",
+                        "message": "deploy-%param.region%-%env.STAGE%",
+                        "nested": [
+                            "%param.region%",
+                            "prefix-%env.STAGE%",
+                            "%param.replicas%"
+                        ]
+                    }
+                }
+                """),
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" },
+                    new OverlayReusableActionParameter { Name = "replicas", Default = replicasNode }
+                ],
+                EnvironmentVariables =
+                [
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+        var environmentVariableValues = new Dictionary<string, string>
+        {
+            ["STAGE"] = "prod"
+        };
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, environmentVariableValues);
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("eu", resolvedAction.Update?["config"]?["regionObject"]?["name"]?.GetValue<string>());
+        Assert.Equal("prod", resolvedAction.Update?["config"]?["stageValue"]?.GetValue<string>());
+        Assert.Contains("deploy-", resolvedAction.Update?["config"]?["message"]?.GetValue<string>(), StringComparison.Ordinal);
+        Assert.Contains("\"name\": \"eu\"", resolvedAction.Update?["config"]?["message"]?.GetValue<string>(), StringComparison.Ordinal);
+        Assert.EndsWith("-prod", resolvedAction.Update?["config"]?["message"]?.GetValue<string>(), StringComparison.Ordinal);
+        Assert.Equal("eu", resolvedAction.Update?["config"]?["nested"]?[0]?["name"]?.GetValue<string>());
+        Assert.Equal("prefix-prod", resolvedAction.Update?["config"]?["nested"]?[1]?.GetValue<string>());
+        Assert.Equal(3, resolvedAction.Update?["config"]?["nested"]?[2]?.GetValue<int>());
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void GetResolvedAction_WithInheritedUpdateUnresolvedPlaceholders_ShouldAddWarning()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse"
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Update = JsonNode.Parse("""
+                {
+                    "config": {
+                        "missing": "%param.unknown%",
+                        "message": "prefix-%env.unknown%"
+                    }
+                }
+                """)
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("%param.unknown%", resolvedAction.Update?["config"]?["missing"]?.GetValue<string>());
+        Assert.Equal("prefix-%env.unknown%", resolvedAction.Update?["config"]?["message"]?.GetValue<string>());
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Single(overlayDiagnostic.Warnings);
+        Assert.Contains(OverlayConstants.ActionUpdateFieldName, overlayDiagnostic.Warnings[0].Message, StringComparison.Ordinal);
+        Assert.Contains("%param.unknown%", overlayDiagnostic.Warnings[0].Message, StringComparison.Ordinal);
+        Assert.Contains("%env.unknown%", overlayDiagnostic.Warnings[0].Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GetResolvedAction_WithDefinedUpdateOverride_ShouldNotReplaceInheritedUpdatePlaceholders()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                Update = JsonNode.Parse("""{ "from": "override" }"""),
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["region"] = JsonValue.Create("eu")!
+                }
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Update = JsonNode.Parse("""{ "template": "%param.region%" }"""),
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("override", resolvedAction.Update?["from"]?.GetValue<string>());
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
     public void GetResolvedAction_WithUndefinedParameterValues_ShouldAddDiagnosticAndReturnNull()
     {
         // Arrange

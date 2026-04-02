@@ -16,6 +16,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 public partial class OverlayReusableActionReference : IOverlayAction
 {
     private static Regex PlaceholderPattern => PlaceholderRegex();
+    private static Regex StrictPlaceholderPattern => StrictPlaceholderRegex();
 
     /// <summary>
     /// Creates a reusable action reference action with the specified reusable action identifier and overlay document context for validation.
@@ -261,13 +262,20 @@ public partial class OverlayReusableActionReference : IOverlayAction
             overlayDiagnostic,
             resolvedEnvironmentVariableValues,
             resolvedParameterValues);
+        var resolvedUpdate = ResolveActionUpdateProperty(
+            Update,
+            Reference.Update,
+            pointer,
+            overlayDiagnostic,
+            resolvedEnvironmentVariableValues,
+            resolvedParameterValues);
 
         return new OverlayAction
         {
             Target = resolvedTarget,
             Description = resolvedDescription,
             Remove = Remove,
-            Update = Update,
+            Update = resolvedUpdate,
             Copy = resolvedCopy,
             Extensions = Extensions
         };
@@ -329,6 +337,127 @@ public partial class OverlayReusableActionReference : IOverlayAction
         return replacedValue;
     }
 
+    private JsonNode? ResolveActionUpdateProperty(
+        JsonNode? value,
+        JsonNode? overrideValue,
+        string pointer,
+        OverlayDiagnostic overlayDiagnostic,
+        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
+        IDictionary<string, JsonNode?> resolvedParameterValues)
+    {
+        if (value is null || overrideValue is not null)
+        {
+            return value;
+        }
+
+        var unresolvedPlaceholders = new HashSet<string>(StringComparer.Ordinal);
+        var replacedValue = ReplaceValuesInJsonNode(
+            value,
+            resolvedEnvironmentVariableValues,
+            resolvedParameterValues,
+            unresolvedPlaceholders);
+
+        if (unresolvedPlaceholders.Count > 0)
+        {
+            overlayDiagnostic.Warnings.Add(new OpenApiError(
+                pointer,
+                $"Reusable action reference contains unresolved value placeholders in '{OverlayConstants.ActionUpdateFieldName}': {GetOrderedNames(unresolvedPlaceholders)}."));
+        }
+
+        return replacedValue;
+    }
+
+    private JsonNode? ReplaceValuesInJsonNode(
+        JsonNode? node,
+        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
+        IDictionary<string, JsonNode?> resolvedParameterValues,
+        HashSet<string> unresolvedPlaceholders)
+    {
+        if (node is null)
+        {
+            return null;
+        }
+
+        if (node is JsonObject sourceObject)
+        {
+            var replacedObject = new JsonObject();
+            foreach (var property in sourceObject)
+            {
+                replacedObject[property.Key] = ReplaceValuesInJsonNode(
+                    property.Value,
+                    resolvedEnvironmentVariableValues,
+                    resolvedParameterValues,
+                    unresolvedPlaceholders);
+            }
+
+            return replacedObject;
+        }
+
+        if (node is JsonArray sourceArray)
+        {
+            var replacedArray = new JsonArray();
+            foreach (var item in sourceArray)
+            {
+                replacedArray.Add(ReplaceValuesInJsonNode(
+                    item,
+                    resolvedEnvironmentVariableValues,
+                    resolvedParameterValues,
+                    unresolvedPlaceholders));
+            }
+
+            return replacedArray;
+        }
+
+        if (node is JsonValue valueNode && valueNode.TryGetValue<string>(out var stringValue))
+        {
+            if (!stringValue.Contains('%', StringComparison.Ordinal))
+            {
+                return valueNode;
+            }
+
+            if (TryResolveStrictPlaceholderValue(
+                stringValue,
+                resolvedEnvironmentVariableValues,
+                resolvedParameterValues,
+                out var strictResolvedValue))
+            {
+                return strictResolvedValue?.DeepClone();
+            }
+
+            var replacedStringValue = ReplaceValues(stringValue, resolvedEnvironmentVariableValues, resolvedParameterValues);
+            foreach (var unresolvedPlaceholder in GetUnresolvedPlaceholders(replacedStringValue))
+            {
+                unresolvedPlaceholders.Add(unresolvedPlaceholder);
+            }
+
+            return JsonValue.Create(replacedStringValue);
+        }
+
+        return node.DeepClone();
+    }
+
+    private static bool TryResolveStrictPlaceholderValue(
+        string value,
+        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
+        IDictionary<string, JsonNode?> resolvedParameterValues,
+        out JsonNode? resolvedValue)
+    {
+        resolvedValue = null;
+        var strictMatch = StrictPlaceholderPattern.Match(value);
+        if (!strictMatch.Success)
+        {
+            return false;
+        }
+
+        var scope = strictMatch.Groups["scope"].Value;
+        var key = strictMatch.Groups["key"].Value;
+        var source = string.Equals(scope, "env", StringComparison.Ordinal)
+            ? resolvedEnvironmentVariableValues
+            : resolvedParameterValues;
+
+        return source.TryGetValue(key, out resolvedValue);
+    }
+
     private static HashSet<string> GetUnresolvedPlaceholders(string value)
     {
         var unresolvedPlaceholders = new HashSet<string>(StringComparer.Ordinal);
@@ -349,6 +478,9 @@ public partial class OverlayReusableActionReference : IOverlayAction
 
     [GeneratedRegex("%(?<scope>env|param)\\.(?<key>[A-Za-z][A-Za-z0-9]*)%", RegexOptions.CultureInvariant)]
     private static partial Regex PlaceholderRegex();
+
+    [GeneratedRegex("^%(?<scope>env|param)\\.(?<key>[A-Za-z][A-Za-z0-9]*)%$", RegexOptions.CultureInvariant)]
+    private static partial Regex StrictPlaceholderRegex();
 
     /// <inheritdoc/>
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(
