@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
@@ -12,8 +13,10 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// Represents a reusable action reference action with local overrides.
 /// </summary>
 [Experimental("BOO002")]
-public class OverlayReusableActionReference : IOverlayAction
+public partial class OverlayReusableActionReference : IOverlayAction
 {
+    private static Regex PlaceholderPattern => PlaceholderRegex();
+
     /// <summary>
     /// Creates a reusable action reference action with the specified reusable action identifier and overlay document context for validation.
     /// </summary>
@@ -189,9 +192,12 @@ public class OverlayReusableActionReference : IOverlayAction
         ArgumentNullException.ThrowIfNull(environmentVariableValues);
 
         var pointer = Reference.Reference;
+        Dictionary<string, JsonNode?> resolvedParameterValues;
+        Dictionary<string, JsonNode?> resolvedEnvironmentVariableValues;
         try
         {
-            var (_, undefinedParameterValues, missingRequiredParameterValues) = ResolveParameterValues();
+            var (resolvedParameters, undefinedParameterValues, missingRequiredParameterValues) = ResolveParameterValues();
+            resolvedParameterValues = resolvedParameters;
             var hasErrors = false;
 
             if (undefinedParameterValues.Count > 0)
@@ -210,7 +216,8 @@ public class OverlayReusableActionReference : IOverlayAction
                 hasErrors = true;
             }
 
-            var (_, missingRequiredEnvironmentVariableValues) = TargetAction!.ResolveEnvironmentVariableValues(environmentVariableValues);
+            var (resolvedEnvironmentVariables, missingRequiredEnvironmentVariableValues) = TargetAction!.ResolveEnvironmentVariableValues(environmentVariableValues);
+            resolvedEnvironmentVariableValues = resolvedEnvironmentVariables;
             if (missingRequiredEnvironmentVariableValues.Count > 0)
             {
                 overlayDiagnostic.Errors.Add(new OpenApiError(
@@ -230,15 +237,107 @@ public class OverlayReusableActionReference : IOverlayAction
             return null;
         }
 
+        var resolvedTarget = ResolveActionStringProperty(
+            Target,
+            Reference.Target,
+            OverlayConstants.ActionTargetFieldName,
+            pointer,
+            overlayDiagnostic,
+            resolvedEnvironmentVariableValues,
+            resolvedParameterValues);
+        var resolvedDescription = ResolveActionStringProperty(
+            Description,
+            Reference.Description,
+            OverlayConstants.ActionDescriptionFieldName,
+            pointer,
+            overlayDiagnostic,
+            resolvedEnvironmentVariableValues,
+            resolvedParameterValues);
+        var resolvedCopy = ResolveActionStringProperty(
+            Copy,
+            Reference.Copy,
+            OverlayConstants.ActionCopyFieldName,
+            pointer,
+            overlayDiagnostic,
+            resolvedEnvironmentVariableValues,
+            resolvedParameterValues);
+
         return new OverlayAction
         {
-            Target = Target,
-            Description = Description,
+            Target = resolvedTarget,
+            Description = resolvedDescription,
             Remove = Remove,
             Update = Update,
-            Copy = Copy,
+            Copy = resolvedCopy,
             Extensions = Extensions
         };
+    }
+
+    internal string ReplaceValues(
+        string value,
+        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
+        IDictionary<string, JsonNode?> resolvedParameterValues)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(resolvedEnvironmentVariableValues);
+        ArgumentNullException.ThrowIfNull(resolvedParameterValues);
+
+        if (!value.Contains('%', StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        return PlaceholderPattern.Replace(
+            value,
+            match =>
+            {
+                var scope = match.Groups["scope"].Value;
+                var key = match.Groups["key"].Value;
+                var source = string.Equals(scope, "env", StringComparison.Ordinal)
+                    ? resolvedEnvironmentVariableValues
+                    : resolvedParameterValues;
+
+                return source.TryGetValue(key, out var resolvedValue)
+                    ? resolvedValue?.ToString() ?? string.Empty
+                    : match.Value;
+            });
+    }
+
+    private string? ResolveActionStringProperty(
+        string? value,
+        string? overrideValue,
+        string propertyName,
+        string pointer,
+        OverlayDiagnostic overlayDiagnostic,
+        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
+        IDictionary<string, JsonNode?> resolvedParameterValues)
+    {
+        if (value is null || overrideValue is not null)
+        {
+            return value;
+        }
+
+        var replacedValue = ReplaceValues(value, resolvedEnvironmentVariableValues, resolvedParameterValues);
+        var unresolvedPlaceholders = GetUnresolvedPlaceholders(replacedValue);
+        if (unresolvedPlaceholders.Count > 0)
+        {
+            overlayDiagnostic.Warnings.Add(new OpenApiError(
+                pointer,
+                $"Reusable action reference contains unresolved value placeholders in '{propertyName}': {GetOrderedNames(unresolvedPlaceholders)}."));
+        }
+
+        return replacedValue;
+    }
+
+    private static HashSet<string> GetUnresolvedPlaceholders(string value)
+    {
+        var unresolvedPlaceholders = new HashSet<string>(StringComparer.Ordinal);
+        foreach (Match match in PlaceholderPattern.Matches(value))
+        {
+            unresolvedPlaceholders.Add(match.Value);
+        }
+
+        return unresolvedPlaceholders;
     }
 
     private static string GetOrderedNames(HashSet<string> names)
@@ -247,6 +346,9 @@ public class OverlayReusableActionReference : IOverlayAction
         Array.Sort(ordered, StringComparer.Ordinal);
         return string.Join(", ", ordered);
     }
+
+    [GeneratedRegex("%(?<scope>env|param)\\.(?<key>[A-Za-z][A-Za-z0-9]*)%", RegexOptions.CultureInvariant)]
+    private static partial Regex PlaceholderRegex();
 
     /// <inheritdoc/>
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(

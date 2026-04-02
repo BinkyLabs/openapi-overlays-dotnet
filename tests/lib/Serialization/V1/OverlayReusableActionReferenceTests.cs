@@ -349,6 +349,132 @@ public class OverlayReusableActionReferenceV1Tests
     }
 
     [Fact]
+    public void GetResolvedAction_WithInheritedStringPlaceholders_ShouldReplaceValues()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["region"] = JsonValue.Create("eu")!
+                }
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Target = "$.paths['/%param.region%/%env.STAGE%']",
+                Description = "Deploy %param.region% to %env.STAGE%",
+                Copy = "$.copy.%param.region%",
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" }
+                ],
+                EnvironmentVariables =
+                [
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+        var environmentVariableValues = new Dictionary<string, string>
+        {
+            ["STAGE"] = "prod"
+        };
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, environmentVariableValues);
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("$.paths['/eu/prod']", resolvedAction.Target);
+        Assert.Equal("Deploy eu to prod", resolvedAction.Description);
+        Assert.Equal("$.copy.eu", resolvedAction.Copy);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void GetResolvedAction_WithDefinedOverrideStringFields_ShouldNotReplaceValues()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["region"] = JsonValue.Create("eu")!
+                },
+                Target = "$.paths['/%param.region%']",
+                Description = "Deploy %param.region%",
+                Copy = "$.copy.%param.region%"
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Target = "$.paths['/%param.region%/%env.STAGE%']",
+                Description = "Deploy %param.region% to %env.STAGE%",
+                Copy = "$.copy.%param.region%",
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" }
+                ],
+                EnvironmentVariables =
+                [
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("$.paths['/%param.region%']", resolvedAction.Target);
+        Assert.Equal("Deploy %param.region%", resolvedAction.Description);
+        Assert.Equal("$.copy.%param.region%", resolvedAction.Copy);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void GetResolvedAction_WithUnresolvedInheritedPlaceholders_ShouldAddWarnings()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse"
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Target = "$.paths['/%param.unknown%']",
+                Description = "Deploy to %env.Unknown%",
+                Copy = "$.copy.%param.unknown%"
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("$.paths['/%param.unknown%']", resolvedAction.Target);
+        Assert.Equal("Deploy to %env.Unknown%", resolvedAction.Description);
+        Assert.Equal("$.copy.%param.unknown%", resolvedAction.Copy);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal(3, overlayDiagnostic.Warnings.Count);
+        Assert.Contains(overlayDiagnostic.Warnings, static w => w.Message.Contains("%param.unknown%", StringComparison.Ordinal));
+        Assert.Contains(overlayDiagnostic.Warnings, static w => w.Message.Contains("%env.Unknown%", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void GetResolvedAction_WithUndefinedParameterValues_ShouldAddDiagnosticAndReturnNull()
     {
         // Arrange
