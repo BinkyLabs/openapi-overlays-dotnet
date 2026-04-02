@@ -251,6 +251,69 @@ public sealed class OverlayDocumentTests
     }
 
     [Fact]
+    public async Task Deserialize_WithUnresolvedReusableActionReference_ShouldAddDiagnosticError()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/missingAction"
+                }
+            ]
+        }
+        """;
+
+        // Act
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(json);
+
+        // Assert
+        Assert.NotNull(diagnostic);
+        Assert.Contains(
+            diagnostic.Errors,
+            static e => e.Pointer == "$.actions[0]" &&
+                        e.Message.Contains("#/components/actions/missingAction", StringComparison.Ordinal));
+    }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void SerializeAsV1_WithUnresolvedReusableActionReference_ShouldThrow()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Actions =
+            [
+                new OverlayReusableActionReference
+                {
+                    Reference = new OverlayReusableActionReferenceItem
+                    {
+                        Id = "missingAction"
+                    }
+                }
+            ]
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1(writer));
+        Assert.Contains("$.actions[0]", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("#/components/actions/missingAction", exception.Message, StringComparison.Ordinal);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
     public void SerializeAsV1_WithUpdate_ShouldWriteCorrectJson()
     {
         // Arrange

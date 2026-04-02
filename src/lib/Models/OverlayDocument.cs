@@ -50,6 +50,12 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 #pragma warning disable BOO002
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
+        var unresolvedActionReferences = GetUnresolvedReusableActionReferences();
+        if (unresolvedActionReferences.Count > 0)
+        {
+            throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
+        }
+
         writer.WriteStartObject();
         writer.WriteRequiredProperty(OverlayConstants.DocumentOverlayFieldName, SpecVersionToStringMap[version]);
         if (Info != null)
@@ -353,6 +359,45 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return mergedDocument;
     }
 #pragma warning restore BOO002
+#pragma warning disable BOO002
+    internal Dictionary<string, string> GetUnresolvedReusableActionReferences()
+    {
+        var unresolvedReferences = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (Actions is not { Count: > 0 })
+        {
+            return unresolvedReferences;
+        }
+
+        for (var index = 0; index < Actions.Count; index++)
+        {
+            if (Actions[index] is not OverlayReusableActionReference reusableActionReference)
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(reusableActionReference.Reference.Id) &&
+                Components?.Actions?.ContainsKey(reusableActionReference.Reference.Id) == true)
+            {
+                continue;
+            }
+
+            unresolvedReferences[GetActionPointer(index)] = reusableActionReference.Reference.Reference;
+        }
+
+        return unresolvedReferences;
+    }
+#pragma warning restore BOO002
+
+    private static string GetActionPointer(int index) => $"$.actions[{index}]";
+
+    private static string FormatUnresolvedReusableActionReferences(Dictionary<string, string> unresolvedActionReferences)
+    {
+        return string.Join(
+            ", ",
+            unresolvedActionReferences.Select(static unresolvedReference =>
+                $"'{unresolvedReference.Key}' => '{unresolvedReference.Value}'"));
+    }
+
     private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, CancellationToken token = default)
     {
         Stream preparedStream = input;
