@@ -59,6 +59,65 @@ public class OverlayReusableAction : IOverlayAction
     /// </summary>
     public IList<OverlayReusableActionParameter>? EnvironmentVariables { get; set; }
 
+    /// <summary>
+    /// Resolves provided environment variable values against reusable action environment variable definitions.
+    /// </summary>
+    /// <param name="environmentVariableValues">The provided environment variable values keyed by name.</param>
+    /// <returns>
+    /// A tuple containing:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>Resolved environment variable values (provided values plus defaults for missing optional environment variables).</description>
+    /// </item>
+    /// <item>
+    /// <description>A hash set of required environment variable names (no default) that do not have a provided value.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
+    public (Dictionary<string, JsonNode?> ResolvedEnvironmentVariableValues, HashSet<string> MissingRequiredEnvironmentVariableValues) ResolveEnvironmentVariableValues(IDictionary<string, string> environmentVariableValues)
+    {
+        var resolvedEnvironmentVariableValues = new Dictionary<string, JsonNode?>(StringComparer.Ordinal);
+        var missingRequiredEnvironmentVariableValues = new HashSet<string>(StringComparer.Ordinal);
+
+        if (EnvironmentVariables is not { Count: > 0 })
+        {
+            return (resolvedEnvironmentVariableValues, missingRequiredEnvironmentVariableValues);
+        }
+
+        var definitionsByName = OverlayReusableActionDefinitionValidator.BuildDefinitionsByName(
+            EnvironmentVariables,
+            "environment variable");
+
+        if (environmentVariableValues is { Count: > 0 })
+        {
+            foreach (var environmentVariableValue in environmentVariableValues)
+            {
+                if (definitionsByName.ContainsKey(environmentVariableValue.Key))
+                {
+                    resolvedEnvironmentVariableValues[environmentVariableValue.Key] = JsonValue.Create(environmentVariableValue.Value);
+                }
+            }
+        }
+
+        foreach (var definition in definitionsByName)
+        {
+            if (resolvedEnvironmentVariableValues.ContainsKey(definition.Key))
+            {
+                continue;
+            }
+
+            if (definition.Value.Default is not null)
+            {
+                resolvedEnvironmentVariableValues[definition.Key] = definition.Value.Default;
+                continue;
+            }
+
+            missingRequiredEnvironmentVariableValues.Add(definition.Key);
+        }
+
+        return (resolvedEnvironmentVariableValues, missingRequiredEnvironmentVariableValues);
+    }
+
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions
     {

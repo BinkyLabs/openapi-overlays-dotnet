@@ -125,5 +125,76 @@ public class OverlayReusableActionV1Tests
         // Assert
         Assert.Equal("$.paths['/pets']", action.Copy);
     }
+
+    [Fact]
+    public void ResolveEnvironmentVariableValues_ShouldIgnoreUnknownAndReturnMissingRequiredSet()
+    {
+        // Arrange
+        var stageDefault = JsonValue.Create("dev")!;
+        var action = new OverlayReusableAction
+        {
+            EnvironmentVariables =
+            [
+                new OverlayReusableActionParameter { Name = "region" },
+                new OverlayReusableActionParameter { Name = "stage", Default = stageDefault },
+                new OverlayReusableActionParameter { Name = "tenant" }
+            ]
+        };
+        var environmentVariableValues = new Dictionary<string, string>
+        {
+            ["region"] = "us",
+            ["unknown"] = "x"
+        };
+
+        // Act
+        var (resolvedEnvironmentVariableValues, missingRequiredEnvironmentVariableValues) =
+            action.ResolveEnvironmentVariableValues(environmentVariableValues);
+
+        // Assert
+        Assert.Equal(2, resolvedEnvironmentVariableValues.Count);
+        Assert.Equal("us", resolvedEnvironmentVariableValues["region"]?.GetValue<string>());
+        Assert.Same(stageDefault, resolvedEnvironmentVariableValues["stage"]);
+        Assert.True(missingRequiredEnvironmentVariableValues.SetEquals(["tenant"]));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("1invalid")]
+    [InlineData("invalid-name")]
+    [InlineData("invalid_name")]
+    public void ResolveEnvironmentVariableValues_WithInvalidEnvironmentVariableDefinitionName_ShouldThrow(string? definitionName)
+    {
+        // Arrange
+        var action = new OverlayReusableAction
+        {
+            EnvironmentVariables =
+            [
+                new OverlayReusableActionParameter { Name = definitionName }
+            ]
+        };
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => action.ResolveEnvironmentVariableValues(new Dictionary<string, string>()));
+        Assert.Contains("environment variable", exception.Message);
+    }
+
+    [Fact]
+    public void ResolveEnvironmentVariableValues_WithDuplicateEnvironmentVariableDefinitionNames_ShouldThrow()
+    {
+        // Arrange
+        var action = new OverlayReusableAction
+        {
+            EnvironmentVariables =
+            [
+                new OverlayReusableActionParameter { Name = "region" },
+                new OverlayReusableActionParameter { Name = "region" }
+            ]
+        };
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => action.ResolveEnvironmentVariableValues(new Dictionary<string, string>()));
+        Assert.Contains("Duplicate reusable action environment variable definition name 'region'.", exception.Message);
+    }
 }
 #pragma warning restore BOO002

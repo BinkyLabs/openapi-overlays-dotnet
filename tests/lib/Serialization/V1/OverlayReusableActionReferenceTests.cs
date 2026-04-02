@@ -250,6 +250,54 @@ public class OverlayReusableActionReferenceV1Tests
         Assert.True(missingRequiredParameterValues.SetEquals(["tenant"]));
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("1invalid")]
+    [InlineData("invalid-name")]
+    [InlineData("invalid_name")]
+    public void ResolveParameterValues_WithInvalidParameterDefinitionName_ShouldThrow(string? definitionName)
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem(),
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = definitionName }
+                ]
+            }
+        };
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => reference.ResolveParameterValues());
+        Assert.Contains("parameter", exception.Message);
+    }
+
+    [Fact]
+    public void ResolveParameterValues_WithDuplicateParameterDefinitionNames_ShouldThrow()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem(),
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" },
+                    new OverlayReusableActionParameter { Name = "region" }
+                ]
+            }
+        };
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => reference.ResolveParameterValues());
+        Assert.Contains("Duplicate reusable action parameter definition name 'region'.", exception.Message);
+    }
+
     [Fact]
     public void Deserialize_ShouldSetPropertiesCorrectly()
     {

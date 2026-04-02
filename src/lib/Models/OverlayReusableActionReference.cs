@@ -144,20 +144,9 @@ public class OverlayReusableActionReference : IOverlayAction
             return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
         }
 
-        var definitionsByName = new Dictionary<string, OverlayReusableActionParameter>(parameterDefinitions.Count, StringComparer.Ordinal);
-        foreach (var parameter in parameterDefinitions)
-        {
-            if (string.IsNullOrEmpty(parameter?.Name))
-            {
-                continue;
-            }
-
-            var parameterName = parameter.Name;
-            if (!definitionsByName.TryAdd(parameterName, parameter))
-            {
-                continue;
-            }
-        }
+        var definitionsByName = OverlayReusableActionDefinitionValidator.BuildDefinitionsByName(
+            parameterDefinitions,
+            "parameter");
 
         if (parameterValues is { Count: > 0 })
         {

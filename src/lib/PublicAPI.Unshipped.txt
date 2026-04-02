@@ -23,6 +23,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Parameters.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Remove.get -> bool?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Remove.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.ResolveEnvironmentVariableValues(System.Collections.Generic.IDictionary<string!, string!>! environmentVariableValues) -> (System.Collections.Generic.Dictionary<string!, System.Text.Json.Nodes.JsonNode?>! ResolvedEnvironmentVariableValues, System.Collections.Generic.HashSet<string!>! MissingRequiredEnvironmentVariableValues)
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Target.get -> string?
