@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.5.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.4.0...v2.5.0) (2026-04-01)
+
+
+### Features
+
+* **tests:** migrate to Microsoft Testing Platform ([3e13584](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3e13584ff214890ee184f2d5468706f00c02ecdd))
+* **tests:** migrate to Microsoft Testing Platform ([61b8c29](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/61b8c29c2573490e4ffca01a3a44896f1bf4dc8b))
+
+
+### Bug Fixes
+
+* **tests:** simplify MTP version pinning and restore sdk version ([a005f29](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/a005f290c376900ee92006b720c42dd06920c5f2))
+* **tests:** upgrade xunit from v2 to v3 (xunit.v3 3.2.2) ([055d3ab](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/055d3abd5c1e57221b42edd7ff9f295c6d0e23d0))
+* **tests:** upgrade xunit package from v2 to v3 ([2110a56](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/2110a5672bf1b3bd4cf834555e38a9e4f29cf5a8))
+* updates outdated links in the doc comments ([d6ad9aa](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d6ad9aa05244330457fc02470671be70e46f5a96))
+* updates outdated links in the doc comments ([5ecacef](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/5ecacef4f9122cc4a96ce946e7963e931ab30eb1))
+
 ## [2.4.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.3.0...v2.4.0) (2026-02-18)
 
 
