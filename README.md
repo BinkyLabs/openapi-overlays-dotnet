@@ -166,7 +166,141 @@ var jsonResult = textWriter.ToString();
 
 This library implements the following experimental features:
 
-No experimental features are implemented at this moment.
+### Reusable Actions (Preview)
+
+> **Note**: Reusable Actions are an experimental, preview feature. When using this library with ReusableActions, you must suppress the **BOO002** diagnostic code in your build configuration, as this feature is not yet part of the official OpenAPI Overlay Specification.
+
+Reusable Actions allow you to define action templates in the `components.actions` section that can be referenced and reused multiple times throughout your overlay. This reduces duplication and makes overlays more maintainable.
+
+#### Simple Example - Local Overrides
+
+This example shows how a reusable action can provide shared update content while a reference overrides the target locally:
+
+**Source OpenAPI:**
+
+```yaml
+openapi: 3.2.0
+info:
+  title: Example API
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      responses:
+        200:
+          description: OK
+  /some-items:
+    delete:
+      responses:
+        200:
+          description: OK
+```
+
+**Overlay:**
+
+```yaml
+overlay: 1.2.0
+info:
+  title: Use reusable actions to insert error responses
+  version: 1.0.0
+x-components:
+  actions:
+    errorResponse:
+      update:
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      description: Adds an error response to the operation
+actions:
+  - x-$ref: '#/components/actions/errorResponse'
+    # Override the target from the reusable action
+    target: "$.paths['/items'].get.responses"
+  - x-$ref: '#/components/actions/errorResponse'
+    # Override the target from the reusable action
+    target: "$.paths['/some-items'].delete.responses"
+```
+
+#### Complex Example - Parameters and Environment Variables
+
+This example shows how a reusable action can use parameters and environment variables for dynamic string interpolation:
+
+**Source OpenAPI:**
+
+```yaml
+openapi: 3.2.0
+info:
+  title: Example API
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      responses:
+        200:
+          description: OK
+  /some-items:
+    delete:
+      responses:
+        200:
+          description: OK
+```
+
+**Overlay:**
+
+```yaml
+overlay: 1.2.0
+info:
+  title: Use reusable actions with parameters and environment variables
+  version: 1.0.0
+x-components:
+  actions:
+    errorResponse:
+      target: "$.paths['%param.pathItem%'].%param.operation%.responses"
+      update:
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '%param.propertyName%':
+                    type: string
+                  stageName:
+                    type: string
+                    const: '%env.stageName%'
+      description: Adds an error response to the %param.pathItem% path item %param.operation% operation
+      parameters:
+        - name: pathItem
+        - name: operation
+          default: get
+        - name: propertyName
+          default: errorMessage
+      environmentVariables:
+        - name: stageName
+          default: dev
+actions:
+  - x-$ref: '#/components/actions/errorResponse'
+    parameterValues:
+      pathItem: '/items'
+  - x-$ref: '#/components/actions/errorResponse'
+    parameterValues:
+      pathItem: '/some-items'
+      operation: delete
+      propertyName: deleteErrorMessage
+```
+
+In this example:
+
+- The `parameters` field defines values that can be interpolated using `%param.parameterName%` syntax in the reusable action's string fields (target, copy, description)
+- The `environmentVariables` field defines references to process environment variables that can be interpolated using `%env.variableName%` syntax
+- Default values are provided for both parameters and environment variables, used when not explicitly provided by the reference
+- Each reference can supply different parameter values through the `parameterValues` object, allowing the same reusable action to target different paths and generate different content
 
 ## Release notes
 
