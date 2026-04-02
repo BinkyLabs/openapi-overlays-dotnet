@@ -192,5 +192,45 @@ public class OverlayReusableActionReferenceV1_1Tests
         Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
         Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
     }
+
+    [Fact]
+    public void ResolveParameterValues_ShouldReturnResolvedValuesAndLookupCollections()
+    {
+        // Arrange
+        var regionValue = JsonValue.Create("us")!;
+        var unknownValue = JsonValue.Create("x")!;
+        var stageDefault = JsonValue.Create("dev")!;
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    ["region"] = regionValue,
+                    ["unknown"] = unknownValue
+                }
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" },
+                    new OverlayReusableActionParameter { Name = "stage", Default = stageDefault },
+                    new OverlayReusableActionParameter { Name = "tenant" }
+                ]
+            }
+        };
+
+        // Act
+        var (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues) = reference.ResolveParameterValues();
+
+        // Assert
+        Assert.Equal(2, resolvedParameterValues.Count);
+        Assert.Same(regionValue, resolvedParameterValues["region"]);
+        Assert.Same(stageDefault, resolvedParameterValues["stage"]);
+        Assert.True(undefinedParameterValues.SetEquals(["unknown"]));
+        Assert.True(missingRequiredParameterValues.SetEquals(["tenant"]));
+    }
 }
 #pragma warning restore BOO002

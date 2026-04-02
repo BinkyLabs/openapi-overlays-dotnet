@@ -18,8 +18,8 @@ public class OverlayReusableActionReference : IOverlayAction
     /// </summary>
     /// <param name="referenceId">The reference identifier of the reusable action.</param>
     /// <param name="hostDocument">The overlay document context for reference resolution.</param>
-    /// <throws cref="ArgumentException">Thrown when the referenceId is null or empty.</throws>
-    /// <throws cref="ArgumentNullException">Thrown when the hostDocument is null.</throws>
+    /// <exception cref="ArgumentException">Thrown when the referenceId is null or empty.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when the hostDocument is null.</exception>
     [SetsRequiredMembers]
     public OverlayReusableActionReference(string referenceId, OverlayDocument hostDocument)
     {
@@ -99,6 +99,98 @@ public class OverlayReusableActionReference : IOverlayAction
     {
         get => Reference.Extensions ?? TargetAction?.Extensions;
         set => Reference.Extensions = value;
+    }
+
+    /// <summary>
+    /// Validates referenced parameter values against the resolved reusable action parameters.
+    /// </summary>
+    /// <returns>
+    /// A tuple containing:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>Resolved parameter values (provided values plus defaults for missing optional parameters).</description>
+    /// </item>
+    /// <item>
+    /// <description>A hash set of parameter value names that do not match any reusable action parameter definition.</description>
+    /// </item>
+    /// <item>
+    /// <description>A hash set of reusable action parameter names that are required (no default) and missing a corresponding parameter value.</description>
+    /// </item>
+    /// </list>
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Thrown when the target action is not resolved.</exception>
+    public (Dictionary<string, JsonNode?> ResolvedParameterValues, HashSet<string> UndefinedParameterValues, HashSet<string> MissingRequiredParameterValues) ResolveParameterValues()
+    {
+        if (TargetAction is null)
+        {
+            throw new InvalidOperationException("Cannot resolve parameter values without a resolved target action.");
+        }
+        var parameterDefinitions = TargetAction.Parameters;
+        var parameterValues = Reference.ParameterValues;
+        var resolvedParameterValues = new Dictionary<string, JsonNode?>(StringComparer.Ordinal);
+        var undefinedParameterValues = new HashSet<string>(StringComparer.Ordinal);
+        var missingRequiredParameterValues = new HashSet<string>(StringComparer.Ordinal);
+
+        if (parameterDefinitions is not { Count: > 0 })
+        {
+            if (parameterValues is { Count: > 0 })
+            {
+                foreach (var valueName in parameterValues.Keys)
+                {
+                    undefinedParameterValues.Add(valueName);
+                }
+            }
+
+            return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
+        }
+
+        var definitionsByName = new Dictionary<string, OverlayReusableActionParameter>(parameterDefinitions.Count, StringComparer.Ordinal);
+        foreach (var parameter in parameterDefinitions)
+        {
+            if (string.IsNullOrEmpty(parameter?.Name))
+            {
+                continue;
+            }
+
+            var parameterName = parameter.Name;
+            if (!definitionsByName.TryAdd(parameterName, parameter))
+            {
+                continue;
+            }
+        }
+
+        if (parameterValues is { Count: > 0 })
+        {
+            foreach (var parameterValue in parameterValues)
+            {
+                if (definitionsByName.ContainsKey(parameterValue.Key))
+                {
+                    resolvedParameterValues[parameterValue.Key] = parameterValue.Value;
+                    continue;
+                }
+
+                undefinedParameterValues.Add(parameterValue.Key);
+            }
+        }
+
+        foreach (var definition in definitionsByName)
+        {
+            var definitionName = definition.Key;
+            if (resolvedParameterValues.ContainsKey(definitionName))
+            {
+                continue;
+            }
+
+            if (definition.Value.Default is not null)
+            {
+                resolvedParameterValues[definitionName] = definition.Value.Default;
+                continue;
+            }
+
+            missingRequiredParameterValues.Add(definitionName);
+        }
+
+        return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
     }
 
     /// <inheritdoc/>

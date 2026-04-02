@@ -59,6 +59,7 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.init -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Remove.get -> bool?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Remove.set -> void
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.ResolveParameterValues() -> (System.Collections.Generic.Dictionary<string!, System.Text.Json.Nodes.JsonNode?>! ResolvedParameterValues, System.Collections.Generic.HashSet<string!>! UndefinedParameterValues, System.Collections.Generic.HashSet<string!>! MissingRequiredParameterValues)
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Target.get -> string?
