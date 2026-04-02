@@ -131,19 +131,45 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         var i = 0;
         var result = true;
+        Dictionary<string, string>? environmentVariableValues = null;
         foreach (var action in Actions)
         {
-            if (action is not OverlayAction overlayAction)
+#pragma warning disable BOO002
+            var overlayAction = action switch
             {
-                throw new NotSupportedException($"Only {nameof(OverlayAction)} instances are supported in {nameof(Actions)}.");
-            }
-            if (!overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
+                OverlayReusableActionReference reusableActionReference => reusableActionReference.GetResolvedAction(
+                    overlayDiagnostic,
+                    environmentVariableValues ??= GetEnvironmentVariableValues()),
+                OverlayAction concreteAction => concreteAction,
+                _ => throw new NotSupportedException(
+                    $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
+            };
+#pragma warning restore BOO002
+
+            if (overlayAction is null || !overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
             {
                 result = false; // If any action fails, the entire application fails
             }
             i++;
         }
         return result;
+    }
+
+    private static Dictionary<string, string> GetEnvironmentVariableValues()
+    {
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+        var environmentVariables = Environment.GetEnvironmentVariables();
+        foreach (var keyObject in environmentVariables.Keys)
+        {
+            if (keyObject is not string key || environmentVariables[keyObject] is not string value)
+            {
+                continue;
+            }
+
+            values[key] = value;
+        }
+
+        return values;
     }
     /// <summary>
     /// Applies the action to an OpenAPI document loaded from the extends property.
