@@ -478,10 +478,10 @@ public partial class OverlayReusableActionReference : IOverlayAction
         return string.Join(", ", ordered);
     }
 
-    [GeneratedRegex("%(?<scope>env|param)\\.(?<key>[A-Za-z][A-Za-z0-9]*)%", RegexOptions.CultureInvariant)]
+    [GeneratedRegex("%(?<scope>env|param)\\.(?<key>[A-Za-z_][A-Za-z0-9_]*)%", RegexOptions.CultureInvariant)]
     private static partial Regex PlaceholderRegex();
 
-    [GeneratedRegex("^%(?<scope>env|param)\\.(?<key>[A-Za-z][A-Za-z0-9]*)%$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex("^%(?<scope>env|param)\\.(?<key>[A-Za-z_][A-Za-z0-9_]*)%$", RegexOptions.CultureInvariant)]
     private static partial Regex StrictPlaceholderRegex();
 
     /// <inheritdoc/>
