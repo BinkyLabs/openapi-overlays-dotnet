@@ -164,7 +164,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return result;
     }
 
-    private static readonly Lazy<Dictionary<string, string>> EnvironmentVariableValues = new(GetEnvironmentVariableValues);
+    private readonly Lazy<Dictionary<string, string>> _environmentVariableValues = new(GetEnvironmentVariableValues);
 
 #pragma warning disable BOO002
     private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)
@@ -177,7 +177,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             return reusableActionReference.GetResolvedAction(
                 overlayDiagnostic,
-                EnvironmentVariableValues.Value,
+                _environmentVariableValues.Value,
                 index);
         }
 
