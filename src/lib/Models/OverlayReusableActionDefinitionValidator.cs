@@ -22,7 +22,7 @@ internal static class OverlayReusableActionDefinitionValidator
             {
                 throw new InvalidOperationException(
                     $"Reusable action {definitionKind} definition name '{definition.Name ?? "<null>"}' is invalid. " +
-                    "Names must match: ALPHA *( ALPHA / DIGIT ).");
+                    "Names must match: ( ALPHA / '_' ) *( ALPHA / DIGIT / '_' ).");
             }
 
             if (!definitionsByName.TryAdd(definition.Name, definition))
@@ -37,7 +37,7 @@ internal static class OverlayReusableActionDefinitionValidator
 
     private static bool IsValidReusableDefinitionName(string name)
     {
-        if (name.Length == 0 || !IsAsciiAlpha(name[0]))
+        if (name.Length == 0 || (!IsAsciiAlpha(name[0]) && !IsUnderscore(name[0])))
         {
             return false;
         }
@@ -45,7 +45,7 @@ internal static class OverlayReusableActionDefinitionValidator
         for (int index = 1; index < name.Length; index++)
         {
             var current = name[index];
-            if (!IsAsciiAlpha(current) && !IsAsciiDigit(current))
+            if (!IsAsciiAlpha(current) && !IsAsciiDigit(current) && !IsUnderscore(current))
             {
                 return false;
             }
@@ -58,5 +58,7 @@ internal static class OverlayReusableActionDefinitionValidator
         (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
 
     private static bool IsAsciiDigit(char value) => value >= '0' && value <= '9';
+
+    private static bool IsUnderscore(char value) => value == '_';
 }
 #pragma warning restore BOO002

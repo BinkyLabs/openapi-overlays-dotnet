@@ -238,7 +238,6 @@ public class OverlayReusableActionReferenceV1_1Tests
     [InlineData("")]
     [InlineData("1invalid")]
     [InlineData("invalid-name")]
-    [InlineData("invalid_name")]
     public void ResolveParameterValues_WithInvalidParameterDefinitionName_ShouldThrow(string? definitionName)
     {
         // Arrange
@@ -257,6 +256,42 @@ public class OverlayReusableActionReferenceV1_1Tests
         // Act + Assert
         var exception = Assert.Throws<InvalidOperationException>(() => reference.ResolveParameterValues());
         Assert.Contains("parameter", exception.Message);
+    }
+
+    [Theory]
+    [InlineData("_region")]
+    [InlineData("region_name")]
+    [InlineData("_region_name_1")]
+    public void ResolveParameterValues_WithUnderscoreInParameterDefinitionName_ShouldResolve(string definitionName)
+    {
+        // Arrange
+        var value = JsonValue.Create("us")!;
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                ParameterValues = new Dictionary<string, JsonNode>
+                {
+                    [definitionName] = value
+                }
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = definitionName }
+                ]
+            }
+        };
+
+        // Act
+        var (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues) = reference.ResolveParameterValues();
+
+        // Assert
+        Assert.Single(resolvedParameterValues);
+        Assert.Same(value, resolvedParameterValues[definitionName]);
+        Assert.Empty(undefinedParameterValues);
+        Assert.Empty(missingRequiredParameterValues);
     }
 
     [Fact]

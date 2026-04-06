@@ -162,7 +162,6 @@ public class OverlayReusableActionV1_1Tests
     [InlineData("")]
     [InlineData("1invalid")]
     [InlineData("invalid-name")]
-    [InlineData("invalid_name")]
     public void ResolveEnvironmentVariableValues_WithInvalidEnvironmentVariableDefinitionName_ShouldThrow(string? definitionName)
     {
         // Arrange
