@@ -101,6 +101,28 @@ public class OverlayReusableActionReferenceV1Tests
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void SerializeAsV1_WithMissingReference_ShouldThrow(string? missingReference)
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = missingReference
+            }
+        };
+
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => reference.SerializeAsV1(writer));
+        Assert.Contains("cannot be null or empty", exception.Message);
+    }
+
     [Fact]
     public void ReferenceAndGetters_ShouldFallbackToTargetAction_WhenBackingFieldNotSet()
     {

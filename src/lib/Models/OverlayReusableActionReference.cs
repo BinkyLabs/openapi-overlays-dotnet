@@ -503,12 +503,14 @@ public partial class OverlayReusableActionReference : IOverlayAction
     {
         ArgumentNullException.ThrowIfNull(writer);
 
+        if (string.IsNullOrEmpty(Reference.Reference))
+        {
+            throw new InvalidOperationException($"'{nameof(Reference.Reference)}' cannot be null or empty when serializing a reusable action reference.");
+        }
+
         writer.WriteStartObject();
 
-        if (!string.IsNullOrEmpty(Reference.Reference))
-        {
-            writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
-        }
+        writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
 
         if (Reference.ParameterValues != null)
         {
