@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
@@ -31,10 +33,12 @@ public static class OverlayConstants
     /// <summary>
     /// Field: OverlayReusableActionReference.$ref (serialized as extension for v1/v1.1 compatibility)
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionReferenceXReferenceFieldName = "x-$ref";
     /// <summary>
     /// Field: OverlayReusableActionReference.parameterValues (serialized as extension for v1/v1.1 compatibility)
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionReferenceXParameterValuesFieldName = "x-parameterValues";
     /// <summary>
     /// Prefix used to build OverlayReusableActionReference.Reference
@@ -85,6 +89,7 @@ public static class OverlayConstants
     /// <summary>
     /// Field: OverlayDocument.Components (serialized as extension for v1/v1.1 compatibility)
     /// </summary>
+    [Experimental("BOO002")]
     public const string DocumentXComponentsFieldName = "x-components";
 
     /// <summary>
