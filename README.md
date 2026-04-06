@@ -286,10 +286,10 @@ x-components:
           default: dev
 actions:
   - x-$ref: '#/components/actions/errorResponse'
-    parameterValues:
+    x-parameterValues:
       pathItem: '/items'
   - x-$ref: '#/components/actions/errorResponse'
-    parameterValues:
+    x-parameterValues:
       pathItem: '/some-items'
       operation: delete
       propertyName: deleteErrorMessage
