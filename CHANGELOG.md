@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.5.0...v2.5.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* diagnostics returned JSONPaths instead of JSON pointers ([538fb31](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/538fb3102799062d28c46e0fec055c068dc7c704))
+* diagnostics returned JSONPaths instead of JSON pointers ([6284353](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/628435353820be15798563bc8a679535fb812dbf))
+
 ## [2.5.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.4.0...v2.5.0) (2026-04-01)
 
 
