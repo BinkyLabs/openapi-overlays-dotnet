@@ -75,8 +75,6 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Description.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Extensions.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.HostDocument.get -> BinkyLabs.OpenApi.Overlays.OverlayDocument?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.HostDocument.init -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.OverlayReusableActionReferenceItem(string! reusableActionIdentifier, BinkyLabs.OpenApi.Overlays.OverlayDocument? overlayDocument = null) -> void

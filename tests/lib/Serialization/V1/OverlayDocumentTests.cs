@@ -282,6 +282,45 @@ public sealed class OverlayDocumentTests
 
     [Fact]
 #pragma warning disable BOO002
+    public async Task Deserialize_WithReusableActionReference_ShouldSetHostDocument()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "errorResponse": {
+                        "target": "$.paths['/pets'].get.responses.404",
+                        "remove": true
+                    }
+                }
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/errorResponse"
+                }
+            ]
+        }
+        """;
+
+        // Act
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
+
+        // Assert
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+#pragma warning disable BOO002
     public void SerializeAsV1_WithUnresolvedReusableActionReference_ShouldThrow()
     {
         // Arrange
@@ -311,6 +350,52 @@ public sealed class OverlayDocumentTests
         Assert.Contains("$.actions[0]", exception.Message, StringComparison.Ordinal);
         Assert.Contains("#/components/actions/missingAction", exception.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void SerializeAsV1_WithReusableActionReferenceWithoutHostDocument_ShouldSetHostDocument()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    ["errorResponse"] = new()
+                    {
+                        Target = "$.paths['/pets'].get.responses.404",
+                        Remove = true
+                    }
+                }
+            },
+            Actions =
+            [
+                new OverlayReusableActionReference
+                {
+                    Reference = new OverlayReusableActionReferenceItem
+                    {
+                        Id = "errorResponse"
+                    }
+                }
+            ]
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act
+        overlayDocument.SerializeAsV1(writer);
+
+        // Assert
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+    }
+#pragma warning restore BOO002
 #pragma warning restore BOO002
 
     [Fact]

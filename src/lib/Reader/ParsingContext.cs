@@ -85,6 +85,8 @@ public class ParsingContext
                 throw new OpenApiUnsupportedSpecVersionException(inputVersion);
         }
 
+        doc.SetUnsetReferenceHostDocuments();
+
         AddUnresolvedReusableActionReferenceErrors(doc);
 
         return doc;

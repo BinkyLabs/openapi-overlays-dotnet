@@ -32,7 +32,7 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
     /// <summary>
     /// Gets the optional overlay document context for validation and reference resolution.
     /// </summary>
-    public OverlayDocument? HostDocument { get; init; }
+    internal OverlayDocument? HostDocument { get; set; }
     /// <summary>
     /// Gets the referenced reusable action identifier.
     /// </summary>

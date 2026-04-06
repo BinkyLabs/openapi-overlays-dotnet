@@ -50,6 +50,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 #pragma warning disable BOO002
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
+        SetUnsetReferenceHostDocuments();
+
         var unresolvedActionReferences = GetUnresolvedReusableActionReferences();
         if (unresolvedActionReferences.Count > 0)
         {
@@ -75,6 +77,21 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         writer.WriteEndObject();
     }
 #pragma warning restore BOO002
+#pragma warning disable BOO002
+    internal void SetUnsetReferenceHostDocuments()
+    {
+        if (Actions is not { Count: > 0 })
+        {
+            return;
+        }
+
+        foreach (var reusableActionReference in Actions.OfType<OverlayReusableActionReference>().Where(static r => r.Reference.HostDocument is null))
+        {
+            reusableActionReference.Reference.HostDocument = this;
+        }
+    }
+#pragma warning restore BOO002
+
     private static readonly Dictionary<OverlaySpecVersion, string> SpecVersionToStringMap = new()
     {
         { OverlaySpecVersion.Overlay1_0, "1.0.0" },
