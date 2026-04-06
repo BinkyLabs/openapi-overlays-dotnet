@@ -335,7 +335,7 @@ public sealed class OverlayDocumentV1_1Tests
             "x-components": {
                 "actions": {
                     "removeNotFoundDescription": {
-                        "target": "$.paths['/pets'].get.responses.404.description",
+                        "target": "$.paths['/pets'].get.responses['404'].description",
                         "remove": true
                     }
                 }
@@ -382,6 +382,7 @@ public sealed class OverlayDocumentV1_1Tests
         // Assert apply output
         Assert.True(result);
         Assert.Empty(applyDiagnostic.Errors);
+        Assert.Empty(applyDiagnostic.Warnings);
         Assert.Null(targetDocument["paths"]?["/pets"]?["get"]?["responses"]?["404"]?["description"]);
     }
 #pragma warning restore BOO002
