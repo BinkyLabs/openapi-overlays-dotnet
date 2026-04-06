@@ -280,7 +280,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Target is required", overlayDiagnostic.Errors[0].Message);
     }
     [Fact]
@@ -297,7 +297,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("At least one of 'remove', 'update' or 'x-copy' must be specified", overlayDiagnostic.Errors[0].Message);
     }
     [Fact]
@@ -316,7 +316,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("At most one of 'remove', 'update' or 'x-copy' can be specified", overlayDiagnostic.Errors[0].Message);
     }
     [Fact]
@@ -334,7 +334,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Invalid JSON Path: 'Test Target'", overlayDiagnostic.Errors[0].Message);
     }
     [Fact]
@@ -598,7 +598,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Invalid copy JSON Path: 'invalid path'", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -623,7 +623,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Copy JSON Path '$.nonexistent.field' must match exactly one result, but matched 0", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -655,7 +655,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Copy JSON Path '$.paths[*].get.nonexistent' must match exactly one result, but matched 0", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -691,7 +691,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Copy JSON Path '$.paths[*].get.operationId' must match exactly one result, but matched 2", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -717,7 +717,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Target '$.info.nonexistent' does not point to a valid JSON node", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -743,7 +743,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Copy target '$.info.nonexistent' does not point to a valid JSON node", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -983,7 +983,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Copy JSON Path '$.paths[*].get.nonexistent' must match exactly one result, but matched 0", overlayDiagnostic.Errors[0].Message);
     }
 
@@ -1020,7 +1020,7 @@ public class OverlayActionV1Tests
 
         Assert.False(result);
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Equal("$.actions[0]", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
         Assert.Equal("Copy JSON Path '$.paths[*].get.summary' must match exactly one result, but matched 2", overlayDiagnostic.Errors[0].Message);
     }
 

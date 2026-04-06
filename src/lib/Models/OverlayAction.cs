@@ -204,7 +204,7 @@ public class OverlayAction : IOverlaySerializable, IOverlayExtensible
         return true;
     }
 
-    private static string GetPointer(int index) => $"$.actions[{index}]";
+    private static string GetPointer(int index) => $"/actions/{index}";
 
     private bool RemoveNodes(PathResult parseResult, JsonNode documentJsonNode, JsonPath jsonPath, OverlayDiagnostic overlayDiagnostic, int index)
     {
