@@ -319,6 +319,72 @@ public sealed class OverlayDocumentV1_1Tests
         var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
         Assert.Same(overlayDocument, reference.Reference.HostDocument);
     }
+
+    [Fact]
+#pragma warning disable BOO002
+    public async Task ParseAndApply_WithReusableActionReference_ShouldResolveTargetActionFromHostDocument()
+    {
+        // Arrange
+        var overlayJson = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "removeNotFoundDescription": {
+                        "target": "$.paths['/pets'].get.responses.404.description",
+                        "remove": true
+                    }
+                }
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/removeNotFoundDescription"
+                }
+            ]
+        }
+        """;
+        var targetDocument = JsonNode.Parse("""
+        {
+            "openapi": "3.1.0",
+            "paths": {
+                "/pets": {
+                    "get": {
+                        "responses": {
+                            "404": {
+                                "description": "Not found"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        """)!;
+
+        // Act
+        var (overlayDocument, parseDiagnostic) = await OverlayDocument.ParseAsync(overlayJson);
+
+        // Assert parse output
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(parseDiagnostic);
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+        Assert.Empty(parseDiagnostic.Errors);
+
+        // Act
+        var applyDiagnostic = new OverlayDiagnostic();
+        var result = overlayDocument.ApplyToDocument(targetDocument, applyDiagnostic);
+
+        // Assert apply output
+        Assert.True(result);
+        Assert.Empty(applyDiagnostic.Errors);
+        Assert.Null(targetDocument["paths"]?["/pets"]?["get"]?["responses"]?["404"]?["description"]);
+    }
+#pragma warning restore BOO002
 #pragma warning restore BOO002
 
     [Fact]
