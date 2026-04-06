@@ -253,7 +253,7 @@ paths:
 **Overlay:**
 
 ```yaml
-overlay: 1.2.0
+overlay: 1.1.0
 info:
   title: Use reusable actions with parameters and environment variables
   version: 1.0.0
