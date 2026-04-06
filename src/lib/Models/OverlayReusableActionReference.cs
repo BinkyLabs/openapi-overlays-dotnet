@@ -412,6 +412,8 @@ public partial class OverlayReusableActionReference : IOverlayAction
         {
             if (!stringValue.Contains('%', StringComparison.Ordinal))
             {
+                // no point in cloning if there are no placeholders to replace
+                // we're only going to apply the resulting tree, and serialize the resulting document, so immutability is not a concern
                 return valueNode;
             }
 
