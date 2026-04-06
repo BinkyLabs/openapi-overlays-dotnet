@@ -50,7 +50,6 @@ BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument
 BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument.OverlayApplicationResultOfOpenApiDocument() -> void
 BinkyLabs.OpenApi.Overlays.OverlayConstants
 BinkyLabs.OpenApi.Overlays.OverlayDocument
-BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayAction!>?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToDocumentAndLoadAsync(string! documentPathOrUri, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? readerSettings = null, bool strict = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument!>!
 BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToDocumentAsync(string! documentPathOrUri, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? readerSettings = null, bool strict = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfJsonNode!>!
@@ -180,7 +179,6 @@ BinkyLabs.OpenApi.Overlays.IOverlayAction.Description.get -> string?
 BinkyLabs.OpenApi.Overlays.IOverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.IOverlayAction.Target.get -> string?
 BinkyLabs.OpenApi.Overlays.IOverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
-*REMOVED*BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayAction!>?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.IOverlayAction!>?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
