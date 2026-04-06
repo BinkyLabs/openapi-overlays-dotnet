@@ -192,7 +192,7 @@ public partial class OverlayReusableActionReference : IOverlayAction
         ArgumentNullException.ThrowIfNull(overlayDiagnostic);
         ArgumentNullException.ThrowIfNull(environmentVariableValues);
 
-        var pointer = $"/actions/{actionIndex}";
+        var pointer = OverlayAction.GetPointer(actionIndex);
         Dictionary<string, JsonNode?> resolvedParameterValues;
         Dictionary<string, JsonNode?> resolvedEnvironmentVariableValues;
         try

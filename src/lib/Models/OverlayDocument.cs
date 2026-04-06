@@ -183,7 +183,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         overlayDiagnostic.Errors.Add(
             new OpenApiError(
-                $"/actions/{index}",
+                OverlayAction.GetPointer(index),
                 $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
         );
 
@@ -443,14 +443,12 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                 continue;
             }
 
-            unresolvedReferences[GetActionPointer(index)] = reusableActionReference.Reference.Reference;
+            unresolvedReferences[OverlayAction.GetPointer(index)] = reusableActionReference.Reference.Reference;
         }
 
         return unresolvedReferences;
     }
 #pragma warning restore BOO002
-
-    private static string GetActionPointer(int index) => $"$.actions[{index}]";
 
     private static string FormatUnresolvedReusableActionReferences(Dictionary<string, string> unresolvedActionReferences)
     {

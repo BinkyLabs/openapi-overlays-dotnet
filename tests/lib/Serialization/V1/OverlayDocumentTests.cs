@@ -276,7 +276,7 @@ public sealed class OverlayDocumentTests
         Assert.NotNull(diagnostic);
         Assert.Contains(
             diagnostic.Errors,
-            static e => e.Pointer == "$.actions[0]" &&
+            static e => e.Pointer == "/actions/0" &&
                         e.Message.Contains("#/components/actions/missingAction", StringComparison.Ordinal));
     }
 
@@ -347,7 +347,7 @@ public sealed class OverlayDocumentTests
 
         // Act + Assert
         var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1(writer));
-        Assert.Contains("$.actions[0]", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("/actions/0", exception.Message, StringComparison.Ordinal);
         Assert.Contains("#/components/actions/missingAction", exception.Message, StringComparison.Ordinal);
     }
 
