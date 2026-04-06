@@ -386,7 +386,6 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Null(targetDocument["paths"]?["/pets"]?["get"]?["responses"]?["404"]?["description"]);
     }
 #pragma warning restore BOO002
-#pragma warning restore BOO002
 
     [Fact]
 #pragma warning disable BOO002

@@ -396,7 +396,6 @@ public sealed class OverlayDocumentTests
         Assert.Same(overlayDocument, reference.Reference.HostDocument);
     }
 #pragma warning restore BOO002
-#pragma warning restore BOO002
 
     [Fact]
     public void SerializeAsV1_WithUpdate_ShouldWriteCorrectJson()
