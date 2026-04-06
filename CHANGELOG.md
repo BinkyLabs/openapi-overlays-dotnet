@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0-preview.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.0...v3.0.0-preview.1) (2026-04-06)
+
+
+### Features
+
+* adds experimental support for reusable actions ([00e7b79](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/00e7b791cf36065201cda966735507b3260d9a1a))
+
 ## [2.5.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.5.0...v2.5.1) (2026-04-06)
 
 
