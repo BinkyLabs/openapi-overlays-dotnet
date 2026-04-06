@@ -74,8 +74,10 @@ public class OverlayReusableAction : IOverlayAction
     /// </item>
     /// </list>
     /// </returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="environmentVariableValues"/> is null.</exception>
     public (Dictionary<string, JsonNode?> ResolvedEnvironmentVariableValues, HashSet<string> MissingRequiredEnvironmentVariableValues) ResolveEnvironmentVariableValues(IDictionary<string, string> environmentVariableValues)
     {
+        ArgumentNullException.ThrowIfNull(environmentVariableValues);
         var resolvedEnvironmentVariableValues = new Dictionary<string, JsonNode?>(StringComparer.Ordinal);
         var missingRequiredEnvironmentVariableValues = new HashSet<string>(StringComparer.Ordinal);
 
