@@ -7,7 +7,6 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// </summary>
 public static class OverlayConstants
 {
-
     /// <summary>
     /// Field: ExtensionFieldNamePrefix
     /// </summary>
