@@ -735,7 +735,7 @@ public class OverlayReusableActionReferenceV1Tests
         Assert.Null(resolvedAction);
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Contains("missing required environment variable values", overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
-        Assert.Equal("#/components/actions/errorResponse", overlayDiagnostic.Errors[0].Pointer);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
     }
 
     [Fact]

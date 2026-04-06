@@ -157,7 +157,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             {
                 OverlayReusableActionReference reusableActionReference => reusableActionReference.GetResolvedAction(
                     overlayDiagnostic,
-                    environmentVariableValues ??= GetEnvironmentVariableValues()),
+                    environmentVariableValues ??= GetEnvironmentVariableValues(),
+                    i),
                 OverlayAction concreteAction => concreteAction,
                 _ => throw new NotSupportedException(
                     $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")

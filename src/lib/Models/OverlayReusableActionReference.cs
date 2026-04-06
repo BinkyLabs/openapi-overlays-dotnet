@@ -187,12 +187,12 @@ public partial class OverlayReusableActionReference : IOverlayAction
         return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
     }
 
-    internal OverlayAction? GetResolvedAction(OverlayDiagnostic overlayDiagnostic, IDictionary<string, string> environmentVariableValues)
+    internal OverlayAction? GetResolvedAction(OverlayDiagnostic overlayDiagnostic, IDictionary<string, string> environmentVariableValues, int actionIndex = 0)
     {
         ArgumentNullException.ThrowIfNull(overlayDiagnostic);
         ArgumentNullException.ThrowIfNull(environmentVariableValues);
 
-        var pointer = Reference.Reference;
+        var pointer = $"/actions/{actionIndex}";
         Dictionary<string, JsonNode?> resolvedParameterValues;
         Dictionary<string, JsonNode?> resolvedEnvironmentVariableValues;
         try
