@@ -1,5 +1,15 @@
 {
   "bootstrap-sha": "a86a120902cf51478bfb3f2dc9cdbffa2c1d0842",
+  "branches": [
+    {
+      "channel": "preview",
+      "name": "main"
+    },
+    {
+      "channel": "latest",
+      "name": "support/v2"
+    }
+  ],
   "exclude-paths": [
     ".github",
     ".vs",
@@ -11,7 +21,8 @@
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "draft": false,
-  "prerelease": false,
+  "prerelease": true,
+  "prerelease-type": "preview",
   "packages": {
     ".": {
       "package-name": "openapi-overlays-dotnet",

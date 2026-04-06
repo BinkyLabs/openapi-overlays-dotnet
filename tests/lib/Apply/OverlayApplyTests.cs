@@ -233,7 +233,7 @@ public sealed class OverlayApplyTests : IDisposable
         var overlayDocument = new OverlayDocument
         {
             Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
-            Actions = new List<OverlayAction>
+            Actions = new List<IOverlayAction>
             {
                 new OverlayAction
                 {
@@ -294,7 +294,7 @@ public sealed class OverlayApplyTests : IDisposable
         var overlayDocument = new OverlayDocument
         {
             Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
-            Actions = new List<OverlayAction>
+            Actions = new List<IOverlayAction>
             {
                 new OverlayAction
                 {
@@ -849,6 +849,181 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Warnings);
         // Verify the successful action was still applied
         Assert.Equal("Updated Description", jsonNode["info"]?["description"]?.ToString());
+    }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void ApplyToDocument_WithReusableActionReference_ShouldResolveAndApplyAction()
+    {
+        // Arrange
+        const string environmentVariableName = "OVERLAYTESTENV";
+        var previousEnvironmentValue = Environment.GetEnvironmentVariable(environmentVariableName);
+        Environment.SetEnvironmentVariable(environmentVariableName, "env-value");
+        try
+        {
+            var overlayDocument = new OverlayDocument();
+            overlayDocument.Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
+                {
+                    ["setServerDescription"] = new OverlayReusableAction
+                    {
+                        Target = "$.servers[0]",
+                        Update = new JsonObject
+                        {
+                            ["description"] = "%param.region%-%env.OVERLAYTESTENV%"
+                        },
+                        Parameters =
+                        [
+                            new OverlayReusableActionParameter
+                            {
+                                Name = "region",
+                                Default = JsonValue.Create("default-region")
+                            }
+                        ],
+                        EnvironmentVariables =
+                        [
+                            new OverlayReusableActionParameter
+                            {
+                                Name = environmentVariableName
+                            }
+                        ]
+                    }
+                }
+            };
+            overlayDocument.Actions =
+            [
+                new OverlayReusableActionReference("setServerDescription", overlayDocument)
+                {
+                    Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
+                    {
+                        ParameterValues = new Dictionary<string, JsonNode>
+                        {
+                            ["region"] = JsonValue.Create("us")
+                        }
+                    }
+                }
+            ];
+
+            var jsonNode = new JsonObject
+            {
+                ["servers"] = new JsonArray
+                {
+                    new JsonObject
+                    {
+                        ["url"] = "https://example.com"
+                    }
+                }
+            };
+            var overlayDiagnostic = new OverlayDiagnostic();
+
+            // Act
+            var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+            // Assert
+            Assert.True(result, "ApplyToDocument should return true when reusable action reference resolves.");
+            Assert.Empty(overlayDiagnostic.Errors);
+            Assert.Empty(overlayDiagnostic.Warnings);
+            Assert.Equal("us-env-value", jsonNode["servers"]?[0]?["description"]?.ToString());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(environmentVariableName, previousEnvironmentValue);
+        }
+    }
+
+    [Fact]
+    public void ApplyToDocument_WithReusableActionReferenceResolutionError_ShouldReturnFalseAndAddDiagnostic()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument();
+        var missingEnvironmentVariableName = $"MissingRequiredEnv{Guid.NewGuid():N}".ToUpperInvariant();
+        overlayDocument.Components = new OverlayComponents
+        {
+            Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
+            {
+                ["setServerDescription"] = new OverlayReusableAction
+                {
+                    Target = "$.servers[0]",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "value"
+                    },
+                    EnvironmentVariables =
+                    [
+                        new OverlayReusableActionParameter
+                        {
+                            Name = missingEnvironmentVariableName
+                        }
+                    ]
+                }
+            }
+        };
+        overlayDocument.Actions =
+        [
+            new OverlayReusableActionReference("setServerDescription", overlayDocument)
+            {
+                Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
+            }
+        ];
+
+        var jsonNode = new JsonObject
+        {
+            ["servers"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["url"] = "https://example.com"
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false when reusable action reference resolution fails.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Contains("missing required environment variable values", overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Null(jsonNode["servers"]?[0]?["description"]);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+    public void ApplyToDocument_ShouldAddErrorForUnsupportedActionType()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions = [new UnsupportedAction()]
+        };
+        var jsonNode = new JsonObject { ["info"] = new JsonObject { ["title"] = "Test" } };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false for an unsupported action type.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
+#pragma warning disable BOO002
+        Assert.Contains(nameof(OverlayAction), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(OverlayReusableActionReference), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+#pragma warning restore BOO002
+    }
+
+    private sealed class UnsupportedAction : IOverlayAction
+    {
+        public string? Target => null;
+        public string? Description => null;
+        public bool? Remove => null;
+        public JsonNode? Update => null;
+        public string? Copy => null;
+        public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
+        public void SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter writer) { }
+        public void SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter writer) { }
     }
 
     public void Dispose()
