@@ -149,6 +149,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var i = 0;
         var result = true;
         Dictionary<string, string>? environmentVariableValues = null;
+        SetUnsetReferenceHostDocuments();
         foreach (var action in Actions)
         {
 #pragma warning disable BOO002
