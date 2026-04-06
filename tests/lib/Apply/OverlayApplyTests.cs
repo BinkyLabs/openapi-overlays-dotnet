@@ -990,6 +990,42 @@ public sealed class OverlayApplyTests : IDisposable
     }
 #pragma warning restore BOO002
 
+    [Fact]
+    public void ApplyToDocument_ShouldAddErrorForUnsupportedActionType()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions = [new UnsupportedAction()]
+        };
+        var jsonNode = new JsonObject { ["info"] = new JsonObject { ["title"] = "Test" } };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false for an unsupported action type.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
+#pragma warning disable BOO002
+        Assert.Contains(nameof(OverlayAction), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(OverlayReusableActionReference), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+#pragma warning restore BOO002
+    }
+
+    private sealed class UnsupportedAction : IOverlayAction
+    {
+        public string? Target => null;
+        public string? Description => null;
+        public bool? Remove => null;
+        public JsonNode? Update => null;
+        public string? Copy => null;
+        public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
+        public void SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter writer) { }
+        public void SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter writer) { }
+    }
+
     public void Dispose()
     {
         // Cleanup

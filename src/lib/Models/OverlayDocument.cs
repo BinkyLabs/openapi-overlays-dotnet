@@ -148,24 +148,14 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         var i = 0;
         var result = true;
-        Dictionary<string, string>? environmentVariableValues = null;
+        var environmentVariableValues = GetEnvironmentVariableValues();
         SetUnsetReferenceHostDocuments();
         foreach (var action in Actions)
         {
-#pragma warning disable BOO002
-            var overlayAction = action switch
-            {
-                OverlayReusableActionReference reusableActionReference => reusableActionReference.GetResolvedAction(
-                    overlayDiagnostic,
-                    environmentVariableValues ??= GetEnvironmentVariableValues(),
-                    i),
-                OverlayAction concreteAction => concreteAction,
-                _ => throw new NotSupportedException(
-                    $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
-            };
-#pragma warning restore BOO002
+            var overlayAction = ResolveAction(action, overlayDiagnostic, i);
 
-            if (overlayAction is null || !overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
+            if (overlayAction is null ||
+                !overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
             {
                 result = false; // If any action fails, the entire application fails
             }
@@ -173,6 +163,33 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         return result;
     }
+
+    private static readonly Lazy<Dictionary<string, string>> EnvironmentVariableValues = new(GetEnvironmentVariableValues);
+
+#pragma warning disable BOO002
+    private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)
+    {
+        if (action is OverlayAction concreteAction)
+        {
+            return concreteAction;
+        }
+        if (action is OverlayReusableActionReference reusableActionReference)
+        {
+            return reusableActionReference.GetResolvedAction(
+                overlayDiagnostic,
+                EnvironmentVariableValues.Value,
+                index);
+        }
+
+        overlayDiagnostic.Errors.Add(
+            new OpenApiError(
+                $"/actions/{index}",
+                $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
+        );
+
+        return null;
+    }
+#pragma warning restore BOO002
 
     private static Dictionary<string, string> GetEnvironmentVariableValues()
     {
