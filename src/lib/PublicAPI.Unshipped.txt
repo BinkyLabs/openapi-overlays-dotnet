@@ -89,13 +89,12 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Target.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.get -> System.Text.Json.Nodes.JsonNode?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.set -> void
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterDefaultFieldName = "default" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterNameFieldName = "name" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
-*REMOVED*const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentComponentsFieldName = "x-components" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionEnvironmentVariablesFieldName = "environmentVariables" -> string!
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParametersFieldName = "parameters" -> string!
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXComponentsFieldName = "x-components" -> string!
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionEnvironmentVariablesFieldName = "environmentVariables" -> string!
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterDefaultFieldName = "default" -> string!
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterNameFieldName = "name" -> string!
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParametersFieldName = "parameters" -> string!
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXParameterValuesFieldName = "x-parameterValues" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXReferenceFieldName = "x-$ref" -> string!

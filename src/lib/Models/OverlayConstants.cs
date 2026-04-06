@@ -16,19 +16,23 @@ public static class OverlayConstants
     /// <summary>
     /// Field: ReusableActionParameter.Name
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionParameterNameFieldName = "name";
 
     /// <summary>
     /// Field: ReusableActionParameter.Default
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionParameterDefaultFieldName = "default";
     /// <summary>
     /// Field: OverlayReusableAction.Parameters
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionParametersFieldName = "parameters";
     /// <summary>
     /// Field: OverlayReusableAction.EnvironmentVariables
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionEnvironmentVariablesFieldName = "environmentVariables";
     /// <summary>
     /// Field: OverlayReusableActionReference.$ref (serialized as extension for v1/v1.1 compatibility)
@@ -43,6 +47,7 @@ public static class OverlayConstants
     /// <summary>
     /// Prefix used to build OverlayReusableActionReference.Reference
     /// </summary>
+    [Experimental("BOO002")]
     public const string ReusableActionReferencePrefix = "#/components/actions/";
 
     /// <summary>
@@ -95,6 +100,7 @@ public static class OverlayConstants
     /// <summary>
     /// Field: OverlayComponents.Actions
     /// </summary>
+    [Experimental("BOO002")]
     public const string ComponentsActionsFieldName = "actions";
 
     /// <summary>
