@@ -251,7 +251,7 @@ Two new experimental helper APIs were added to support explicit reusable-action 
 
 Notes:
 
-- Reusable parameter/environment-variable definition names are validated and must match `ALPHA *( ALPHA / DIGIT / "_" )` (`[A-Za-z][A-Za-z0-9_]*`). The same validated names are used in `%param.name%` and `%env.name%` interpolation placeholders.
+- Reusable parameter/environment-variable definition names are validated and must match `( ALPHA / "_" ) *( ALPHA / DIGIT / "_" )` (`[A-Za-z_][A-Za-z0-9_]*`). The same validated names are used in `%param.name%` and `%env.name%` interpolation placeholders.
 - Invalid names, duplicate definition names, null definitions, or unresolved target-action resolution preconditions raise `InvalidOperationException`.
 
 #### Validation and apply-time behavior updates
