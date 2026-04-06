@@ -91,6 +91,8 @@ internal sealed class OverlayCommonAction
         string copyFieldName,
         Action<IOpenApiWriter> serializeAdditionalProperties)
     {
+        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(serializeAdditionalProperties);
         writer.WriteStartObject();
         writer.WriteRequiredProperty(OverlayConstants.ActionTargetFieldName, Target);
         writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Description);
