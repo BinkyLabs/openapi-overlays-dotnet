@@ -35,7 +35,7 @@ public class OverlayComponentsV1Tests
                             new OverlayReusableActionParameter
                             {
                                 Name = "region",
-                                Default = JsonNode.Parse("\"us\"")
+                                Default = "us"
                             }
                         ]
                     }
@@ -115,7 +115,7 @@ public class OverlayComponentsV1Tests
         Assert.NotNull(action.Parameters);
         Assert.Single(action.Parameters);
         Assert.Equal("region", action.Parameters[0].Name);
-        Assert.Equal("us", action.Parameters[0].Default?.GetValue<string>());
+        Assert.Equal("us", action.Parameters[0].Default);
     }
 
     [Fact]

@@ -75,31 +75,23 @@ public class OverlayReusableAction : IOverlayAction
     /// </list>
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="environmentVariableValues"/> is null.</exception>
-    public (Dictionary<string, JsonNode?> ResolvedEnvironmentVariableValues, HashSet<string> MissingRequiredEnvironmentVariableValues) ResolveEnvironmentVariableValues(IDictionary<string, string> environmentVariableValues)
+    public (Dictionary<string, string> ResolvedEnvironmentVariableValues, HashSet<string> MissingRequiredEnvironmentVariableValues) ResolveEnvironmentVariableValues(IDictionary<string, string> environmentVariableValues)
     {
         ArgumentNullException.ThrowIfNull(environmentVariableValues);
-        var resolvedEnvironmentVariableValues = new Dictionary<string, JsonNode?>(StringComparer.Ordinal);
         var missingRequiredEnvironmentVariableValues = new HashSet<string>(StringComparer.Ordinal);
 
         if (EnvironmentVariables is not { Count: > 0 })
         {
-            return (resolvedEnvironmentVariableValues, missingRequiredEnvironmentVariableValues);
+            return ([], missingRequiredEnvironmentVariableValues);
         }
 
         var definitionsByName = OverlayReusableActionDefinitionValidator.BuildDefinitionsByName(
             EnvironmentVariables,
             "environment variable");
 
-        if (environmentVariableValues is { Count: > 0 })
-        {
-            foreach (var environmentVariableValue in environmentVariableValues)
-            {
-                if (definitionsByName.ContainsKey(environmentVariableValue.Key))
-                {
-                    resolvedEnvironmentVariableValues[environmentVariableValue.Key] = JsonValue.Create(environmentVariableValue.Value);
-                }
-            }
-        }
+        var resolvedEnvironmentVariableValues = new Dictionary<string, string>(
+            environmentVariableValues is { Count: > 0 } ? environmentVariableValues.Where(x => definitionsByName.ContainsKey(x.Key)) : [],
+            StringComparer.Ordinal);
 
         foreach (var definition in definitionsByName)
         {

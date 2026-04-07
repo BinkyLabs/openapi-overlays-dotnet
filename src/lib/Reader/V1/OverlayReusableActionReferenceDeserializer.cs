@@ -1,5 +1,3 @@
-using System.Text.Json.Nodes;
-
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -31,16 +29,10 @@ internal static partial class OverlayV1Deserializer
     public static OverlayReusableActionReference LoadReusableActionReference(ParseNode node) =>
         OverlayCommonAction.LoadActionInternal(node, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
 
-    private static IDictionary<string, JsonNode> LoadReusableActionReferenceParameterValues(ParseNode node)
+    private static IDictionary<string, string> LoadReusableActionReferenceParameterValues(ParseNode node)
     {
-        if (node.CreateAny() is not JsonObject parameterValuesObject)
-        {
-            throw new OverlayReaderException("ReusableActionReference parameter values must be a map/object", node.Context);
-        }
-
-        return parameterValuesObject
-            .Where(static kvp => kvp.Value is not null)
-            .ToDictionary(static kvp => kvp.Key, static kvp => kvp.Value!);
+        var parameterValuesMap = node.CheckMapNode("ReusableActionReference parameter values");
+        return parameterValuesMap.CreateSimpleMap(static valueNode => valueNode.GetScalarValue());
     }
 }
 #pragma warning restore BOO002
