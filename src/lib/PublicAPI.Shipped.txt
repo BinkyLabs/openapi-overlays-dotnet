@@ -180,8 +180,6 @@ BinkyLabs.OpenApi.Overlays.IOverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.IOverlayAction.Target.get -> string?
 BinkyLabs.OpenApi.Overlays.IOverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.IOverlayAction!>?
-BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
-BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Copy.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Copy.set -> void
@@ -269,3 +267,5 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXParameterValuesFieldName = "x-parameterValues" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXReferenceFieldName = "x-$ref" -> string!
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
