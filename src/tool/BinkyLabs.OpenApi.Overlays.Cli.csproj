@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\lib\BinkyLabs.OpenApi.Overlays.csproj"/>
+    <ProjectReference Include="..\lib\BinkyLabs.OpenApi.Overlays.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.5"/>
+    <PackageReference Include="System.CommandLine" Version="2.0.5" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -48,8 +48,8 @@
   </PropertyGroup>
 
    <ItemGroup>
-    <None Include="./README.md" Pack="true" PackagePath=""/>
-    <None Include="..\Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png"/>
+    <None Include="./README.md" Pack="true" PackagePath="" />
+    <None Include="..\Assets\logo-binkylabs.png" Pack="true" PackagePath="logo-binkylabs.png" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -58,7 +58,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="4.14.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.7.0-1.26203.108">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
