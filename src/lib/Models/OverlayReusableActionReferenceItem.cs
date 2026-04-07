@@ -36,7 +36,11 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
     /// <summary>
     /// Gets the referenced reusable action identifier.
     /// </summary>
-    public string? Id { get; set; }
+    public string? Id
+    {
+        get;
+        set => field = NormalizeReusableActionReferenceId(value);
+    }
 
     /// <summary>
     /// Gets the map of parameter values for the reusable action reference.
@@ -76,4 +80,16 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
 
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
+
+    internal static string? NormalizeReusableActionReferenceId(string? referenceOrId)
+    {
+        if (string.IsNullOrEmpty(referenceOrId))
+        {
+            return referenceOrId;
+        }
+
+        return referenceOrId.StartsWith(OverlayConstants.ReusableActionReferencePrefix, StringComparison.Ordinal)
+            ? referenceOrId[OverlayConstants.ReusableActionReferencePrefix.Length..]
+            : referenceOrId;
+    }
 }
