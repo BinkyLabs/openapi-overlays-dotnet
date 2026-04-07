@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Writers;
 
@@ -22,7 +21,7 @@ public class OverlayReusableActionParameter : IOverlaySerializable, IOverlayExte
     /// <summary>
     /// The default value for the parameter.
     /// </summary>
-    public JsonNode? Default { get; set; }
+    public string? Default { get; set; }
 
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
@@ -43,7 +42,7 @@ public class OverlayReusableActionParameter : IOverlaySerializable, IOverlayExte
 
         if (Default != null)
         {
-            writer.WriteOptionalObject(OverlayConstants.ReusableActionParameterDefaultFieldName, Default, static (w, s) => w.WriteAny(s));
+            writer.WriteProperty(OverlayConstants.ReusableActionParameterDefaultFieldName, Default);
         }
 
         writer.WriteOverlayExtensions(Extensions, version);

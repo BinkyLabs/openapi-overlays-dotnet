@@ -27,7 +27,7 @@ public class OverlayReusableActionV1Tests
             ],
             EnvironmentVariables =
             [
-                new OverlayReusableActionParameter { Name = "region", Default = JsonNode.Parse("\"us\"") }
+                new OverlayReusableActionParameter { Name = "region", Default = "us" }
             ]
         };
         using var textWriter = new StringWriter();
@@ -102,7 +102,36 @@ public class OverlayReusableActionV1Tests
         Assert.NotNull(action.EnvironmentVariables);
         Assert.Single(action.EnvironmentVariables);
         Assert.Equal("region", action.EnvironmentVariables[0].Name);
-        Assert.Equal("us", action.EnvironmentVariables[0].Default?.GetValue<string>());
+        Assert.Equal("us", action.EnvironmentVariables[0].Default);
+    }
+
+    [Fact]
+    public void Deserialize_WithNonStringEnvironmentVariableDefault_ShouldCoerceToString()
+    {
+        // Arrange
+        var json = """
+        {
+            "target": "Test Target",
+            "environmentVariables": [
+                {
+                    "name": "region",
+                    "default": false
+                }
+            ]
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var action = OverlayV1Deserializer.LoadReusableAction(parseNode);
+
+        // Assert
+        Assert.NotNull(action.EnvironmentVariables);
+        Assert.Single(action.EnvironmentVariables);
+        Assert.Equal("False", action.EnvironmentVariables[0].Default);
+        Assert.Empty(parsingContext.Diagnostic.Errors);
     }
 
     [Fact]
@@ -130,7 +159,7 @@ public class OverlayReusableActionV1Tests
     public void ResolveEnvironmentVariableValues_ShouldIgnoreUnknownAndReturnMissingRequiredSet()
     {
         // Arrange
-        var stageDefault = JsonValue.Create("dev")!;
+        var stageDefault = "dev";
         var action = new OverlayReusableAction
         {
             EnvironmentVariables =
@@ -152,8 +181,8 @@ public class OverlayReusableActionV1Tests
 
         // Assert
         Assert.Equal(2, resolvedEnvironmentVariableValues.Count);
-        Assert.Equal("us", resolvedEnvironmentVariableValues["region"]?.GetValue<string>());
-        Assert.Same(stageDefault, resolvedEnvironmentVariableValues["stage"]);
+        Assert.Equal("us", resolvedEnvironmentVariableValues["region"]);
+        Assert.Equal(stageDefault, resolvedEnvironmentVariableValues["stage"]);
         Assert.True(missingRequiredEnvironmentVariableValues.SetEquals(["tenant"]));
     }
 

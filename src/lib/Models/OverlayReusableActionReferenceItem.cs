@@ -45,7 +45,7 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
     /// <summary>
     /// Gets the map of parameter values for the reusable action reference.
     /// </summary>
-    public IDictionary<string, JsonNode>? ParameterValues { get; set; }
+    public IDictionary<string, string>? ParameterValues { get; set; }
 
     /// <summary>
     /// Gets the computed reusable-action reference pointer.

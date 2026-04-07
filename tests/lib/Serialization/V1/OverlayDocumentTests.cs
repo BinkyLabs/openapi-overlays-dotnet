@@ -126,7 +126,7 @@ public sealed class OverlayDocumentTests
         Assert.NotNull(action.Parameters);
         Assert.Single(action.Parameters);
         Assert.Equal("region", action.Parameters[0].Name);
-        Assert.Equal("us", action.Parameters[0].Default?.GetValue<string>());
+        Assert.Equal("us", action.Parameters[0].Default);
     }
 #pragma warning restore BOO002
 
@@ -901,7 +901,7 @@ public sealed class OverlayDocumentTests
         Assert.Equal("errorResponse", reference.Reference.Id);
         Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
         Assert.NotNull(reference.Reference.ParameterValues);
-        Assert.Equal("us", reference.Reference.ParameterValues["region"].GetValue<string>());
+        Assert.Equal("us", reference.Reference.ParameterValues["region"]);
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
     }
 #pragma warning restore BOO002

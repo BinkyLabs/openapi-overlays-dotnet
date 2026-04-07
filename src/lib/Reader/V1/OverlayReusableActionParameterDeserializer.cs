@@ -8,7 +8,7 @@ internal static partial class OverlayV1Deserializer
     public static readonly FixedFieldMap<OverlayReusableActionParameter> ReusableActionParameterFixedFields = new()
     {
         { OverlayConstants.ReusableActionParameterNameFieldName, (o, v) => o.Name = v.GetScalarValue() },
-        { OverlayConstants.ReusableActionParameterDefaultFieldName, (o, v) => o.Default = v.CreateAny() }
+        { OverlayConstants.ReusableActionParameterDefaultFieldName, (o, v) => o.Default = v.GetScalarValue() }
     };
 
     public static PatternFieldMap<OverlayReusableActionParameter> GetReusableActionParameterPatternFields(OverlaySpecVersion version) =>

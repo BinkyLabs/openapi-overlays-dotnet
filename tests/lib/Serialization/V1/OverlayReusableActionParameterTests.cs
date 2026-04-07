@@ -47,12 +47,7 @@ public class OverlayReusableActionParameterV1Tests
         var parameter = new OverlayReusableActionParameter
         {
             Name = "id",
-            Default = JsonNode.Parse("""
-            {
-                "type": "string",
-                "value": "abc"
-            }
-            """)
+            Default = "abc"
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -61,10 +56,7 @@ public class OverlayReusableActionParameterV1Tests
 """
 {
     "name": "id",
-    "default": {
-        "type": "string",
-        "value": "abc"
-    }
+    "default": "abc"
 }
 """;
 
@@ -118,10 +110,7 @@ public class OverlayReusableActionParameterV1Tests
         var json = """
         {
             "name": "id",
-            "default": {
-                "type": "string",
-                "value": "abc"
-            }
+            "default": "abc"
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -133,9 +122,29 @@ public class OverlayReusableActionParameterV1Tests
 
         // Assert
         Assert.Equal("id", parameter.Name);
-        Assert.NotNull(parameter.Default);
-        Assert.Equal("string", parameter.Default["type"]?.GetValue<string>());
-        Assert.Equal("abc", parameter.Default["value"]?.GetValue<string>());
+        Assert.Equal("abc", parameter.Default);
+    }
+
+    [Fact]
+    public void Deserialize_WithNonStringDefault_ShouldCoerceToString()
+    {
+        // Arrange
+        var json = """
+        {
+            "name": "id",
+            "default": 100
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var parameter = OverlayV1Deserializer.LoadReusableActionParameter(parseNode);
+
+        // Assert
+        Assert.Equal("100", parameter.Default);
+        Assert.Empty(parsingContext.Diagnostic.Errors);
     }
 }
 #pragma warning restore BOO002

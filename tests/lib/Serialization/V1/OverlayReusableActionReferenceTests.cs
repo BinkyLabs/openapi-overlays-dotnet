@@ -21,9 +21,9 @@ public class OverlayReusableActionReferenceV1Tests
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    { "region", JsonValue.Create("us")! }
+                    { "region", "us" }
                 }
             },
             Description = "Override Description",
@@ -266,15 +266,15 @@ public class OverlayReusableActionReferenceV1Tests
     public void ResolveParameterValues_ShouldReturnResolvedValuesAndLookupCollections()
     {
         // Arrange
-        var regionValue = JsonValue.Create("us")!;
-        var unknownValue = JsonValue.Create("x")!;
-        var stageDefault = JsonValue.Create("dev")!;
+        var regionValue = "us";
+        var unknownValue = "x";
+        var stageDefault = "dev";
         var reference = new OverlayReusableActionReference
         {
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
                     ["region"] = regionValue,
                     ["unknown"] = unknownValue
@@ -296,8 +296,8 @@ public class OverlayReusableActionReferenceV1Tests
 
         // Assert
         Assert.Equal(2, resolvedParameterValues.Count);
-        Assert.Same(regionValue, resolvedParameterValues["region"]);
-        Assert.Same(stageDefault, resolvedParameterValues["stage"]);
+        Assert.Equal(regionValue, resolvedParameterValues["region"]);
+        Assert.Equal(stageDefault, resolvedParameterValues["stage"]);
         Assert.True(undefinedParameterValues.SetEquals(["unknown"]));
         Assert.True(missingRequiredParameterValues.SetEquals(["tenant"]));
     }
@@ -334,12 +334,12 @@ public class OverlayReusableActionReferenceV1Tests
     public void ResolveParameterValues_WithUnderscoreInParameterDefinitionName_ShouldResolve(string definitionName)
     {
         // Arrange
-        var value = JsonValue.Create("us")!;
+        var value = "us";
         var reference = new OverlayReusableActionReference
         {
             Reference = new OverlayReusableActionReferenceItem
             {
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
                     [definitionName] = value
                 }
@@ -358,7 +358,7 @@ public class OverlayReusableActionReferenceV1Tests
 
         // Assert
         Assert.Single(resolvedParameterValues);
-        Assert.Same(value, resolvedParameterValues[definitionName]);
+        Assert.Equal(value, resolvedParameterValues[definitionName]);
         Assert.Empty(undefinedParameterValues);
         Assert.Empty(missingRequiredParameterValues);
     }
@@ -394,9 +394,9 @@ public class OverlayReusableActionReferenceV1Tests
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    ["region"] = JsonValue.Create("us")!
+                    ["region"] = "us"
                 },
                 Target = "$.paths['/pets'].get.responses"
             },
@@ -412,7 +412,7 @@ public class OverlayReusableActionReferenceV1Tests
                 ],
                 EnvironmentVariables =
                 [
-                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = "dev" }
                 ]
             }
         };
@@ -444,9 +444,9 @@ public class OverlayReusableActionReferenceV1Tests
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    ["region"] = JsonValue.Create("eu")!
+                    ["region"] = "eu"
                 }
             },
             TargetAction = new OverlayReusableAction
@@ -460,7 +460,7 @@ public class OverlayReusableActionReferenceV1Tests
                 ],
                 EnvironmentVariables =
                 [
-                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = "dev" }
                 ]
             }
         };
@@ -491,9 +491,9 @@ public class OverlayReusableActionReferenceV1Tests
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    ["region"] = JsonValue.Create("eu")!
+                    ["region"] = "eu"
                 },
                 Target = "$.paths['/%param.region%']",
                 Description = "Deploy %param.region%",
@@ -510,7 +510,7 @@ public class OverlayReusableActionReferenceV1Tests
                 ],
                 EnvironmentVariables =
                 [
-                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = "dev" }
                 ]
             }
         };
@@ -565,16 +565,16 @@ public class OverlayReusableActionReferenceV1Tests
     public void GetResolvedAction_WithInheritedUpdatePlaceholders_ShouldReplaceValuesRecursively()
     {
         // Arrange
-        var regionNode = JsonObject.Parse("""{ "name": "eu" }""")!;
-        var replicasNode = JsonValue.Create(3)!;
+        var regionValue = "eu";
+        var replicasDefault = "3";
         var reference = new OverlayReusableActionReference
         {
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    ["region"] = regionNode
+                    ["region"] = regionValue
                 }
             },
             TargetAction = new OverlayReusableAction
@@ -596,11 +596,11 @@ public class OverlayReusableActionReferenceV1Tests
                 Parameters =
                 [
                     new OverlayReusableActionParameter { Name = "region" },
-                    new OverlayReusableActionParameter { Name = "replicas", Default = replicasNode }
+                    new OverlayReusableActionParameter { Name = "replicas", Default = replicasDefault }
                 ],
                 EnvironmentVariables =
                 [
-                    new OverlayReusableActionParameter { Name = "STAGE", Default = JsonValue.Create("dev")! }
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = "dev" }
                 ]
             }
         };
@@ -615,14 +615,12 @@ public class OverlayReusableActionReferenceV1Tests
 
         // Assert
         Assert.NotNull(resolvedAction);
-        Assert.Equal("eu", resolvedAction.Update?["config"]?["regionObject"]?["name"]?.GetValue<string>());
+        Assert.Equal("eu", resolvedAction.Update?["config"]?["regionObject"]?.GetValue<string>());
         Assert.Equal("prod", resolvedAction.Update?["config"]?["stageValue"]?.GetValue<string>());
-        Assert.Contains("deploy-", resolvedAction.Update?["config"]?["message"]?.GetValue<string>(), StringComparison.Ordinal);
-        Assert.Contains("\"name\": \"eu\"", resolvedAction.Update?["config"]?["message"]?.GetValue<string>(), StringComparison.Ordinal);
-        Assert.EndsWith("-prod", resolvedAction.Update?["config"]?["message"]?.GetValue<string>(), StringComparison.Ordinal);
-        Assert.Equal("eu", resolvedAction.Update?["config"]?["nested"]?[0]?["name"]?.GetValue<string>());
+        Assert.Equal("deploy-eu-prod", resolvedAction.Update?["config"]?["message"]?.GetValue<string>());
+        Assert.Equal("eu", resolvedAction.Update?["config"]?["nested"]?[0]?.GetValue<string>());
         Assert.Equal("prefix-prod", resolvedAction.Update?["config"]?["nested"]?[1]?.GetValue<string>());
-        Assert.Equal(3, resolvedAction.Update?["config"]?["nested"]?[2]?.GetValue<int>());
+        Assert.Equal("3", resolvedAction.Update?["config"]?["nested"]?[2]?.GetValue<string>());
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Empty(overlayDiagnostic.Warnings);
     }
@@ -675,9 +673,9 @@ public class OverlayReusableActionReferenceV1Tests
             {
                 Id = "errorResponse",
                 Update = JsonNode.Parse("""{ "from": "override" }"""),
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    ["region"] = JsonValue.Create("eu")!
+                    ["region"] = "eu"
                 }
             },
             TargetAction = new OverlayReusableAction
@@ -710,9 +708,9 @@ public class OverlayReusableActionReferenceV1Tests
             Reference = new OverlayReusableActionReferenceItem
             {
                 Id = "errorResponse",
-                ParameterValues = new Dictionary<string, JsonNode>
+                ParameterValues = new Dictionary<string, string>
                 {
-                    ["unknown"] = JsonValue.Create("x")!
+                    ["unknown"] = "x"
                 }
             },
             TargetAction = new OverlayReusableAction
@@ -748,7 +746,7 @@ public class OverlayReusableActionReferenceV1Tests
             {
                 Parameters =
                 [
-                    new OverlayReusableActionParameter { Name = "region", Default = JsonValue.Create("us")! }
+                    new OverlayReusableActionParameter { Name = "region", Default = "us" }
                 ],
                 EnvironmentVariables =
                 [
@@ -777,9 +775,7 @@ public class OverlayReusableActionReferenceV1Tests
             "x-$ref": "#/components/actions/errorResponse",
             "x-parameterValues": {
                 "region": "us",
-                "stage": {
-                    "name": "dev"
-                }
+                "stage": "dev"
             },
             "target": "$.paths['/pets'].get.responses",
             "description": "Override Description",
@@ -804,13 +800,38 @@ public class OverlayReusableActionReferenceV1Tests
         Assert.Equal("errorResponse", reference.Reference.Id);
         Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
         Assert.NotNull(reference.Reference.ParameterValues);
-        Assert.Equal("us", reference.Reference.ParameterValues["region"].GetValue<string>());
-        Assert.Equal("dev", reference.Reference.ParameterValues["stage"]["name"]?.GetValue<string>());
+        Assert.Equal("us", reference.Reference.ParameterValues["region"]);
+        Assert.Equal("dev", reference.Reference.ParameterValues["stage"]);
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
         Assert.Equal("Override Description", reference.Description);
         Assert.False(reference.Remove);
         Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
         Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public void Deserialize_WithNonStringParameterValue_ShouldCoerceToString()
+    {
+        // Arrange
+        var json = """
+        {
+            "x-$ref": "#/components/actions/errorResponse",
+            "x-parameterValues": {
+                "region": 100
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var reference = OverlayV1Deserializer.LoadReusableActionReference(parseNode);
+
+        // Assert
+        Assert.NotNull(reference.Reference.ParameterValues);
+        Assert.Equal("100", reference.Reference.ParameterValues["region"]);
+        Assert.Empty(parsingContext.Diagnostic.Errors);
     }
 }
 #pragma warning restore BOO002

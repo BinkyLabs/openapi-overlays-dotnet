@@ -124,7 +124,7 @@ public partial class OverlayReusableActionReference : IOverlayAction
     /// </list>
     /// </returns>
     /// <exception cref="InvalidOperationException">Thrown when the target action is not resolved.</exception>
-    public (Dictionary<string, JsonNode?> ResolvedParameterValues, HashSet<string> UndefinedParameterValues, HashSet<string> MissingRequiredParameterValues) ResolveParameterValues()
+    public (Dictionary<string, string> ResolvedParameterValues, HashSet<string> UndefinedParameterValues, HashSet<string> MissingRequiredParameterValues) ResolveParameterValues()
     {
         if (TargetAction is null)
         {
@@ -132,7 +132,7 @@ public partial class OverlayReusableActionReference : IOverlayAction
         }
         var parameterDefinitions = TargetAction.Parameters;
         var parameterValues = Reference.ParameterValues;
-        var resolvedParameterValues = new Dictionary<string, JsonNode?>(StringComparer.Ordinal);
+        var resolvedParameterValues = new Dictionary<string, string>(StringComparer.Ordinal);
         var undefinedParameterValues = new HashSet<string>(StringComparer.Ordinal);
         var missingRequiredParameterValues = new HashSet<string>(StringComparer.Ordinal);
 
@@ -193,8 +193,8 @@ public partial class OverlayReusableActionReference : IOverlayAction
         ArgumentNullException.ThrowIfNull(environmentVariableValues);
 
         var pointer = OverlayAction.GetPointer(actionIndex);
-        Dictionary<string, JsonNode?> resolvedParameterValues;
-        Dictionary<string, JsonNode?> resolvedEnvironmentVariableValues;
+        Dictionary<string, string> resolvedParameterValues;
+        Dictionary<string, string> resolvedEnvironmentVariableValues;
         try
         {
             var (resolvedParameters, undefinedParameterValues, missingRequiredParameterValues) = ResolveParameterValues();
@@ -283,8 +283,8 @@ public partial class OverlayReusableActionReference : IOverlayAction
 
     internal string ReplaceValues(
         string value,
-        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
-        IDictionary<string, JsonNode?> resolvedParameterValues)
+        IDictionary<string, string> resolvedEnvironmentVariableValues,
+        IDictionary<string, string> resolvedParameterValues)
     {
         ArgumentNullException.ThrowIfNull(value);
         ArgumentNullException.ThrowIfNull(resolvedEnvironmentVariableValues);
@@ -306,7 +306,7 @@ public partial class OverlayReusableActionReference : IOverlayAction
                     : resolvedParameterValues;
 
                 return source.TryGetValue(key, out var resolvedValue)
-                    ? resolvedValue?.ToString() ?? string.Empty
+                    ? resolvedValue
                     : match.Value;
             });
     }
@@ -317,8 +317,8 @@ public partial class OverlayReusableActionReference : IOverlayAction
         string propertyName,
         string pointer,
         OverlayDiagnostic overlayDiagnostic,
-        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
-        IDictionary<string, JsonNode?> resolvedParameterValues)
+        IDictionary<string, string> resolvedEnvironmentVariableValues,
+        IDictionary<string, string> resolvedParameterValues)
     {
         if (value is null || overrideValue is not null)
         {
@@ -342,8 +342,8 @@ public partial class OverlayReusableActionReference : IOverlayAction
         JsonNode? overrideValue,
         string pointer,
         OverlayDiagnostic overlayDiagnostic,
-        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
-        IDictionary<string, JsonNode?> resolvedParameterValues)
+        IDictionary<string, string> resolvedEnvironmentVariableValues,
+        IDictionary<string, string> resolvedParameterValues)
     {
         if (value is null || overrideValue is not null)
         {
@@ -369,8 +369,8 @@ public partial class OverlayReusableActionReference : IOverlayAction
 
     private JsonNode? ReplaceValuesInJsonNode(
         JsonNode? node,
-        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
-        IDictionary<string, JsonNode?> resolvedParameterValues,
+        IDictionary<string, string> resolvedEnvironmentVariableValues,
+        IDictionary<string, string> resolvedParameterValues,
         HashSet<string> unresolvedPlaceholders)
     {
         if (node is null)
@@ -423,7 +423,7 @@ public partial class OverlayReusableActionReference : IOverlayAction
                 resolvedParameterValues,
                 out var strictResolvedValue))
             {
-                return strictResolvedValue?.DeepClone();
+                return JsonValue.Create(strictResolvedValue);
             }
 
             var replacedStringValue = ReplaceValues(stringValue, resolvedEnvironmentVariableValues, resolvedParameterValues);
@@ -440,9 +440,9 @@ public partial class OverlayReusableActionReference : IOverlayAction
 
     private static bool TryResolveStrictPlaceholderValue(
         string value,
-        IDictionary<string, JsonNode?> resolvedEnvironmentVariableValues,
-        IDictionary<string, JsonNode?> resolvedParameterValues,
-        out JsonNode? resolvedValue)
+        IDictionary<string, string> resolvedEnvironmentVariableValues,
+        IDictionary<string, string> resolvedParameterValues,
+        out string? resolvedValue)
     {
         resolvedValue = null;
         var strictMatch = StrictPlaceholderPattern.Match(value);
@@ -517,7 +517,7 @@ public partial class OverlayReusableActionReference : IOverlayAction
             writer.WriteOptionalMap(
                 OverlayConstants.ReusableActionReferenceXParameterValuesFieldName,
                 Reference.ParameterValues,
-                static (w, n) => w.WriteAny(n));
+                static (w, n) => w.WriteValue(n));
         }
 
         if (!string.IsNullOrEmpty(Reference.Target))

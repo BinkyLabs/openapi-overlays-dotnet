@@ -878,7 +878,7 @@ public sealed class OverlayApplyTests : IDisposable
                             new OverlayReusableActionParameter
                             {
                                 Name = "region",
-                                Default = JsonValue.Create("default-region")
+                                Default = "default-region"
                             }
                         ],
                         EnvironmentVariables =
@@ -897,9 +897,9 @@ public sealed class OverlayApplyTests : IDisposable
                 {
                     Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
                     {
-                        ParameterValues = new Dictionary<string, JsonNode>
+                        ParameterValues = new Dictionary<string, string>
                         {
-                            ["region"] = JsonValue.Create("us")
+                            ["region"] = "us"
                         }
                     }
                 }
