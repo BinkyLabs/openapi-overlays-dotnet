@@ -233,6 +233,36 @@ public class OverlayReusableActionReferenceV1Tests
     }
 
     [Fact]
+    public void ConstructorWithHostDocument_WithCanonicalReferencePointer_ShouldResolveTargetAction()
+    {
+        // Arrange
+        var resolvedAction = new OverlayReusableAction
+        {
+            Target = "$.paths['/pets'].get.responses",
+            Description = "Resolved reusable action"
+        };
+
+        var hostDocument = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    ["errorResponse"] = resolvedAction
+                }
+            }
+        };
+
+        // Act
+        var reference = new OverlayReusableActionReference("#/components/actions/errorResponse", hostDocument);
+
+        // Assert
+        Assert.Equal("errorResponse", reference.Reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.Same(resolvedAction, reference.TargetAction);
+    }
+
+    [Fact]
     public void ResolveParameterValues_ShouldReturnResolvedValuesAndLookupCollections()
     {
         // Arrange

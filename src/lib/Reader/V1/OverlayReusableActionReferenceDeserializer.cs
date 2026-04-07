@@ -21,7 +21,7 @@ internal static partial class OverlayV1Deserializer
         },
         { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
         { OverlayConstants.ActionXCopyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
-        { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v) => o.Reference.Id = ParseReusableActionReferenceId(v.GetScalarValue()) },
+        { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v) => o.Reference.Id = OverlayReusableActionReferenceItem.NormalizeReusableActionReferenceId(v.GetScalarValue()) },
         { OverlayConstants.ReusableActionReferenceXParameterValuesFieldName, (o, v) => o.Reference.ParameterValues = LoadReusableActionReferenceParameterValues(v) },
     };
 
@@ -30,18 +30,6 @@ internal static partial class OverlayV1Deserializer
 
     public static OverlayReusableActionReference LoadReusableActionReference(ParseNode node) =>
         OverlayCommonAction.LoadActionInternal(node, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
-
-    private static string? ParseReusableActionReferenceId(string? reference)
-    {
-        if (string.IsNullOrEmpty(reference))
-        {
-            return reference;
-        }
-
-        return reference.StartsWith(OverlayConstants.ReusableActionReferencePrefix, StringComparison.Ordinal)
-            ? reference[OverlayConstants.ReusableActionReferencePrefix.Length..]
-            : reference;
-    }
 
     private static IDictionary<string, JsonNode> LoadReusableActionReferenceParameterValues(ParseNode node)
     {
