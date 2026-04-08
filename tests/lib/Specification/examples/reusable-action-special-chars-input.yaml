@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  title: Example API
+  version: 1.0.0
+paths:
+  /items:
+    get:
+      responses:
+        '200':
+          description: OK
+  /users:
+    delete:
+      responses:
+        '200':
+          description: OK

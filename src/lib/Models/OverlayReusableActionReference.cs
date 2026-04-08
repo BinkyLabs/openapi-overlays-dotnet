@@ -412,9 +412,9 @@ public partial class OverlayReusableActionReference : IOverlayAction
         {
             if (!stringValue.Contains('%', StringComparison.Ordinal))
             {
-                // no point in cloning if there are no placeholders to replace
-                // we're only going to apply the resulting tree, and serialize the resulting document, so immutability is not a concern
-                return valueNode;
+                // Create a new JsonValue so the resulting node is not bound to an existing
+                // parent; JsonNode instances may only have a single parent at a time.
+                return JsonValue.Create(stringValue);
             }
 
             if (TryResolveStrictPlaceholderValue(
