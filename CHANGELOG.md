@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.0.0-preview.2](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.1...v3.0.0-preview.2) (2026-04-08)
+
+
+### Features
+
+* **reusable-actions:** encode component action keys as RFC 6901 JSON Pointer tokens in references ([156e90f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/156e90f4818337b1349a23ef479a6ed0970afcae))
+* **reusable-actions:** RFC 6901 encode component action keys in x-$ref pointers ([0e5b9a0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0e5b9a06ff75d1f30d09bb018f936ae82b124325))
+
+
+### Bug Fixes
+
+* normalize references during parsing to avoid broken resolution ([1761a55](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/1761a55e322bf9d69b0c39366ac648b9985f817d))
+* normalize references during parsing to avoid broken resolution ([0ecc396](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0ecc396a2f3f77799ad27c8621d3a939089fa1f3))
+* string interpolation now relies on string values only for parameters ([3c61cca](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3c61ccacc3878496f28bae3aea12fc10097e262d))
+* string interpolation now relies on string values only for parameters ([29eaed4](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/29eaed4ebb77577b4878b0040cdd339d9bc89456))
+
 ## [3.0.0-preview.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.0...v3.0.0-preview.1) (2026-04-06)
 
 
