@@ -1014,6 +1014,109 @@ public sealed class OverlayApplyTests : IDisposable
 #pragma warning restore BOO002
     }
 
+    [Theory]
+    [InlineData("my/action", "my~1action")]
+    [InlineData("my~action", "my~0action")]
+    [InlineData("my/~action", "my~1~0action")]
+#pragma warning disable BOO002
+    public void ApplyToDocument_WithReusableActionReferenceContainingSpecialCharacters_ShouldResolveAndApplyAction(
+        string actionKey,
+        string encodedKey)
+#pragma warning restore BOO002
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument();
+#pragma warning disable BOO002
+        overlayDocument.Components = new OverlayComponents
+        {
+            Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
+            {
+                [actionKey] = new OverlayReusableAction
+                {
+                    Target = "$.info",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "Added by reusable action"
+                    }
+                }
+            }
+        };
+        overlayDocument.Actions =
+        [
+            new OverlayReusableActionReference(actionKey, overlayDocument)
+        ];
+#pragma warning restore BOO002
+
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject { ["title"] = "Test" }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, $"ApplyToDocument should succeed for action key '{actionKey}'.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal("Added by reusable action", jsonNode["info"]?["description"]?.ToString());
+
+#pragma warning disable BOO002
+        // Verify the serialized reference uses the correctly encoded form
+        var referenceItem = ((OverlayReusableActionReference)overlayDocument.Actions[0]).Reference;
+#pragma warning restore BOO002
+        Assert.Equal($"#/components/actions/{encodedKey}", referenceItem.Reference);
+    }
+
+    [Theory]
+    [InlineData("my/action", "#/components/actions/my~1action")]
+    [InlineData("my~action", "#/components/actions/my~0action")]
+    [InlineData("my/~action", "#/components/actions/my~1~0action")]
+#pragma warning disable BOO002
+    public async Task ApplyToDocument_WithDeserializedReusableActionReferenceContainingSpecialCharacters_ShouldResolveAndApplyAction(
+        string actionKey,
+        string encodedReference)
+#pragma warning restore BOO002
+    {
+        // Arrange – build an in-memory overlay YAML that uses the encoded reference
+        var overlayYaml = $"""
+            overlay: '1.0.0'
+            info:
+              title: Test
+              version: '1.0.0'
+            x-components:
+              actions:
+                '{actionKey}':
+                  target: '$.info'
+                  update:
+                    description: Added by reusable action
+            actions:
+              - 'x-$ref': '{encodedReference}'
+            """;
+
+        var readResult = await OverlayModelFactory.ParseAsync(overlayYaml, "yaml");
+        var overlayDocument = readResult.Document;
+        var diags = readResult.Diagnostic;
+
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(diags);
+        Assert.Empty(diags.Errors);
+
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject { ["title"] = "Test" }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, $"ApplyToDocument should succeed for encoded reference '{encodedReference}'.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal("Added by reusable action", jsonNode["info"]?["description"]?.ToString());
+    }
+
     private sealed class UnsupportedAction : IOverlayAction
     {
         public string? Target => null;

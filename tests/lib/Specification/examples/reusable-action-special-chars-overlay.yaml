@@ -1,0 +1,21 @@
+overlay: '1.0.0'
+info:
+  title: Add error responses using reusable actions with special-character names
+  version: '1.0.0'
+x-components:
+  actions:
+    # Action name containing '/' – reference token must encode it as '~1'
+    'errors/notFound':
+      target: "$.paths['/items'].get.responses"
+      update:
+        '404':
+          description: Not Found
+    # Action name containing '~' – reference token must encode it as '~0'
+    'errors~badRequest':
+      target: "$.paths['/users'].delete.responses"
+      update:
+        '400':
+          description: Bad Request
+actions:
+  - 'x-$ref': '#/components/actions/errors~1notFound'
+  - 'x-$ref': '#/components/actions/errors~0badRequest'

@@ -49,9 +49,11 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
 
     /// <summary>
     /// Gets the computed reusable-action reference pointer.
+    /// The <see cref="Id"/> is encoded as a JSON Pointer token per RFC 6901 so that
+    /// names containing <c>/</c> or <c>~</c> are represented correctly in the reference.
     /// </summary>
     public string Reference =>
-        string.IsNullOrEmpty(Id) ? string.Empty : $"{OverlayConstants.ReusableActionReferencePrefix}{Id}";
+        string.IsNullOrEmpty(Id) ? string.Empty : $"{OverlayConstants.ReusableActionReferencePrefix}{EncodeJsonPointerToken(Id)}";
 
     /// <summary>
     /// The target override.
@@ -89,7 +91,27 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
         }
 
         return referenceOrId.StartsWith(OverlayConstants.ReusableActionReferencePrefix, StringComparison.Ordinal)
-            ? referenceOrId[OverlayConstants.ReusableActionReferencePrefix.Length..]
+            ? DecodeJsonPointerToken(referenceOrId[OverlayConstants.ReusableActionReferencePrefix.Length..])
             : referenceOrId;
+    }
+
+    /// <summary>
+    /// Encodes a string as a JSON Pointer token per RFC 6901 §3:
+    /// <c>~</c> is replaced by <c>~0</c> and <c>/</c> is replaced by <c>~1</c>.
+    /// </summary>
+    internal static string EncodeJsonPointerToken(string token)
+    {
+        // Order matters: ~ must be encoded before / to avoid double-encoding.
+        return token.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Decodes a JSON Pointer token per RFC 6901 §3:
+    /// <c>~1</c> is replaced by <c>/</c> and <c>~0</c> is replaced by <c>~</c>.
+    /// </summary>
+    internal static string DecodeJsonPointerToken(string token)
+    {
+        // Order matters: ~1 must be decoded before ~0 to avoid double-decoding.
+        return token.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal);
     }
 }
