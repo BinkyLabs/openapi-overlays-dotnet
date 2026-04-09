@@ -269,3 +269,5 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.ResolveParameterValues() -> (System.Collections.Generic.Dictionary<string!, string!>! ResolvedParameterValues, System.Collections.Generic.HashSet<string!>! UndefinedParameterValues, System.Collections.Generic.HashSet<string!>! MissingRequiredParameterValues)
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.ParameterValues.get -> System.Collections.Generic.IDictionary<string!, string!>?
+static BinkyLabs.OpenApi.Overlays.OverlayDocument.Combine(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! documents) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
+[BOO002]static BinkyLabs.OpenApi.Overlays.OverlayComponents.Combine(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! componentsArray) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
