@@ -388,7 +388,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// </summary>
     /// <param name="others"></param>
     /// <returns>The merged overlay document.</returns>
-#pragma warning disable BOO002
     public OverlayDocument CombineWith(params OverlayDocument[] others)
     {
         if (others is not { Length: > 0 })
@@ -396,28 +395,38 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new ArgumentException("At least one other document must be provided.", nameof(others));
         }
 
-        var lastDocument = others[^1];
-        var actions = new List<IOverlayAction>(Actions ?? []);
-        var mergedDocument = new OverlayDocument
+        return Combine([this, .. others]);
+    }
+
+    /// <summary>
+    /// Combines overlay documents into a single overlay document.
+    /// The returned document will be a new document, and its metadata (info, etc.) will be the one from the last document.
+    /// The actions from all documents will be merged. The actions from earlier documents will be first, and the ones from later documents will be next.
+    /// </summary>
+    /// <param name="documents">Documents to combine.</param>
+    /// <returns>The merged overlay document.</returns>
+    public static OverlayDocument Combine(params OverlayDocument[] documents)
+    {
+        if (documents is not { Length: > 0 })
+        {
+            throw new ArgumentException("At least one document must be provided.", nameof(documents));
+        }
+
+        var lastDocument = documents[^1];
+        // Merge actions from all documents
+        var actions = new List<IOverlayAction>(documents.SelectMany(static d => d.Actions ?? Array.Empty<IOverlayAction>()));
+
+#pragma warning disable BOO002
+        return new OverlayDocument
         {
             Info = lastDocument.Info,
-            Extensions = lastDocument.Extensions is not null
-                ? new Dictionary<string, IOverlayExtension>(lastDocument.Extensions)
-                : null,
+            Extensions = lastDocument.Extensions?.ToDictionary(StringComparer.Ordinal),
             Extends = lastDocument.Extends,
             Actions = actions,
-            Components = (Components, others.Where(static x => x.Components is not null).Select(static x => x.Components!)) switch
-            {
-                (null, var otherComponents) => otherComponents.Any() ? new OverlayComponents().CombineWith(otherComponents.ToArray()) : null,
-                (var current, var otherComponents) => current.CombineWith(otherComponents.ToArray())
-            },
+            Components = documents.Select(static x => x.Components).OfType<OverlayComponents>().ToArray() is { Length: > 0 } components ?
+                            OverlayComponents.Combine(components) :
+                            null
         };
-
-        // Merge actions from all documents
-        actions.AddRange(others.Where(static x => x.Actions is not null)
-            .SelectMany(static x => x.Actions!));
-
-        return mergedDocument;
     }
 #pragma warning restore BOO002
 #pragma warning disable BOO002

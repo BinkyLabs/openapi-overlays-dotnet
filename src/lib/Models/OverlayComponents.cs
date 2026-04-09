@@ -30,25 +30,29 @@ public class OverlayComponents : IOverlaySerializable
     /// <returns>A new components object containing merged actions.</returns>
     public OverlayComponents CombineWith(params OverlayComponents[] others)
     {
-        var actions = Actions is not null
-            ? new Dictionary<string, OverlayReusableAction>(Actions)
-            : [];
+        return Combine([this, .. others]);
+    }
 
-        if (others is { Length: > 0 })
+    /// <summary>
+    /// Combines multiple components objects into a single components object.
+    /// </summary>
+    /// <param name="componentsArray">The components objects to combine.</param>
+    /// <returns>A new components object containing merged actions.</returns>
+    /// <exception cref="ArgumentException">Thrown when no components objects are provided.</exception>
+    public static OverlayComponents Combine(params OverlayComponents[] componentsArray)
+    {
+        if (componentsArray is not { Length: > 0 })
         {
-            foreach (var other in others)
-            {
-                if (other.Actions is null)
-                {
-                    continue;
-                }
-
-                foreach (var action in other.Actions)
-                {
-                    actions[action.Key] = action.Value;
-                }
-            }
+            throw new ArgumentException("At least one components object must be provided for combination.", nameof(componentsArray));
         }
+        var actions = componentsArray
+            .Select(static x => x.Actions)
+            .OfType<IDictionary<string, OverlayReusableAction>>()
+            .SelectMany(static x => x)
+            .GroupBy(static x => x.Key, StringComparer.Ordinal)
+            .ToDictionary(static x => x.Key,
+                        static x => x.Last().Value,
+                        StringComparer.Ordinal);
 
         return new OverlayComponents
         {
