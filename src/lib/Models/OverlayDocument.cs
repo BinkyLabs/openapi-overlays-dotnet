@@ -420,7 +420,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return new OverlayDocument
         {
             Info = lastDocument.Info,
-            Extensions = lastDocument.Extensions?.ToDictionary(),
+            Extensions = lastDocument.Extensions?.ToDictionary(StringComparer.Ordinal),
             Extends = lastDocument.Extends,
             Actions = actions,
             Components = documents.Select(static x => x.Components).OfType<OverlayComponents>().ToArray() is { Length: > 0 } components ?
