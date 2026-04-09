@@ -1,17 +1,29 @@
 {
-  "bootstrap-sha": "a86a120902cf51478bfb3f2dc9cdbffa2c1d0842",
+  "bootstrap-sha": "7f95a40ed0407aa6513de4a1ab46921cdc46cd92",
+  "branches": [
+    {
+      "channel": "preview",
+      "name": "main"
+    },
+    {
+      "channel": "latest",
+      "name": "support/v2"
+    }
+  ],
   "exclude-paths": [
     ".github",
     ".vs",
     ".vscode"
   ],
   "release-type": "simple",
+  "versioning": "prerelease",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "draft": false,
-  "prerelease": false,
+  "prerelease": true,
+  "prerelease-type": "preview",
   "packages": {
     ".": {
       "package-name": "openapi-overlays-dotnet",

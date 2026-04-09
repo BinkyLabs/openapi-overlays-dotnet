@@ -2,14 +2,16 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
+#pragma warning disable BOO002
 internal static partial class OverlayV1Deserializer
 {
     public static readonly FixedFieldMap<OverlayDocument> DocumentFixedFields = new()
     {
-        { "overlay", (o, v) => o.Overlay = v.GetScalarValue() },
-        { "extends", (o, v) => o.Extends = v.GetScalarValue() },
-        { "info", (o, v) => o.Info = LoadInfo(v) },
-        { "actions", (o, v) => o.Actions = v.CreateList<OverlayAction>(LoadAction) }
+        { OverlayConstants.DocumentOverlayFieldName, (o, v) => o.Overlay = v.GetScalarValue() },
+        { OverlayConstants.DocumentExtendsFieldName, (o, v) => o.Extends = v.GetScalarValue() },
+        { OverlayConstants.DocumentInfoFieldName, (o, v) => o.Info = LoadInfo(v) },
+        { OverlayConstants.DocumentActionsFieldName, (o, v) => o.Actions = v.CreateList<IOverlayAction>(n => LoadActionOrReference(n)) },
+        { OverlayConstants.DocumentXComponentsFieldName, (o, v) => o.Components = LoadComponents(v) }
     };
     public static PatternFieldMap<OverlayDocument> GetDocumentPatternFields(OverlaySpecVersion version) =>
     new()
@@ -26,4 +28,12 @@ internal static partial class OverlayV1Deserializer
 
         return document;
     }
+
+    private static IOverlayAction LoadActionOrReference(MapNode node)
+    {
+        return node[OverlayConstants.ReusableActionReferenceXReferenceFieldName] != null
+            ? LoadReusableActionReference(node)
+            : LoadAction(node);
+    }
 }
+#pragma warning restore BOO002

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays;
@@ -32,7 +33,12 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the list of actions for the overlay.
     /// </summary>
-    public IList<OverlayAction>? Actions { get; set; }
+    public IList<IOverlayAction>? Actions { get; set; }
+    /// <summary>
+    /// Gets or sets the reusable components available to this overlay document.
+    /// </summary>
+    [Experimental("BOO002")]
+    public OverlayComponents? Components { get; set; }
 
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
@@ -41,22 +47,51 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, (w, obj) => obj.SerializeAsV1(w));
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, (w, obj) => obj.SerializeAsV1_1(w));
+#pragma warning disable BOO002
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
+        SetUnsetReferenceHostDocuments();
+
+        var unresolvedActionReferences = GetUnresolvedReusableActionReferences();
+        if (unresolvedActionReferences.Count > 0)
+        {
+            throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
+        }
+
         writer.WriteStartObject();
-        writer.WriteRequiredProperty("overlay", SpecVersionToStringMap[version]);
+        writer.WriteRequiredProperty(OverlayConstants.DocumentOverlayFieldName, SpecVersionToStringMap[version]);
         if (Info != null)
         {
-            writer.WriteRequiredObject("info", Info, serializeAction);
+            writer.WriteRequiredObject(OverlayConstants.DocumentInfoFieldName, Info, serializeAction);
         }
-        writer.WriteProperty("extends", Extends);
+        writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
         if (Actions != null)
         {
-            writer.WriteRequiredCollection<OverlayAction>("actions", Actions, serializeAction);
+            writer.WriteRequiredCollection<IOverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
+        }
+        if (Components != null)
+        {
+            writer.WriteRequiredObject(OverlayConstants.DocumentXComponentsFieldName, Components, serializeAction);
         }
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
+#pragma warning restore BOO002
+#pragma warning disable BOO002
+    internal void SetUnsetReferenceHostDocuments()
+    {
+        if (Actions is not { Count: > 0 })
+        {
+            return;
+        }
+
+        foreach (var reusableActionReference in Actions.OfType<OverlayReusableActionReference>().Where(static r => r.Reference.HostDocument is null))
+        {
+            reusableActionReference.Reference.HostDocument = this;
+        }
+    }
+#pragma warning restore BOO002
+
     private static readonly Dictionary<OverlaySpecVersion, string> SpecVersionToStringMap = new()
     {
         { OverlaySpecVersion.Overlay1_0, "1.0.0" },
@@ -113,15 +148,63 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         var i = 0;
         var result = true;
+        SetUnsetReferenceHostDocuments();
         foreach (var action in Actions)
         {
-            if (!action.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
+            var overlayAction = ResolveAction(action, overlayDiagnostic, i);
+
+            if (overlayAction is null ||
+                !overlayAction.ApplyToDocument(jsonNode, overlayDiagnostic, i, strict))
             {
                 result = false; // If any action fails, the entire application fails
             }
             i++;
         }
         return result;
+    }
+
+    private readonly Lazy<Dictionary<string, string>> _environmentVariableValues = new(GetEnvironmentVariableValues);
+
+#pragma warning disable BOO002
+    private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)
+    {
+        if (action is OverlayAction concreteAction)
+        {
+            return concreteAction;
+        }
+        if (action is OverlayReusableActionReference reusableActionReference)
+        {
+            return reusableActionReference.GetResolvedAction(
+                overlayDiagnostic,
+                _environmentVariableValues.Value,
+                index);
+        }
+
+        overlayDiagnostic.Errors.Add(
+            new OpenApiError(
+                OverlayAction.GetPointer(index),
+                $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
+        );
+
+        return null;
+    }
+#pragma warning restore BOO002
+
+    private static Dictionary<string, string> GetEnvironmentVariableValues()
+    {
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+        var environmentVariables = Environment.GetEnvironmentVariables();
+        foreach (var keyObject in environmentVariables.Keys)
+        {
+            if (keyObject is not string key || environmentVariables[keyObject] is not string value)
+            {
+                continue;
+            }
+
+            values[key] = value;
+        }
+
+        return values;
     }
     /// <summary>
     /// Applies the action to an OpenAPI document loaded from the extends property.
@@ -330,19 +413,57 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
 
         var lastDocument = documents[^1];
-        var actions = new List<OverlayAction>();
         // Merge actions from all documents
-        foreach (var doc in documents)
-            if (doc.Actions is { } otherActions)
-                actions.AddRange(otherActions);
+        var actions = new List<IOverlayAction>(documents.SelectMany(static d => d.Actions ?? Array.Empty<IOverlayAction>()));
 
+#pragma warning disable BOO002
         return new OverlayDocument
         {
             Info = lastDocument.Info,
             Extensions = lastDocument.Extensions?.ToDictionary(),
             Extends = lastDocument.Extends,
             Actions = actions,
+            Components = documents.Select(static x => x.Components).OfType<OverlayComponents>().ToArray() is { Length: > 0 } components ?
+                            OverlayComponents.Combine(components) :
+                            null
         };
+    }
+#pragma warning restore BOO002
+#pragma warning disable BOO002
+    internal Dictionary<string, string> GetUnresolvedReusableActionReferences()
+    {
+        var unresolvedReferences = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (Actions is not { Count: > 0 })
+        {
+            return unresolvedReferences;
+        }
+
+        for (var index = 0; index < Actions.Count; index++)
+        {
+            if (Actions[index] is not OverlayReusableActionReference reusableActionReference)
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(reusableActionReference.Reference.Id) &&
+                Components?.Actions?.ContainsKey(reusableActionReference.Reference.Id) == true)
+            {
+                continue;
+            }
+
+            unresolvedReferences[OverlayAction.GetPointer(index)] = reusableActionReference.Reference.Reference;
+        }
+
+        return unresolvedReferences;
+    }
+#pragma warning restore BOO002
+
+    private static string FormatUnresolvedReusableActionReferences(Dictionary<string, string> unresolvedActionReferences)
+    {
+        return string.Join(
+            ", ",
+            unresolvedActionReferences.Select(static unresolvedReference =>
+                $"'{unresolvedReference.Key}' => '{unresolvedReference.Value}'"));
     }
 
     private static async Task<(Stream, string)> PrepareStreamForReadingAsync(Stream input, CancellationToken token = default)

@@ -34,13 +34,13 @@ public class OverlayInfo : IOverlaySerializable, IOverlayExtensible
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version)
     {
         writer.WriteStartObject();
-        writer.WriteProperty("title", Title);
-        writer.WriteProperty("version", Version);
+        writer.WriteProperty(OverlayConstants.InfoTitleFieldName, Title);
+        writer.WriteProperty(OverlayConstants.InfoVersionFieldName, Version);
 
         // Handle version-specific description field name
         if (Description != null)
         {
-            var descriptionFieldName = version == OverlaySpecVersion.Overlay1_0 ? "x-description" : "description";
+            var descriptionFieldName = version == OverlaySpecVersion.Overlay1_0 ? OverlayConstants.InfoXDescriptionFieldName : OverlayConstants.InfoDescriptionFieldName;
             writer.WriteProperty(descriptionFieldName, Description);
         }
 

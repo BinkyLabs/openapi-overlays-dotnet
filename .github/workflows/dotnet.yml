@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
       - name: Test
-        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --configuration Release
+        run: dotnet test --no-build --verbosity normal --configuration Release --coverlet --coverlet-output-format cobertura
       - name: Install report generator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
       - name: Pack the project
@@ -98,11 +98,11 @@ jobs:
       - uses: actions/checkout@v6
       
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -110,7 +110,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -120,11 +120,13 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha,prefix=sha-{{branch}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=v2,enable=${{ startsWith(github.ref, 'refs/tags/v2') }}
+            type=raw,value=v3,enable=${{ startsWith(github.ref, 'refs/tags/v3') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v3') }}
 
       - name: Build Docker image
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -137,7 +139,7 @@ jobs:
       - name: Push Docker image
         id: push
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64

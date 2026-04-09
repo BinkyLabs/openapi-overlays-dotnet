@@ -94,7 +94,7 @@ public sealed class OverlayApplyTests : IDisposable
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
         await writer.WriteAsync(yamlDocument);
-        await writer.FlushAsync();
+        await writer.FlushAsync(TestContext.Current.CancellationToken);
         documentStream.Seek(0, SeekOrigin.Begin);
         var overlayDocument = new OverlayDocument
         {
@@ -124,7 +124,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
@@ -163,7 +163,7 @@ public sealed class OverlayApplyTests : IDisposable
         var documentStream = new MemoryStream();
         using var writer = new StreamWriter(documentStream, leaveOpen: true);
         await writer.WriteAsync(json);
-        await writer.FlushAsync();
+        await writer.FlushAsync(TestContext.Current.CancellationToken);
         documentStream.Seek(0, SeekOrigin.Begin);
         var overlayDocument = new OverlayDocument
         {
@@ -193,7 +193,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         var tempUri = new Uri("http://example.com/overlay.yaml");
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentStreamAndLoadAsync(documentStream, tempUri, cancellationToken: TestContext.Current.CancellationToken);
         Assert.True(result, "Overlay application should succeed.");
         Assert.NotNull(document);
         Assert.NotNull(overlayDiagnostic);
@@ -233,7 +233,7 @@ public sealed class OverlayApplyTests : IDisposable
         var overlayDocument = new OverlayDocument
         {
             Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
-            Actions = new List<OverlayAction>
+            Actions = new List<IOverlayAction>
             {
                 new OverlayAction
                 {
@@ -248,10 +248,10 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         // Create a temporary file with a relative path
-        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument, TestContext.Current.CancellationToken);
 
         // Act
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(result, "Overlay application should succeed.");
@@ -289,12 +289,12 @@ public sealed class OverlayApplyTests : IDisposable
         """;
 
         // Create a temporary file with a relative path
-        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument, TestContext.Current.CancellationToken);
 
         var overlayDocument = new OverlayDocument
         {
             Info = new OverlayInfo { Title = "Test Overlay", Version = "1.0.0" },
-            Actions = new List<OverlayAction>
+            Actions = new List<IOverlayAction>
             {
                 new OverlayAction
                 {
@@ -318,7 +318,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         // Act
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath, cancellationToken: TestContext.Current.CancellationToken);
         // Assert
         Assert.False(result, "Overlay application should fail.");
         Assert.NotNull(document);
@@ -357,7 +357,7 @@ public sealed class OverlayApplyTests : IDisposable
         """;
 
         // Create a temporary file with a relative path
-        await File.WriteAllTextAsync(_tempFilePath, openApiDocument);
+        await File.WriteAllTextAsync(_tempFilePath, openApiDocument, TestContext.Current.CancellationToken);
         var overlayDocument = new OverlayDocument
         {
             Actions =
@@ -375,7 +375,7 @@ public sealed class OverlayApplyTests : IDisposable
         };
 
         // When
-        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath);
+        var (document, overlayDiagnostic, openApiDiagnostic, result) = await overlayDocument.ApplyToDocumentAndLoadAsync(_tempFilePath, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.True(result, "Overlay application should succeed.");
@@ -849,6 +849,284 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Warnings);
         // Verify the successful action was still applied
         Assert.Equal("Updated Description", jsonNode["info"]?["description"]?.ToString());
+    }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void ApplyToDocument_WithReusableActionReference_ShouldResolveAndApplyAction()
+    {
+        // Arrange
+        const string environmentVariableName = "OVERLAYTESTENV";
+        var previousEnvironmentValue = Environment.GetEnvironmentVariable(environmentVariableName);
+        Environment.SetEnvironmentVariable(environmentVariableName, "env-value");
+        try
+        {
+            var overlayDocument = new OverlayDocument();
+            overlayDocument.Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
+                {
+                    ["setServerDescription"] = new OverlayReusableAction
+                    {
+                        Target = "$.servers[0]",
+                        Update = new JsonObject
+                        {
+                            ["description"] = "%param.region%-%env.OVERLAYTESTENV%"
+                        },
+                        Parameters =
+                        [
+                            new OverlayReusableActionParameter
+                            {
+                                Name = "region",
+                                Default = "default-region"
+                            }
+                        ],
+                        EnvironmentVariables =
+                        [
+                            new OverlayReusableActionParameter
+                            {
+                                Name = environmentVariableName
+                            }
+                        ]
+                    }
+                }
+            };
+            overlayDocument.Actions =
+            [
+                new OverlayReusableActionReference("setServerDescription", overlayDocument)
+                {
+                    Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
+                    {
+                        ParameterValues = new Dictionary<string, string>
+                        {
+                            ["region"] = "us"
+                        }
+                    }
+                }
+            ];
+
+            var jsonNode = new JsonObject
+            {
+                ["servers"] = new JsonArray
+                {
+                    new JsonObject
+                    {
+                        ["url"] = "https://example.com"
+                    }
+                }
+            };
+            var overlayDiagnostic = new OverlayDiagnostic();
+
+            // Act
+            var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+            // Assert
+            Assert.True(result, "ApplyToDocument should return true when reusable action reference resolves.");
+            Assert.Empty(overlayDiagnostic.Errors);
+            Assert.Empty(overlayDiagnostic.Warnings);
+            Assert.Equal("us-env-value", jsonNode["servers"]?[0]?["description"]?.ToString());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(environmentVariableName, previousEnvironmentValue);
+        }
+    }
+
+    [Fact]
+    public void ApplyToDocument_WithReusableActionReferenceResolutionError_ShouldReturnFalseAndAddDiagnostic()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument();
+        var missingEnvironmentVariableName = $"MissingRequiredEnv{Guid.NewGuid():N}".ToUpperInvariant();
+        overlayDocument.Components = new OverlayComponents
+        {
+            Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
+            {
+                ["setServerDescription"] = new OverlayReusableAction
+                {
+                    Target = "$.servers[0]",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "value"
+                    },
+                    EnvironmentVariables =
+                    [
+                        new OverlayReusableActionParameter
+                        {
+                            Name = missingEnvironmentVariableName
+                        }
+                    ]
+                }
+            }
+        };
+        overlayDocument.Actions =
+        [
+            new OverlayReusableActionReference("setServerDescription", overlayDocument)
+            {
+                Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
+            }
+        ];
+
+        var jsonNode = new JsonObject
+        {
+            ["servers"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["url"] = "https://example.com"
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false when reusable action reference resolution fails.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Contains("missing required environment variable values", overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Null(jsonNode["servers"]?[0]?["description"]);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+    public void ApplyToDocument_ShouldAddErrorForUnsupportedActionType()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Actions = [new UnsupportedAction()]
+        };
+        var jsonNode = new JsonObject { ["info"] = new JsonObject { ["title"] = "Test" } };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.False(result, "ApplyToDocument should return false for an unsupported action type.");
+        Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
+#pragma warning disable BOO002
+        Assert.Contains(nameof(OverlayAction), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(OverlayReusableActionReference), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+#pragma warning restore BOO002
+    }
+
+    [Theory]
+    [InlineData("my/action", "my~1action")]
+    [InlineData("my~action", "my~0action")]
+    [InlineData("my/~action", "my~1~0action")]
+#pragma warning disable BOO002
+    public void ApplyToDocument_WithReusableActionReferenceContainingSpecialCharacters_ShouldResolveAndApplyAction(
+        string actionKey,
+        string encodedKey)
+#pragma warning restore BOO002
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument();
+#pragma warning disable BOO002
+        overlayDocument.Components = new OverlayComponents
+        {
+            Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
+            {
+                [actionKey] = new OverlayReusableAction
+                {
+                    Target = "$.info",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "Added by reusable action"
+                    }
+                }
+            }
+        };
+        overlayDocument.Actions =
+        [
+            new OverlayReusableActionReference(actionKey, overlayDocument)
+        ];
+#pragma warning restore BOO002
+
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject { ["title"] = "Test" }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, $"ApplyToDocument should succeed for action key '{actionKey}'.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal("Added by reusable action", jsonNode["info"]?["description"]?.ToString());
+
+#pragma warning disable BOO002
+        // Verify the serialized reference uses the correctly encoded form
+        var referenceItem = ((OverlayReusableActionReference)overlayDocument.Actions[0]).Reference;
+#pragma warning restore BOO002
+        Assert.Equal($"#/components/actions/{encodedKey}", referenceItem.Reference);
+    }
+
+    [Theory]
+    [InlineData("my/action", "#/components/actions/my~1action")]
+    [InlineData("my~action", "#/components/actions/my~0action")]
+    [InlineData("my/~action", "#/components/actions/my~1~0action")]
+#pragma warning disable BOO002
+    public async Task ApplyToDocument_WithDeserializedReusableActionReferenceContainingSpecialCharacters_ShouldResolveAndApplyAction(
+        string actionKey,
+        string encodedReference)
+#pragma warning restore BOO002
+    {
+        // Arrange – build an in-memory overlay YAML that uses the encoded reference
+        var overlayYaml = $"""
+            overlay: '1.0.0'
+            info:
+              title: Test
+              version: '1.0.0'
+            x-components:
+              actions:
+                '{actionKey}':
+                  target: '$.info'
+                  update:
+                    description: Added by reusable action
+            actions:
+              - 'x-$ref': '{encodedReference}'
+            """;
+
+        var readResult = await OverlayModelFactory.ParseAsync(overlayYaml, "yaml");
+        var overlayDocument = readResult.Document;
+        var diags = readResult.Diagnostic;
+
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(diags);
+        Assert.Empty(diags.Errors);
+
+        var jsonNode = new JsonObject
+        {
+            ["info"] = new JsonObject { ["title"] = "Test" }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, $"ApplyToDocument should succeed for encoded reference '{encodedReference}'.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Equal("Added by reusable action", jsonNode["info"]?["description"]?.ToString());
+    }
+
+    private sealed class UnsupportedAction : IOverlayAction
+    {
+        public string? Target => null;
+        public string? Description => null;
+        public bool? Remove => null;
+        public JsonNode? Update => null;
+        public string? Copy => null;
+        public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
+        public void SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter writer) { }
+        public void SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter writer) { }
     }
 
     public void Dispose()

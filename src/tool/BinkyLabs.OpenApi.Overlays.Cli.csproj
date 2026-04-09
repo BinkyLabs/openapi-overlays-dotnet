@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.3"/>
+    <PackageReference Include="System.CommandLine" Version="2.0.5"/>
   </ItemGroup>
 
   <PropertyGroup>
@@ -39,7 +39,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>clio</ToolCommandName>
     <PackageId>BinkyLabs.OpenApi.Overlays.Tool</PackageId>
-    <Version>2.4.0</Version>
+    <Version>3.0.0-preview.2</Version>
     <Authors>BinkyLabs</Authors>
     <Description>OpenAPI Overlays CLI - Apply overlays to OpenAPI documents</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -54,7 +54,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.103">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

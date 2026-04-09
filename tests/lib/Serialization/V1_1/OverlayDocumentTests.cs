@@ -15,6 +15,124 @@ namespace BinkyLabs.OpenApi.Overlays.Tests;
 public sealed class OverlayDocumentV1_1Tests
 {
     [Fact]
+#pragma warning disable BOO002
+    public void SerializeAsV1_1_WithComponents_ShouldWriteCorrectJson()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    {
+                        "setServerUrl",
+                        new OverlayReusableAction
+                        {
+                            Target = "$.servers[0]",
+                            Update = JsonNode.Parse("""
+                            {
+                                "url": "https://api.example.com"
+                            }
+                            """)
+                        }
+                    }
+                }
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        var expectedJson = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "setServerUrl": {
+                        "target": "$.servers[0]",
+                        "update": {
+                            "url": "https://api.example.com"
+                        }
+                    }
+                }
+            }
+        }
+        """;
+
+        // Act
+        overlayDocument.SerializeAsV1_1(writer);
+        var jsonResult = textWriter.ToString();
+        var jsonResultObject = JsonNode.Parse(jsonResult);
+        var expectedJsonObject = JsonNode.Parse(expectedJson);
+
+        // Assert
+        Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+#pragma warning disable BOO002
+    public void Deserialize_WithComponents_ShouldSetPropertiesCorrectly()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "setServerUrl": {
+                        "target": "$.servers[0]",
+                        "update": {
+                            "url": "https://api.example.com"
+                        },
+                        "parameters": [
+                            {
+                                "name": "region",
+                                "default": "us"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var overlayDocument = OverlayV1_1Deserializer.LoadDocument(parseNode);
+
+        // Assert
+        Assert.NotNull(overlayDocument.Components);
+        Assert.NotNull(overlayDocument.Components.Actions);
+        Assert.Single(overlayDocument.Components.Actions);
+        Assert.True(overlayDocument.Components.Actions.ContainsKey("setServerUrl"));
+        var action = overlayDocument.Components.Actions["setServerUrl"];
+        Assert.Equal("$.servers[0]", action.Target);
+        Assert.NotNull(action.Update);
+        Assert.Equal("https://api.example.com", action.Update["url"]?.GetValue<string>());
+        Assert.NotNull(action.Parameters);
+        Assert.Single(action.Parameters);
+        Assert.Equal("region", action.Parameters[0].Name);
+        Assert.Equal("us", action.Parameters[0].Default);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
     public void SerializeAsV1_1_ShouldWriteCorrectJson()
     {
         // Arrange
@@ -133,6 +251,220 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("Test Description 2", overlayDocument.Actions[1].Description);
         Assert.False(overlayDocument.Actions[1].Remove);
     }
+
+    [Fact]
+    public async Task Deserialize_WithUnresolvedReusableActionReference_ShouldAddDiagnosticError()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/missingAction"
+                }
+            ]
+        }
+        """;
+
+        // Act
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(json);
+
+        // Assert
+        Assert.NotNull(diagnostic);
+        Assert.Contains(
+            diagnostic.Errors,
+            static e => e.Pointer == "/actions/0" &&
+                        e.Message.Contains("#/components/actions/missingAction", StringComparison.Ordinal));
+    }
+
+    [Fact]
+#pragma warning disable BOO002
+    public async Task Deserialize_WithReusableActionReference_ShouldSetHostDocument()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "errorResponse": {
+                        "target": "$.paths['/pets'].get.responses.404",
+                        "remove": true
+                    }
+                }
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/errorResponse"
+                }
+            ]
+        }
+        """;
+
+        // Act
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
+
+        // Assert
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+    }
+
+    [Fact]
+#pragma warning disable BOO002
+    public async Task ParseAndApply_WithReusableActionReference_ShouldResolveTargetActionFromHostDocument()
+    {
+        // Arrange
+        var overlayJson = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-components": {
+                "actions": {
+                    "removeNotFoundDescription": {
+                        "target": "$.paths['/pets'].get.responses['404'].description",
+                        "remove": true
+                    }
+                }
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/removeNotFoundDescription"
+                }
+            ]
+        }
+        """;
+        var targetDocument = JsonNode.Parse("""
+        {
+            "openapi": "3.1.0",
+            "paths": {
+                "/pets": {
+                    "get": {
+                        "responses": {
+                            "404": {
+                                "description": "Not found"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        """)!;
+
+        // Act
+        var (overlayDocument, parseDiagnostic) = await OverlayDocument.ParseAsync(overlayJson);
+
+        // Assert parse output
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(parseDiagnostic);
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+        Assert.Empty(parseDiagnostic.Errors);
+
+        // Act
+        var applyDiagnostic = new OverlayDiagnostic();
+        var result = overlayDocument.ApplyToDocument(targetDocument, applyDiagnostic);
+
+        // Assert apply output
+        Assert.True(result);
+        Assert.Empty(applyDiagnostic.Errors);
+        Assert.Empty(applyDiagnostic.Warnings);
+        Assert.Null(targetDocument["paths"]?["/pets"]?["get"]?["responses"]?["404"]?["description"]);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+#pragma warning disable BOO002
+    public void SerializeAsV1_1_WithUnresolvedReusableActionReference_ShouldThrow()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Actions =
+            [
+                new OverlayReusableActionReference
+                {
+                    Reference = new OverlayReusableActionReferenceItem
+                    {
+                        Id = "missingAction"
+                    }
+                }
+            ]
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1_1(writer));
+        Assert.Contains("/actions/0", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("#/components/actions/missingAction", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void SerializeAsV1_1_WithReusableActionReferenceWithoutHostDocument_ShouldSetHostDocument()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    ["errorResponse"] = new()
+                    {
+                        Target = "$.paths['/pets'].get.responses.404",
+                        Remove = true
+                    }
+                }
+            },
+            Actions =
+            [
+                new OverlayReusableActionReference
+                {
+                    Reference = new OverlayReusableActionReferenceItem
+                    {
+                        Id = "errorResponse"
+                    }
+                }
+            ]
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act
+        overlayDocument.SerializeAsV1_1(writer);
+
+        // Assert
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+    }
+#pragma warning restore BOO002
+#pragma warning restore BOO002
 
     [Fact]
     public void SerializeAsV1_1_WithUpdate_ShouldWriteCorrectJson()
@@ -298,7 +630,7 @@ public sealed class OverlayDocumentV1_1Tests
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.LoadFromStreamAsync(stream);
+        var (overlayDocument, _) = await OverlayDocument.LoadFromStreamAsync(stream, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -374,10 +706,10 @@ public sealed class OverlayDocumentV1_1Tests
         """;
 
         var tempFile = Path.ChangeExtension(Path.GetTempFileName(), ".json");
-        await File.WriteAllTextAsync(tempFile, json);
+        await File.WriteAllTextAsync(tempFile, json, TestContext.Current.CancellationToken);
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.LoadFromUrlAsync(tempFile);
+        var (overlayDocument, _) = await OverlayDocument.LoadFromUrlAsync(tempFile, token: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -558,4 +890,87 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("Description3", result.Actions[2].Description);
         Assert.False(result.Actions[2].Remove);
     }
+
+    [Fact]
+#pragma warning disable BOO002
+    public void CombineWith_MergesComponents()
+    {
+        // Given
+        var overlayDocument1 = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    { "setTitle", new OverlayReusableAction { Target = "$.info.title", Update = JsonNode.Parse("\"A\"") } },
+                    { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"1.0.0\"") } }
+                }
+            }
+        };
+        var overlayDocument2 = new OverlayDocument
+        {
+            Components = new OverlayComponents
+            {
+                Actions = new Dictionary<string, OverlayReusableAction>
+                {
+                    { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"2.0.0\"") } },
+                    { "setDescription", new OverlayReusableAction { Target = "$.info.description", Update = JsonNode.Parse("\"desc\"") } }
+                }
+            }
+        };
+
+        // When
+        var result = overlayDocument1.CombineWith(overlayDocument2);
+
+        // Then
+        Assert.NotNull(result.Components);
+        Assert.NotNull(result.Components.Actions);
+        Assert.Equal(3, result.Components.Actions.Count);
+        Assert.Equal("$.info.title", result.Components.Actions["setTitle"].Target);
+        Assert.Equal("2.0.0", result.Components.Actions["setVersion"].Update?.GetValue<string>());
+        Assert.Equal("$.info.description", result.Components.Actions["setDescription"].Target);
+    }
+#pragma warning restore BOO002
+
+    [Fact]
+#pragma warning disable BOO002
+    public void Deserialize_WithReusableActionReference_ShouldCreateReferenceAction()
+    {
+        // Arrange
+        var json = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "x-$ref": "#/components/actions/errorResponse",
+                    "x-parameterValues": {
+                        "region": "us"
+                    },
+                    "target": "$.paths['/pets'].get.responses"
+                }
+            ]
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act
+        var overlayDocument = OverlayV1_1Deserializer.LoadDocument(parseNode);
+
+        // Assert
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.NotNull(reference.Reference);
+        Assert.Equal("errorResponse", reference.Reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.NotNull(reference.Reference.ParameterValues);
+        Assert.Equal("us", reference.Reference.ParameterValues["region"]);
+        Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
+    }
+#pragma warning restore BOO002
 }

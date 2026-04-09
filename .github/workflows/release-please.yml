@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+      - support/v2
   workflow_dispatch:
 
 permissions:
@@ -15,7 +16,7 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RELEASE_PLEASE_TOKEN_PROVIDER_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_TOKEN_PROVIDER_PEM }}

@@ -85,6 +85,10 @@ public class ParsingContext
                 throw new OpenApiUnsupportedSpecVersionException(inputVersion);
         }
 
+        doc.SetUnsetReferenceHostDocuments();
+
+        AddUnresolvedReusableActionReferenceErrors(doc);
+
         return doc;
     }
 
@@ -261,6 +265,16 @@ public class ParsingContext
                 RootNode.Context.Diagnostic.Errors.Add(new OpenApiError("", $"Actions is a REQUIRED field at {RootNode.Context.GetLocation()}"));
             if (doc.Info == null)
                 RootNode.Context.Diagnostic.Errors.Add(new OpenApiError("", $"Info is a REQUIRED field at {RootNode.Context.GetLocation()}"));
+        }
+    }
+
+    private void AddUnresolvedReusableActionReferenceErrors(OverlayDocument document)
+    {
+        foreach (var unresolvedReference in document.GetUnresolvedReusableActionReferences())
+        {
+            Diagnostic.Errors.Add(new OpenApiError(
+                unresolvedReference.Key,
+                $"Reusable action reference '{unresolvedReference.Value}' could not be resolved to a component action."));
         }
     }
 }

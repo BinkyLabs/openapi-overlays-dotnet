@@ -123,9 +123,9 @@ x-custom-extension:
     [Fact]
     public async Task RunAsync_WithArguments_ReturnsOK_Json()
     {
-        var result = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson]);
+        var result = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson], TestContext.Current.CancellationToken);
         Assert.Equal(0, result);
-        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson, token: TestContext.Current.CancellationToken);
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);
@@ -134,12 +134,12 @@ x-custom-extension:
     [Fact]
     public async Task RunAsync_WithArguments_ReturnsOK_Yaml()
     {
-        var result = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml]);
+        var result = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml], TestContext.Current.CancellationToken);
         Assert.Equal(0, result);
         // load output file and verify content
         var openApiReaderSettings = new OpenApiReaderSettings();
         openApiReaderSettings.AddYamlReader();
-        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileYaml, settings: openApiReaderSettings);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileYaml, settings: openApiReaderSettings, token: TestContext.Current.CancellationToken);
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);
@@ -148,7 +148,7 @@ x-custom-extension:
     [Fact]
     public async Task RunAsync_MissingArguments_ReturnsError()
     {
-        var result = await OverlayCliApp.RunAsync([]);
+        var result = await OverlayCliApp.RunAsync([], TestContext.Current.CancellationToken);
         Assert.Equal(1, result);
     }
 
@@ -156,14 +156,14 @@ x-custom-extension:
     public async Task RunAsync_WithForceOption_OverwritesExistingFile_Json()
     {
         // First run to create the output file
-        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson]);
+        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson], TestContext.Current.CancellationToken);
         Assert.Equal(0, result1);
         Assert.True(File.Exists(_tempOutputFileJson));
 
         // Second run with --force to overwrite
-        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson, "--force"]);
+        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson, "--force"], TestContext.Current.CancellationToken);
         Assert.Equal(0, result2);
-        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson, token: TestContext.Current.CancellationToken);
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);
@@ -173,14 +173,14 @@ x-custom-extension:
     public async Task RunAsync_WithForceOption_ShortForm_OverwritesExistingFile_Json()
     {
         // First run to create the output file
-        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson]);
+        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson], TestContext.Current.CancellationToken);
         Assert.Equal(0, result1);
         Assert.True(File.Exists(_tempOutputFileJson));
 
         // Second run with -f to overwrite
-        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson, "-f"]);
+        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileJson, "--overlay", _tempOverlayFileJson, "-out", _tempOutputFileJson, "-f"], TestContext.Current.CancellationToken);
         Assert.Equal(0, result2);
-        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileJson, token: TestContext.Current.CancellationToken);
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);
@@ -190,16 +190,16 @@ x-custom-extension:
     public async Task RunAsync_WithForceOption_OverwritesExistingFile_Yaml()
     {
         // First run to create the output file
-        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml]);
+        var result1 = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml], TestContext.Current.CancellationToken);
         Assert.Equal(0, result1);
         Assert.True(File.Exists(_tempOutputFileYaml));
 
         // Second run with --force to overwrite
-        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml, "--force"]);
+        var result2 = await OverlayCliApp.RunAsync(["apply", _tempInputFileYaml, "--overlay", _tempOverlayFileYaml, "-out", _tempOutputFileYaml, "--force"], TestContext.Current.CancellationToken);
         Assert.Equal(0, result2);
         var openApiReaderSettings = new OpenApiReaderSettings();
         openApiReaderSettings.AddYamlReader();
-        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileYaml, settings: openApiReaderSettings);
+        var (openApiDocument, diags) = await OpenApiDocument.LoadAsync(_tempOutputFileYaml, settings: openApiReaderSettings, token: TestContext.Current.CancellationToken);
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);

@@ -3,23 +3,23 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>../../keyfile.snk</AssemblyOriginatorKeyFile>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="8.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="coverlet.MTP" Version="8.0.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; compile</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="Microsoft.Testing.Platform" Version="2.2.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
   </ItemGroup>
   
   <ItemGroup>
@@ -29,5 +29,4 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-
 </Project>
