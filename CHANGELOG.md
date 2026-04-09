@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.5.1...v2.6.0) (2026-04-09)
+
+
+### Features
+
+* adds combine static method for Overlay Documents combination ([c8ba2d9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/c8ba2d991aa1232060717a3547435f49167e4a29))
+
 ## [2.5.1](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v2.5.0...v2.5.1) (2026-04-06)
 
 
