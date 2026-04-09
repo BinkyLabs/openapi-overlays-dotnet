@@ -174,3 +174,4 @@ const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoDescriptionFieldName = "de
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoTitleFieldName = "title" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoVersionFieldName = "version" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoXDescriptionFieldName = "x-description" -> string!
+static BinkyLabs.OpenApi.Overlays.OverlayDocument.Combine(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! documents) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
