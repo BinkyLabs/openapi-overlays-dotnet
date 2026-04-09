@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0-preview.3](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.2...v3.0.0-preview.3) (2026-04-09)
+
+
+### Features
+
+* added static combine method to OverlayDocument ([#239](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/239)) ([f201b21](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f201b214966e4e3852426c3d052c7d35a6dc2506))
+
 ## [3.0.0-preview.2](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.1...v3.0.0-preview.2) (2026-04-08)
 
 
