@@ -330,7 +330,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
 
         var lastDocument = documents[^1];
-         // Merge actions from all documents
+        // Merge actions from all documents
         var actions = new List<OverlayAction>(documents.SelectMany(static d => d.Actions ?? Array.Empty<OverlayAction>()));
 
         return new OverlayDocument
