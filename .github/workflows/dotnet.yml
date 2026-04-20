@@ -31,13 +31,13 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
       - name: Test
-        run: dotnet test --no-build --verbosity normal --configuration Release --coverage --coverage-output-format cobertura
+        run: dotnet test --no-build --verbosity normal --configuration Release --coverlet --coverlet-output-format cobertura
       - name: Install report generator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
       - name: Pack the project
         run: dotnet pack --configuration Release
       - name: Generate coverage report
-        run: reportgenerator -reporttypes:MarkdownSummary -reports:**/coverage.cobertura.xml -targetdir:./reports/coverage
+        run: reportgenerator -reporttypes:MarkdownSummary -reports:**/coverage.cobertura.*.xml -targetdir:./reports/coverage
       - uses: actions/upload-artifact@v7
         with:
           name: coverage
