@@ -5,9 +5,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 internal static partial class OverlayV1_1Deserializer
 {
     public static readonly FixedFieldMap<OverlayAction> ActionFixedFields = new(
-        OverlayCommonAction.GetActionFixedFields<OverlayAction>(
-            OverlayConstants.ActionCopyFieldName,
-            static a => a.CommonAction),
+        OverlayAction.GetActionFixedFields(OverlayConstants.ActionCopyFieldName),
         [OverlayConstants.ActionXCopyFieldName])
     {
     };
@@ -16,5 +14,5 @@ internal static partial class OverlayV1_1Deserializer
         OverlayV1Deserializer.GetActionPatternFields<OverlayAction>(OverlaySpecVersion.Overlay1_1);
 
     public static OverlayAction LoadAction(ParseNode node) =>
-        OverlayCommonAction.LoadActionInternal(node, ActionFixedFields, ActionPatternFields);
+        OverlayAction.LoadActionInternal(node, ActionFixedFields, ActionPatternFields);
 }

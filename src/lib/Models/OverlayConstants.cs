@@ -24,6 +24,11 @@ public static class OverlayConstants
     [Experimental("BOO002")]
     public const string ReusableActionParameterDefaultFieldName = "default";
     /// <summary>
+    /// Field: OverlayReusableAction.Fields
+    /// </summary>
+    [Experimental("BOO002")]
+    public const string ReusableActionFieldsFieldName = "fields";
+    /// <summary>
     /// Field: OverlayReusableAction.Parameters
     /// </summary>
     [Experimental("BOO002")]

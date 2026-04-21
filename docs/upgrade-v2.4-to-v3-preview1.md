@@ -144,8 +144,11 @@ using System.Text.Json.Nodes;
 // Define a reusable action that sets a server URL using a parameter
 var setServerAction = new OverlayReusableAction
 {
-    Target = "$.servers[0]",
-    Update = JsonNode.Parse("""{"url":"%param.serverUrl%"}"""),
+    Fields = new OverlayAction
+    {
+        Target = "$.servers[0]",
+        Update = JsonNode.Parse("""{"url":"%param.serverUrl%"}""")
+    },
     Parameters =
     [
         new OverlayReusableActionParameter { Name = "serverUrl", Default = JsonValue.Create("https://api.example.com") }
@@ -180,8 +183,11 @@ var overlay = new OverlayDocument
         {
             ["setServer"] = new()
             {
-                Target = "$.servers[0]",
-                Update = JsonNode.Parse("""{"url":"https://prod.example.com"}""")
+                Fields = new OverlayAction
+                {
+                    Target = "$.servers[0]",
+                    Update = JsonNode.Parse("""{"url":"https://prod.example.com"}""")
+                }
             }
         }
     }
@@ -214,7 +220,7 @@ overlay.Actions =
 ```
 
 `OverlayReusableActionReference.Reference.Reference` returns the canonical pointer `#/components/actions/{id}`.
-When a host `OverlayDocument` is provided, `TargetAction` resolves from `overlay.Components.Actions[id]`, and unset interface fields on the reference fall back to values from the resolved target action.
+When a host `OverlayDocument` is provided, `TargetAction` resolves from `overlay.Components.Actions[id]`, and unset action fields on the reference fall back to values from the resolved target action's `Fields`.
 
 #### Reusable action with environment variables
 
@@ -225,8 +231,11 @@ A reusable action can also declare environment-variable bindings via `Environmen
 
 var deployAction = new OverlayReusableAction
 {
-    Target = "$.info",
-    Update = JsonNode.Parse("""{"x-deploy-region":"%param.region%"}"""),
+    Fields = new OverlayAction
+    {
+        Target = "$.info",
+        Update = JsonNode.Parse("""{"x-deploy-region":"%param.region%"}""")
+    },
     Parameters =
     [
         new OverlayReusableActionParameter { Name = "region" }

@@ -26,8 +26,13 @@ internal static partial class OverlayV1Deserializer
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =
         GetActionPatternFields<OverlayReusableActionReference>(OverlaySpecVersion.Overlay1_0);
 
-    public static OverlayReusableActionReference LoadReusableActionReference(ParseNode node) =>
-        OverlayCommonAction.LoadActionInternal(node, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
+    public static OverlayReusableActionReference LoadReusableActionReference(ParseNode node)
+    {
+        var mapNode = node.CheckMapNode("ReusableActionReference");
+        var action = new OverlayReusableActionReference();
+        ParseMap(mapNode, action, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
+        return action;
+    }
 
     private static IDictionary<string, string> LoadReusableActionReferenceParameterValues(ParseNode node)
     {

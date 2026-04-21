@@ -18,9 +18,12 @@ public class OverlayReusableActionV1Tests
         // Arrange
         var action = new OverlayReusableAction
         {
-            Target = "Test Target",
-            Description = "Test Description",
-            Remove = true,
+            Fields = new OverlayAction
+            {
+                Target = "Test Target",
+                Description = "Test Description",
+                Remove = true,
+            },
             Parameters =
             [
                 new OverlayReusableActionParameter { Name = "id" }
@@ -36,9 +39,11 @@ public class OverlayReusableActionV1Tests
         var expectedJson =
 """
 {
-    "target": "Test Target",
-    "description": "Test Description",
-    "remove": true,
+    "fields": {
+        "target": "Test Target",
+        "description": "Test Description",
+        "remove": true
+    },
     "parameters": [
         {
             "name": "id"
@@ -69,9 +74,11 @@ public class OverlayReusableActionV1Tests
         // Arrange
         var json = """
         {
-            "target": "Test Target",
-            "description": "Test Description",
-            "remove": true,
+            "fields": {
+                "target": "Test Target",
+                "description": "Test Description",
+                "remove": true
+            },
             "parameters": [
                 {
                     "name": "id"
@@ -93,9 +100,10 @@ public class OverlayReusableActionV1Tests
         var action = OverlayV1Deserializer.LoadReusableAction(parseNode);
 
         // Assert
-        Assert.Equal("Test Target", action.Target);
-        Assert.Equal("Test Description", action.Description);
-        Assert.True(action.Remove);
+        Assert.NotNull(action.Fields);
+        Assert.Equal("Test Target", action.Fields.Target);
+        Assert.Equal("Test Description", action.Fields.Description);
+        Assert.True(action.Fields.Remove);
         Assert.NotNull(action.Parameters);
         Assert.Single(action.Parameters);
         Assert.Equal("id", action.Parameters[0].Name);
@@ -111,7 +119,9 @@ public class OverlayReusableActionV1Tests
         // Arrange
         var json = """
         {
-            "target": "Test Target",
+            "fields": {
+                "target": "Test Target"
+            },
             "environmentVariables": [
                 {
                     "name": "region",
@@ -140,8 +150,10 @@ public class OverlayReusableActionV1Tests
         // Arrange
         var json = """
         {
-            "target": "Test Target",
-            "x-copy": "$.paths['/pets']"
+            "fields": {
+                "target": "Test Target",
+                "x-copy": "$.paths['/pets']"
+            }
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -152,7 +164,8 @@ public class OverlayReusableActionV1Tests
         var action = OverlayV1Deserializer.LoadReusableAction(parseNode);
 
         // Assert
-        Assert.Equal("$.paths['/pets']", action.Copy);
+        Assert.NotNull(action.Fields);
+        Assert.Equal("$.paths['/pets']", action.Fields.Copy);
     }
 
     [Fact]

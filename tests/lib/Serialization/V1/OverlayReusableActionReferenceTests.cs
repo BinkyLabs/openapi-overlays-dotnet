@@ -74,10 +74,13 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Target = "$.info",
-                Description = "from target action",
-                Remove = true,
-                Update = JsonNode.Parse("""{ "title": "x" }""")
+                Fields = new OverlayAction
+                {
+                    Target = "$.info",
+                    Description = "from target action",
+                    Remove = true,
+                    Update = JsonNode.Parse("""{ "title": "x" }""")
+                }
             }
         };
 
@@ -129,11 +132,14 @@ public class OverlayReusableActionReferenceV1Tests
         // Arrange
         var targetAction = new OverlayReusableAction
         {
-            Target = "$.paths",
-            Description = "Target Description",
-            Remove = true,
-            Update = JsonNode.Parse("""{ "x": 1 }"""),
-            Copy = "$.other"
+            Fields = new OverlayAction
+            {
+                Target = "$.paths",
+                Description = "Target Description",
+                Remove = true,
+                Update = JsonNode.Parse("""{ "x": 1 }"""),
+                Copy = "$.other"
+            }
         };
         var reference = new OverlayReusableActionReference
         {
@@ -160,11 +166,14 @@ public class OverlayReusableActionReferenceV1Tests
         // Arrange
         var targetAction = new OverlayReusableAction
         {
-            Target = "$.paths",
-            Description = "Target Description",
-            Remove = false,
-            Update = JsonNode.Parse("""{ "x": 1 }"""),
-            Copy = "$.other"
+            Fields = new OverlayAction
+            {
+                Target = "$.paths",
+                Description = "Target Description",
+                Remove = false,
+                Update = JsonNode.Parse("""{ "x": 1 }"""),
+                Copy = "$.other"
+            }
         };
         var reference = new OverlayReusableActionReference
         {
@@ -193,17 +202,20 @@ public class OverlayReusableActionReferenceV1Tests
         // Arrange
         var resolvedAction = new OverlayReusableAction
         {
-            Target = "$.paths['/pets'].get.responses",
-            Description = "Resolved reusable action",
-            Remove = false,
-            Update = JsonNode.Parse("""
+            Fields = new OverlayAction
             {
-                "404": {
-                    "description": "Not found"
+                Target = "$.paths['/pets'].get.responses",
+                Description = "Resolved reusable action",
+                Remove = false,
+                Update = JsonNode.Parse("""
+                {
+                    "404": {
+                        "description": "Not found"
+                    }
                 }
+                """),
+                Copy = "$.paths['/pets'].post.responses"
             }
-            """),
-            Copy = "$.paths['/pets'].post.responses"
         };
 
         var hostDocument = new OverlayDocument
@@ -238,8 +250,11 @@ public class OverlayReusableActionReferenceV1Tests
         // Arrange
         var resolvedAction = new OverlayReusableAction
         {
-            Target = "$.paths['/pets'].get.responses",
-            Description = "Resolved reusable action"
+            Fields = new OverlayAction
+            {
+                Target = "$.paths['/pets'].get.responses",
+                Description = "Resolved reusable action"
+            }
         };
 
         var hostDocument = new OverlayDocument
@@ -451,9 +466,12 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Target = "$.paths['/%param.region%/%env.STAGE%']",
-                Description = "Deploy %param.region% to %env.STAGE%",
-                Copy = "$.copy.%param.region%",
+                Fields = new OverlayAction
+                {
+                    Target = "$.paths['/%param.region%/%env.STAGE%']",
+                    Description = "Deploy %param.region% to %env.STAGE%",
+                    Copy = "$.copy.%param.region%"
+                },
                 Parameters =
                 [
                     new OverlayReusableActionParameter { Name = "region" }
@@ -501,9 +519,12 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Target = "$.paths['/%param.region%/%env.STAGE%']",
-                Description = "Deploy %param.region% to %env.STAGE%",
-                Copy = "$.copy.%param.region%",
+                Fields = new OverlayAction
+                {
+                    Target = "$.paths['/%param.region%/%env.STAGE%']",
+                    Description = "Deploy %param.region% to %env.STAGE%",
+                    Copy = "$.copy.%param.region%"
+                },
                 Parameters =
                 [
                     new OverlayReusableActionParameter { Name = "region" }
@@ -540,9 +561,12 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Target = "$.paths['/%param.unknown%']",
-                Description = "Deploy to %env.Unknown%",
-                Copy = "$.copy.%param.unknown%"
+                Fields = new OverlayAction
+                {
+                    Target = "$.paths['/%param.unknown%']",
+                    Description = "Deploy to %env.Unknown%",
+                    Copy = "$.copy.%param.unknown%"
+                }
             }
         };
         var overlayDiagnostic = new OverlayDiagnostic();
@@ -579,20 +603,23 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Update = JsonNode.Parse("""
+                Fields = new OverlayAction
                 {
-                    "config": {
-                        "regionObject": "%param.region%",
-                        "stageValue": "%env.STAGE%",
-                        "message": "deploy-%param.region%-%env.STAGE%",
-                        "nested": [
-                            "%param.region%",
-                            "prefix-%env.STAGE%",
-                            "%param.replicas%"
-                        ]
+                    Update = JsonNode.Parse("""
+                    {
+                        "config": {
+                            "regionObject": "%param.region%",
+                            "stageValue": "%env.STAGE%",
+                            "message": "deploy-%param.region%-%env.STAGE%",
+                            "nested": [
+                                "%param.region%",
+                                "prefix-%env.STAGE%",
+                                "%param.replicas%"
+                            ]
+                        }
                     }
-                }
-                """),
+                    """)
+                },
                 Parameters =
                 [
                     new OverlayReusableActionParameter { Name = "region" },
@@ -637,14 +664,17 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Update = JsonNode.Parse("""
+                Fields = new OverlayAction
                 {
-                    "config": {
-                        "missing": "%param.unknown%",
-                        "message": "prefix-%env.unknown%"
+                    Update = JsonNode.Parse("""
+                    {
+                        "config": {
+                            "missing": "%param.unknown%",
+                            "message": "prefix-%env.unknown%"
+                        }
                     }
+                    """)
                 }
-                """)
             }
         };
         var overlayDiagnostic = new OverlayDiagnostic();
@@ -680,7 +710,10 @@ public class OverlayReusableActionReferenceV1Tests
             },
             TargetAction = new OverlayReusableAction
             {
-                Update = JsonNode.Parse("""{ "template": "%param.region%" }"""),
+                Fields = new OverlayAction
+                {
+                    Update = JsonNode.Parse("""{ "template": "%param.region%" }""")
+                },
                 Parameters =
                 [
                     new OverlayReusableActionParameter { Name = "region" }

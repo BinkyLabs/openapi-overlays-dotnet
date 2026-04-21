@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Nodes;
+
+using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Microsoft.OpenApi;
 
@@ -10,44 +11,12 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// See: https://spec.openapis.org/overlay/v1.2.0.html#reusable-action-object
 /// </summary>
 [Experimental("BOO002")]
-public class OverlayReusableAction : IOverlayAction
+public class OverlayReusableAction : IOverlaySerializable, IOverlayExtensible
 {
-    private readonly OverlayCommonAction _common = new();
-
-    /// <inheritdoc/>
-    public string? Target
-    {
-        get => _common.Target;
-        set => _common.Target = value;
-    }
-
-    /// <inheritdoc/>
-    public string? Description
-    {
-        get => _common.Description;
-        set => _common.Description = value;
-    }
-
-    /// <inheritdoc/>
-    public bool? Remove
-    {
-        get => _common.Remove;
-        set => _common.Remove = value;
-    }
-
-    /// <inheritdoc/>
-    public JsonNode? Update
-    {
-        get => _common.Update;
-        set => _common.Update = value;
-    }
-
-    /// <inheritdoc/>
-    public string? Copy
-    {
-        get => _common.Copy;
-        set => _common.Copy = value;
-    }
+    /// <summary>
+    /// The action fields for this reusable action.
+    /// </summary>
+    public OverlayAction? Fields { get; set; }
 
     /// <summary>
     /// The reusable action parameters.
@@ -113,34 +82,26 @@ public class OverlayReusableAction : IOverlayAction
     }
 
     /// <inheritdoc/>
-    public IDictionary<string, IOverlayExtension>? Extensions
-    {
-        get => _common.Extensions;
-        set => _common.Extensions = value;
-    }
+    public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 
     /// <inheritdoc/>
-    public void SerializeAsV1(IOpenApiWriter writer) => _common.SerializeAsV1(writer, SerializeAdditionalPropertiesAsV1);
+    public void SerializeAsV1(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, static (w, p) => p.SerializeAsV1(w), static (w, f) => f.SerializeFieldsAsV1(w));
 
     /// <inheritdoc/>
-    public void SerializeAsV1_1(IOpenApiWriter writer) => _common.SerializeAsV1_1(writer, SerializeAdditionalPropertiesAsV1_1);
+    public void SerializeAsV1_1(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, static (w, p) => p.SerializeAsV1_1(w), static (w, f) => f.SerializeFieldsAsV1_1(w));
 
-    internal OverlayCommonAction CommonAction => _common;
-
-    private void SerializeAdditionalPropertiesAsV1(IOpenApiWriter writer)
-    {
-        WriteAdditionalProperties(writer, static (w, p) => p.SerializeAsV1(w));
-    }
-
-    private void SerializeAdditionalPropertiesAsV1_1(IOpenApiWriter writer)
-    {
-        WriteAdditionalProperties(writer, static (w, p) => p.SerializeAsV1_1(w));
-    }
-
-    private void WriteAdditionalProperties(
+    private void SerializeInternal(
         IOpenApiWriter writer,
-        Action<IOpenApiWriter, OverlayReusableActionParameter> serializeParameter)
+        OverlaySpecVersion version,
+        Action<IOpenApiWriter, OverlayReusableActionParameter> serializeParameter,
+        Action<IOpenApiWriter, OverlayAction> serializeFields)
     {
+        ArgumentNullException.ThrowIfNull(writer);
+
+        writer.WriteStartObject();
+
         if (Parameters != null)
         {
             writer.WriteRequiredCollection(
@@ -156,5 +117,16 @@ public class OverlayReusableAction : IOverlayAction
                 EnvironmentVariables,
                 serializeParameter);
         }
+
+        if (Fields != null)
+        {
+            writer.WriteRequiredObject(
+                OverlayConstants.ReusableActionFieldsFieldName,
+                Fields,
+                serializeFields);
+        }
+
+        writer.WriteOverlayExtensions(Extensions, version);
+        writer.WriteEndObject();
     }
 }

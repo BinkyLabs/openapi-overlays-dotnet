@@ -183,10 +183,6 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Gen
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Copy.get -> string?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Copy.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Description.get -> string?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Description.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.EnvironmentVariables.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.EnvironmentVariables.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
@@ -194,14 +190,8 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.OverlayReusableAction() -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Parameters.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Parameters.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Remove.get -> bool?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Remove.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Target.get -> string?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Target.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Update.get -> System.Text.Json.Nodes.JsonNode?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Update.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
