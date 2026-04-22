@@ -501,6 +501,55 @@ public class OverlayReusableActionReferenceV1_1Tests
     }
 
     [Fact]
+    public void GetResolvedAction_WithDefinedOverrideStringFields_ShouldNotReplaceValues()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse",
+                ParameterValues = new Dictionary<string, string>
+                {
+                    ["region"] = "eu"
+                },
+                Target = "$.paths['/%param.region%']",
+                Description = "Deploy %param.region%",
+                Copy = "$.copy.%param.region%"
+            },
+            TargetAction = new OverlayReusableAction
+            {
+                Fields = new OverlayAction
+                {
+                    Target = "$.paths['/%param.region%/%env.STAGE%']",
+                    Description = "Deploy %param.region% to %env.STAGE%",
+                    Copy = "$.copy.%param.region%"
+                },
+                Parameters =
+                [
+                    new OverlayReusableActionParameter { Name = "region" }
+                ],
+                EnvironmentVariables =
+                [
+                    new OverlayReusableActionParameter { Name = "STAGE", Default = "dev" }
+                ]
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var resolvedAction = reference.GetResolvedAction(overlayDiagnostic, new Dictionary<string, string>());
+
+        // Assert
+        Assert.NotNull(resolvedAction);
+        Assert.Equal("$.paths['/%param.region%']", resolvedAction.Target);
+        Assert.Equal("Deploy %param.region%", resolvedAction.Description);
+        Assert.Equal("$.copy.%param.region%", resolvedAction.Copy);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
     public void GetResolvedAction_WithUnresolvedInheritedPlaceholders_ShouldAddWarnings()
     {
         // Arrange
