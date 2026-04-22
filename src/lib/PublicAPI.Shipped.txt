@@ -261,3 +261,6 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.ParameterValues.get -> System.Collections.Generic.IDictionary<string!, string!>?
 static BinkyLabs.OpenApi.Overlays.OverlayDocument.Combine(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! documents) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
 [BOO002]static BinkyLabs.OpenApi.Overlays.OverlayComponents.Combine(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! componentsArray) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.get -> BinkyLabs.OpenApi.Overlays.OverlayAction?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.set -> void
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionFieldsFieldName = "fields" -> string!

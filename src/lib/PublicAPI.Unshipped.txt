@@ -1,4 +1,1 @@
 #nullable enable
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.get -> BinkyLabs.OpenApi.Overlays.OverlayAction?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.set -> void
-[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionFieldsFieldName = "fields" -> string!
