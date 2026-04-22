@@ -190,6 +190,26 @@ public class OverlayReusableActionV1_1Tests
     }
 
     [Fact]
+    public void Deserialize_WithNonBooleanRemove_ShouldThrow()
+    {
+        // Arrange
+        var json = """
+        {
+            "fields": {
+                "target": "Test Target",
+                "remove": "true"
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act + Assert
+        Assert.Throws<InvalidOperationException>(() => OverlayV1_1Deserializer.LoadReusableAction(parseNode));
+    }
+
+    [Fact]
     public void ResolveEnvironmentVariableValues_ShouldIgnoreUnknownAndReturnMissingRequiredSet()
     {
         // Arrange
