@@ -53,14 +53,7 @@ public class OverlayAction : IOverlayAction
         {
             { OverlayConstants.ActionTargetFieldName, (o, v) => o.Target = v.GetScalarValue() },
             { OverlayConstants.ActionDescriptionFieldName, (o, v) => o.Description = v.GetScalarValue() },
-            { OverlayConstants.ActionRemoveFieldName, (o, v) =>
-                {
-                    if (v.GetScalarValue() is string removeValue && bool.TryParse(removeValue, out var removeBool))
-                    {
-                        o.Remove = removeBool;
-                    }
-                }
-            },
+            { OverlayConstants.ActionRemoveFieldName, (o, v) => o.Remove = v.GetScalarValue<bool>() },
             { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
             { copyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
         };

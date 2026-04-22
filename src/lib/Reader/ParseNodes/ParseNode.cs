@@ -81,6 +81,11 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
             throw new OverlayReaderException("Cannot create a scalar value from this type of node.", Context);
         }
 
+        public virtual T GetScalarValue<T>()
+        {
+            throw new OverlayReaderException("Cannot create a scalar value from this type of node.", Context);
+        }
+
         public virtual List<JsonNode> CreateListOfAny()
         {
             throw new OverlayReaderException("Cannot create a list from this type of node.", Context);
