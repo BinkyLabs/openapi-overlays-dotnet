@@ -67,42 +67,42 @@ public partial class OverlayReusableActionReference : IOverlayAction
     /// <inheritdoc/>
     public string? Target
     {
-        get => Reference.Target ?? TargetAction?.Target;
+        get => Reference.Target ?? TargetAction?.Fields?.Target;
         set => Reference.Target = value;
     }
 
     /// <inheritdoc/>
     public string? Description
     {
-        get => Reference.Description ?? TargetAction?.Description;
+        get => Reference.Description ?? TargetAction?.Fields?.Description;
         set => Reference.Description = value;
     }
 
     /// <inheritdoc/>
     public bool? Remove
     {
-        get => Reference.Remove ?? TargetAction?.Remove;
+        get => Reference.Remove ?? TargetAction?.Fields?.Remove;
         set => Reference.Remove = value;
     }
 
     /// <inheritdoc/>
     public JsonNode? Update
     {
-        get => Reference.Update ?? TargetAction?.Update;
+        get => Reference.Update ?? TargetAction?.Fields?.Update;
         set => Reference.Update = value;
     }
 
     /// <inheritdoc/>
     public string? Copy
     {
-        get => Reference.Copy ?? TargetAction?.Copy;
+        get => Reference.Copy ?? TargetAction?.Fields?.Copy;
         set => Reference.Copy = value;
     }
 
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions
     {
-        get => Reference.Extensions ?? TargetAction?.Extensions;
+        get => Reference.Extensions ?? TargetAction?.Fields?.Extensions;
         set => Reference.Extensions = value;
     }
 

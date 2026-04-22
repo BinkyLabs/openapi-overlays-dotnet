@@ -1,6 +1,8 @@
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
+using BinkyLabs.OpenApi.Overlays.Reader.V1;
+using BinkyLabs.OpenApi.Overlays.Writers;
 
 using Json.Path;
 
@@ -13,63 +15,95 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// </summary>
 public class OverlayAction : IOverlayAction
 {
-    private readonly OverlayCommonAction _common = new();
+    /// <inheritdoc/>
+    public string? Target { get; set; }
 
     /// <inheritdoc/>
-    public string? Target
+    public string? Description { get; set; }
+
+    /// <inheritdoc/>
+    public bool? Remove { get; set; }
+
+    /// <inheritdoc/>
+    public JsonNode? Update { get; set; }
+
+    /// <inheritdoc/>
+    public string? Copy { get; set; }
+
+    /// <inheritdoc/>
+    public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
+
+    /// <inheritdoc/>
+    public void SerializeAsV1(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName, targetRequired: true);
+
+    /// <inheritdoc/>
+    public void SerializeAsV1_1(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName, targetRequired: true);
+
+    internal void SerializeFieldsAsV1(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName, targetRequired: false);
+
+    internal void SerializeFieldsAsV1_1(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName, targetRequired: false);
+
+    internal static FixedFieldMap<OverlayAction> GetActionFixedFields(string copyFieldName)
     {
-        get => _common.Target;
-        set => _common.Target = value;
+        return new FixedFieldMap<OverlayAction>
+        {
+            { OverlayConstants.ActionTargetFieldName, (o, v) => o.Target = v.GetScalarValue() },
+            { OverlayConstants.ActionDescriptionFieldName, (o, v) => o.Description = v.GetScalarValue() },
+            { OverlayConstants.ActionRemoveFieldName, (o, v) => o.Remove = v.GetScalarValue<bool>() },
+            { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
+            { copyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
+        };
     }
 
-    /// <inheritdoc/>
-    public string? Description
+    internal static OverlayAction LoadActionInternal(
+        ParseNode node,
+        FixedFieldMap<OverlayAction> actionFixedFields,
+        PatternFieldMap<OverlayAction> actionPatternFields)
     {
-        get => _common.Description;
-        set => _common.Description = value;
+        var mapNode = node.CheckMapNode("Action");
+        var action = new OverlayAction();
+        OverlayV1Deserializer.ParseMap(mapNode, action, actionFixedFields, actionPatternFields);
+
+        return action;
     }
 
-    /// <inheritdoc/>
-    public bool? Remove
+    private void SerializeInternal(
+        IOpenApiWriter writer,
+        OverlaySpecVersion version,
+        string copyFieldName,
+        bool targetRequired)
     {
-        get => _common.Remove;
-        set => _common.Remove = value;
+        ArgumentNullException.ThrowIfNull(writer);
+        writer.WriteStartObject();
+
+        if (targetRequired)
+        {
+            writer.WriteRequiredProperty(OverlayConstants.ActionTargetFieldName, Target);
+        }
+        else
+        {
+            writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Target);
+        }
+
+        writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Description);
+        writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, Remove, false);
+
+        if (Update != null)
+        {
+            writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, Update, static (w, s) => w.WriteAny(s));
+        }
+        if (Copy != null)
+        {
+            writer.WriteProperty(copyFieldName, Copy);
+        }
+
+        writer.WriteOverlayExtensions(Extensions, version);
+        writer.WriteEndObject();
     }
-
-    /// <inheritdoc/>
-    public JsonNode? Update
-    {
-        get => _common.Update;
-        set => _common.Update = value;
-    }
-
-    /// <inheritdoc/>
-    public string? Copy
-    {
-        get => _common.Copy;
-        set => _common.Copy = value;
-    }
-
-    /// <inheritdoc/>
-    public IDictionary<string, IOverlayExtension>? Extensions
-    {
-        get => _common.Extensions;
-        set => _common.Extensions = value;
-    }
-
-    /// <inheritdoc/>
-    public void SerializeAsV1(IOpenApiWriter writer) => _common.SerializeAsV1(writer, SerializeAdditionalPropertiesAsV1);
-
-    /// <inheritdoc/>
-    public void SerializeAsV1_1(IOpenApiWriter writer) => _common.SerializeAsV1_1(writer, SerializeAdditionalPropertiesAsV1_1);
-
-    internal OverlayCommonAction CommonAction => _common;
-
-    internal static void SerializeAdditionalPropertiesAsV1(IOpenApiWriter writer)
-    { }
-
-    internal static void SerializeAdditionalPropertiesAsV1_1(IOpenApiWriter writer)
-    { }
 
     private (bool, JsonPath?, PathResult?) ValidateBeforeApplying(JsonNode documentJsonNode, OverlayDiagnostic overlayDiagnostic, int index)
     {

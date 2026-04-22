@@ -30,6 +30,11 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
                 ?? throw new OverlayReaderException($"Expected a value at {Context.GetLocation()}.");
         }
 
+        public override T GetScalarValue<T>()
+        {
+            return _node.GetValue<T>();
+        }
+
         /// <summary>
         /// Create a <see cref="JsonNode"/>
         /// </summary>

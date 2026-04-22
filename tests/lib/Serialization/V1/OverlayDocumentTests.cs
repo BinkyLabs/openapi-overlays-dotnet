@@ -32,12 +32,15 @@ public sealed class OverlayDocumentTests
                         "setServerUrl",
                         new OverlayReusableAction
                         {
-                            Target = "$.servers[0]",
-                            Update = JsonNode.Parse("""
+                            Fields = new OverlayAction
                             {
-                                "url": "https://api.example.com"
+                                Target = "$.servers[0]",
+                                Update = JsonNode.Parse("""
+                                {
+                                    "url": "https://api.example.com"
+                                }
+                                """)
                             }
-                            """)
                         }
                     }
                 }
@@ -56,9 +59,11 @@ public sealed class OverlayDocumentTests
             "x-components": {
                 "actions": {
                     "setServerUrl": {
-                        "target": "$.servers[0]",
-                        "update": {
-                            "url": "https://api.example.com"
+                        "fields": {
+                            "target": "$.servers[0]",
+                            "update": {
+                                "url": "https://api.example.com"
+                            }
                         }
                     }
                 }
@@ -92,9 +97,11 @@ public sealed class OverlayDocumentTests
             "x-components": {
                 "actions": {
                     "setServerUrl": {
-                        "target": "$.servers[0]",
-                        "update": {
-                            "url": "https://api.example.com"
+                        "fields": {
+                            "target": "$.servers[0]",
+                            "update": {
+                                "url": "https://api.example.com"
+                            }
                         },
                         "parameters": [
                             {
@@ -120,9 +127,10 @@ public sealed class OverlayDocumentTests
         Assert.Single(overlayDocument.Components.Actions);
         Assert.True(overlayDocument.Components.Actions.ContainsKey("setServerUrl"));
         var action = overlayDocument.Components.Actions["setServerUrl"];
-        Assert.Equal("$.servers[0]", action.Target);
-        Assert.NotNull(action.Update);
-        Assert.Equal("https://api.example.com", action.Update["url"]?.GetValue<string>());
+        Assert.NotNull(action.Fields);
+        Assert.Equal("$.servers[0]", action.Fields.Target);
+        Assert.NotNull(action.Fields.Update);
+        Assert.Equal("https://api.example.com", action.Fields.Update["url"]?.GetValue<string>());
         Assert.NotNull(action.Parameters);
         Assert.Single(action.Parameters);
         Assert.Equal("region", action.Parameters[0].Name);
@@ -295,8 +303,10 @@ public sealed class OverlayDocumentTests
             "x-components": {
                 "actions": {
                     "errorResponse": {
-                        "target": "$.paths['/pets'].get.responses.404",
-                        "remove": true
+                        "fields": {
+                            "target": "$.paths['/pets'].get.responses.404",
+                            "remove": true
+                        }
                     }
                 }
             },
@@ -369,8 +379,11 @@ public sealed class OverlayDocumentTests
                 {
                     ["errorResponse"] = new()
                     {
-                        Target = "$.paths['/pets'].get.responses.404",
-                        Remove = true
+                        Fields = new OverlayAction
+                        {
+                            Target = "$.paths['/pets'].get.responses.404",
+                            Remove = true
+                        }
                     }
                 }
             },
@@ -834,8 +847,8 @@ public sealed class OverlayDocumentTests
             {
                 Actions = new Dictionary<string, OverlayReusableAction>
                 {
-                    { "setTitle", new OverlayReusableAction { Target = "$.info.title", Update = JsonNode.Parse("\"A\"") } },
-                    { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"1.0.0\"") } }
+                    { "setTitle", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.title", Update = JsonNode.Parse("\"A\"") } } },
+                    { "setVersion", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.version", Update = JsonNode.Parse("\"1.0.0\"") } } }
                 }
             }
         };
@@ -845,8 +858,8 @@ public sealed class OverlayDocumentTests
             {
                 Actions = new Dictionary<string, OverlayReusableAction>
                 {
-                    { "setVersion", new OverlayReusableAction { Target = "$.info.version", Update = JsonNode.Parse("\"2.0.0\"") } },
-                    { "setDescription", new OverlayReusableAction { Target = "$.info.description", Update = JsonNode.Parse("\"desc\"") } }
+                    { "setVersion", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.version", Update = JsonNode.Parse("\"2.0.0\"") } } },
+                    { "setDescription", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.description", Update = JsonNode.Parse("\"desc\"") } } }
                 }
             }
         };
@@ -858,9 +871,9 @@ public sealed class OverlayDocumentTests
         Assert.NotNull(result.Components);
         Assert.NotNull(result.Components.Actions);
         Assert.Equal(3, result.Components.Actions.Count);
-        Assert.Equal("$.info.title", result.Components.Actions["setTitle"].Target);
-        Assert.Equal("2.0.0", result.Components.Actions["setVersion"].Update?.GetValue<string>());
-        Assert.Equal("$.info.description", result.Components.Actions["setDescription"].Target);
+        Assert.Equal("$.info.title", result.Components.Actions["setTitle"].Fields?.Target);
+        Assert.Equal("2.0.0", result.Components.Actions["setVersion"].Fields?.Update?.GetValue<string>());
+        Assert.Equal("$.info.description", result.Components.Actions["setDescription"].Fields?.Target);
     }
 #pragma warning restore BOO002
 

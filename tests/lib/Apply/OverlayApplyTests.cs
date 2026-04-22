@@ -868,10 +868,13 @@ public sealed class OverlayApplyTests : IDisposable
                 {
                     ["setServerDescription"] = new OverlayReusableAction
                     {
-                        Target = "$.servers[0]",
-                        Update = new JsonObject
+                        Fields = new OverlayAction
                         {
-                            ["description"] = "%param.region%-%env.OVERLAYTESTENV%"
+                            Target = "$.servers[0]",
+                            Update = new JsonObject
+                            {
+                                ["description"] = "%param.region%-%env.OVERLAYTESTENV%"
+                            }
                         },
                         Parameters =
                         [
@@ -944,10 +947,13 @@ public sealed class OverlayApplyTests : IDisposable
             {
                 ["setServerDescription"] = new OverlayReusableAction
                 {
-                    Target = "$.servers[0]",
-                    Update = new JsonObject
+                    Fields = new OverlayAction
                     {
-                        ["description"] = "value"
+                        Target = "$.servers[0]",
+                        Update = new JsonObject
+                        {
+                            ["description"] = "value"
+                        }
                     },
                     EnvironmentVariables =
                     [
@@ -1033,10 +1039,13 @@ public sealed class OverlayApplyTests : IDisposable
             {
                 [actionKey] = new OverlayReusableAction
                 {
-                    Target = "$.info",
-                    Update = new JsonObject
+                    Fields = new OverlayAction
                     {
-                        ["description"] = "Added by reusable action"
+                        Target = "$.info",
+                        Update = new JsonObject
+                        {
+                            ["description"] = "Added by reusable action"
+                        }
                     }
                 }
             }
@@ -1087,9 +1096,10 @@ public sealed class OverlayApplyTests : IDisposable
             x-components:
               actions:
                 '{actionKey}':
-                  target: '$.info'
-                  update:
-                    description: Added by reusable action
+                  fields:
+                    target: '$.info'
+                    update:
+                      description: Added by reusable action
             actions:
               - 'x-$ref': '{encodedReference}'
             """;
