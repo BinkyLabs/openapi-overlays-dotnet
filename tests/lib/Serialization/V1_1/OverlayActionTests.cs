@@ -240,6 +240,25 @@ public class OverlayActionV1_1Tests
         Assert.NotNull(overlayAction.Update);
         Assert.Equal("simple string value", overlayAction.Update.GetValue<string>());
     }
+
+    [Fact]
+    public void Deserialize_WithNonBooleanRemove_ShouldThrow()
+    {
+        // Arrange
+        var json = """
+        {
+            "target": "Test Target",
+            "remove": "true"
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+        var parseNode = new MapNode(parsingContext, jsonNode);
+
+        // Act + Assert
+        Assert.Throws<InvalidOperationException>(() => OverlayV1_1Deserializer.LoadAction(parseNode));
+    }
+
     [Fact]
     public void ApplyToDocument_ShouldFailNoNullJsonNode()
     {
