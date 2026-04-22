@@ -69,6 +69,27 @@ public class OverlayReusableActionV1Tests
     }
 
     [Fact]
+    public void SerializeAsV1_WithNullFields_ShouldWriteEmptyFieldsObject()
+    {
+        // Arrange
+        var action = new OverlayReusableAction
+        {
+            Fields = null,
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act
+        action.SerializeAsV1(writer);
+        var jsonResult = textWriter.ToString();
+        var jsonResultObject = JsonNode.Parse(jsonResult)!.AsObject();
+
+        // Assert
+        Assert.True(jsonResultObject.ContainsKey("fields"), "The serialized JSON should contain a 'fields' property.");
+        Assert.NotNull(jsonResultObject["fields"]!.AsObject());
+    }
+
+    [Fact]
     public void Deserialize_ShouldSetPropertiesCorrectly()
     {
         // Arrange

@@ -118,13 +118,10 @@ public class OverlayReusableAction : IOverlaySerializable, IOverlayExtensible
                 serializeParameter);
         }
 
-        if (Fields != null)
-        {
-            writer.WriteRequiredObject(
-                OverlayConstants.ReusableActionFieldsFieldName,
-                Fields,
-                serializeFields);
-        }
+        writer.WriteRequiredObject(
+            OverlayConstants.ReusableActionFieldsFieldName,
+            Fields ?? new OverlayAction(),
+            serializeFields);
 
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
