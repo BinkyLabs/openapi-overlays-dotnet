@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0-preview.4](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.3...v3.0.0-preview.4) (2026-04-23)
+
+
+### Features
+
+* **reusable-action:** nest action fields under Fields property ([#312](https://github.com/BinkyLabs/openapi-overlays-dotnet/issues/312)) ([6de3ffa](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6de3ffab2ad3708e0a8f5c83df414a42d27062f3))
+
 ## [3.0.0-preview.3](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.2...v3.0.0-preview.3) (2026-04-09)
 
 
