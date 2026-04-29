@@ -206,17 +206,18 @@ info:
 x-components:
   actions:
     errorResponse:
-      update:
-        404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-      description: Adds an error response to the operation
+      fields:
+        update:
+          404:
+            description: Not Found
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+        description: Adds an error response to the operation
 actions:
   - x-$ref: '#/components/actions/errorResponse'
     # Override the target from the reusable action
@@ -260,21 +261,22 @@ info:
 x-components:
   actions:
     errorResponse:
-      target: "$.paths['%param.pathItem%'].%param.operation%.responses"
-      update:
-        404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  '%param.propertyName%':
-                    type: string
-                  stageName:
-                    type: string
-                    const: '%env.stageName%'
-      description: Adds an error response to the %param.pathItem% path item %param.operation% operation
+      fields:
+        target: "$.paths['%param.pathItem%'].%param.operation%.responses"
+        update:
+          404:
+            description: Not Found
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    '%param.propertyName%':
+                      type: string
+                    stageName:
+                      type: string
+                      const: '%env.stageName%'
+        description: Adds an error response to the %param.pathItem% path item %param.operation% operation
       parameters:
         - name: pathItem
         - name: operation
