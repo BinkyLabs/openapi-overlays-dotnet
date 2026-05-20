@@ -105,12 +105,7 @@ public sealed class OverlayDocumentV1_1Tests
                                 "url": "https://api.example.com"
                             }
                         },
-                        "parameters": [
-                            {
-                                "name": "region",
-                                "default": "us"
-                            }
-                        ]
+                        "description": "Sets the server URL"
                     }
                 }
             }
@@ -133,10 +128,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("$.servers[0]", action.Fields.Target);
         Assert.NotNull(action.Fields.Update);
         Assert.Equal("https://api.example.com", action.Fields.Update["url"]?.GetValue<string>());
-        Assert.NotNull(action.Parameters);
-        Assert.Single(action.Parameters);
-        Assert.Equal("region", action.Parameters[0].Name);
-        Assert.Equal("us", action.Parameters[0].Default);
+        Assert.Equal("Sets the server URL", action.Description);
     }
 #pragma warning restore BOO002
 
@@ -346,7 +338,6 @@ public sealed class OverlayDocumentV1_1Tests
                 "actions": {
                     "removeNotFoundDescription": {
                         "fields": {
-                            "target": "$.paths['/pets'].get.responses['404'].description",
                             "remove": true
                         }
                     }
@@ -354,7 +345,8 @@ public sealed class OverlayDocumentV1_1Tests
             },
             "actions": [
                 {
-                    "x-$ref": "#/components/actions/removeNotFoundDescription"
+                    "x-$ref": "#/components/actions/removeNotFoundDescription",
+                    "target": "$.paths['/pets'].get.responses['404'].description"
                 }
             ]
         }
@@ -962,9 +954,6 @@ public sealed class OverlayDocumentV1_1Tests
             "actions": [
                 {
                     "x-$ref": "#/components/actions/errorResponse",
-                    "x-parameterValues": {
-                        "region": "us"
-                    },
                     "target": "$.paths['/pets'].get.responses"
                 }
             ]
@@ -983,8 +972,6 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.NotNull(reference.Reference);
         Assert.Equal("errorResponse", reference.Reference.Id);
         Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
-        Assert.NotNull(reference.Reference.ParameterValues);
-        Assert.Equal("us", reference.Reference.ParameterValues["region"]);
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
     }
 #pragma warning restore BOO002

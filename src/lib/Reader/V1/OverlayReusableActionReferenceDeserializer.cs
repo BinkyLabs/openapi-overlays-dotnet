@@ -20,7 +20,6 @@ internal static partial class OverlayV1Deserializer
         { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
         { OverlayConstants.ActionXCopyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
         { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v) => o.Reference.Id = OverlayReusableActionReferenceItem.NormalizeReusableActionReferenceId(v.GetScalarValue()) },
-        { OverlayConstants.ReusableActionReferenceXParameterValuesFieldName, (o, v) => o.Reference.ParameterValues = LoadReusableActionReferenceParameterValues(v) },
     };
 
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =
@@ -32,12 +31,6 @@ internal static partial class OverlayV1Deserializer
         var action = new OverlayReusableActionReference();
         ParseMap(mapNode, action, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
         return action;
-    }
-
-    private static IDictionary<string, string> LoadReusableActionReferenceParameterValues(ParseNode node)
-    {
-        var parameterValuesMap = node.CheckMapNode("ReusableActionReference parameter values");
-        return parameterValuesMap.CreateSimpleMap(static valueNode => valueNode.GetScalarValue());
     }
 }
 #pragma warning restore BOO002

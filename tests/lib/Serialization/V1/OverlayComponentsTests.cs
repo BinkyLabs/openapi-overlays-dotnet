@@ -24,6 +24,7 @@ public class OverlayComponentsV1Tests
                     "setServerUrl",
                     new OverlayReusableAction
                     {
+                        Description = "Sets the server URL",
                         Fields = new OverlayAction
                         {
                             Target = "$.servers[0]",
@@ -32,15 +33,7 @@ public class OverlayComponentsV1Tests
                                 "url": "https://api.example.com"
                             }
                             """),
-                        },
-                        Parameters =
-                        [
-                            new OverlayReusableActionParameter
-                            {
-                                Name = "region",
-                                Default = "us"
-                            }
-                        ]
+                        }
                     }
                 }
             }
@@ -53,12 +46,7 @@ public class OverlayComponentsV1Tests
 {
     "actions": {
         "setServerUrl": {
-            "parameters": [
-                {
-                    "name": "region",
-                    "default": "us"
-                }
-            ],
+            "description": "Sets the server URL",
             "fields": {
                 "target": "$.servers[0]",
                 "update": {
@@ -94,12 +82,7 @@ public class OverlayComponentsV1Tests
                             "url": "https://api.example.com"
                         }
                     },
-                    "parameters": [
-                        {
-                            "name": "region",
-                            "default": "us"
-                        }
-                    ]
+                    "description": "Sets the server URL"
                 }
             }
         }
@@ -120,10 +103,7 @@ public class OverlayComponentsV1Tests
         Assert.Equal("$.servers[0]", action.Fields.Target);
         Assert.NotNull(action.Fields.Update);
         Assert.Equal("https://api.example.com", action.Fields.Update["url"]?.GetValue<string>());
-        Assert.NotNull(action.Parameters);
-        Assert.Single(action.Parameters);
-        Assert.Equal("region", action.Parameters[0].Name);
-        Assert.Equal("us", action.Parameters[0].Default);
+        Assert.Equal("Sets the server URL", action.Description);
     }
 
     [Fact]

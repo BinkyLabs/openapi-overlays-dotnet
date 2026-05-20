@@ -163,21 +163,16 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return result;
     }
 
-    private readonly Lazy<Dictionary<string, string>> _environmentVariableValues = new(GetEnvironmentVariableValues);
-
-#pragma warning disable BOO002
     private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)
     {
         if (action is OverlayAction concreteAction)
         {
             return concreteAction;
         }
+#pragma warning disable BOO002
         if (action is OverlayReusableActionReference reusableActionReference)
         {
-            return reusableActionReference.GetResolvedAction(
-                overlayDiagnostic,
-                _environmentVariableValues.Value,
-                index);
+            return reusableActionReference.GetResolvedAction(overlayDiagnostic, index);
         }
 
         overlayDiagnostic.Errors.Add(
@@ -185,27 +180,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                 OverlayAction.GetPointer(index),
                 $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
         );
+#pragma warning restore BOO002
 
         return null;
     }
-#pragma warning restore BOO002
 
-    private static Dictionary<string, string> GetEnvironmentVariableValues()
-    {
-        var values = new Dictionary<string, string>(StringComparer.Ordinal);
-        var environmentVariables = Environment.GetEnvironmentVariables();
-        foreach (var keyObject in environmentVariables.Keys)
-        {
-            if (keyObject is not string key || environmentVariables[keyObject] is not string value)
-            {
-                continue;
-            }
-
-            values[key] = value;
-        }
-
-        return values;
-    }
     /// <summary>
     /// Applies the action to an OpenAPI document loaded from the extends property.
     /// The document is read in the specified format (e.g., JSON or YAML).

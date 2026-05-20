@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 using BinkyLabs.OpenApi.Overlays.Writers;
@@ -13,11 +12,8 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// Represents a reusable action reference action with local overrides.
 /// </summary>
 [Experimental("BOO002")]
-public partial class OverlayReusableActionReference : IOverlayAction
+public class OverlayReusableActionReference : IOverlayAction
 {
-    private static Regex PlaceholderPattern => PlaceholderRegex();
-    private static Regex StrictPlaceholderPattern => StrictPlaceholderRegex();
-
     /// <summary>
     /// Creates a reusable action reference action with the specified reusable action identifier and overlay document context for validation.
     /// </summary>
@@ -65,9 +61,13 @@ public partial class OverlayReusableActionReference : IOverlayAction
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The <c>target</c> field is supplied by the reference itself; it MUST NOT be set on the
+    /// referenced reusable action's <see cref="OverlayReusableAction.Fields"/>.
+    /// </remarks>
     public string? Target
     {
-        get => Reference.Target ?? TargetAction?.Fields?.Target;
+        get => Reference.Target;
         set => Reference.Target = value;
     }
 
@@ -106,383 +106,38 @@ public partial class OverlayReusableActionReference : IOverlayAction
         set => Reference.Extensions = value;
     }
 
-    /// <summary>
-    /// Validates referenced parameter values against the resolved reusable action parameters.
-    /// </summary>
-    /// <returns>
-    /// A tuple containing:
-    /// <list type="bullet">
-    /// <item>
-    /// <description>Resolved parameter values (provided values plus defaults for missing optional parameters).</description>
-    /// </item>
-    /// <item>
-    /// <description>A hash set of parameter value names that do not match any reusable action parameter definition.</description>
-    /// </item>
-    /// <item>
-    /// <description>A hash set of reusable action parameter names that are required (no default) and missing a corresponding parameter value.</description>
-    /// </item>
-    /// </list>
-    /// </returns>
-    /// <exception cref="InvalidOperationException">Thrown when the target action is not resolved.</exception>
-    public (Dictionary<string, string> ResolvedParameterValues, HashSet<string> UndefinedParameterValues, HashSet<string> MissingRequiredParameterValues) ResolveParameterValues()
-    {
-        if (TargetAction is null)
-        {
-            throw new InvalidOperationException("Cannot resolve parameter values without a resolved target action.");
-        }
-        var parameterDefinitions = TargetAction.Parameters;
-        var parameterValues = Reference.ParameterValues;
-        var resolvedParameterValues = new Dictionary<string, string>(StringComparer.Ordinal);
-        var undefinedParameterValues = new HashSet<string>(StringComparer.Ordinal);
-        var missingRequiredParameterValues = new HashSet<string>(StringComparer.Ordinal);
-
-        if (parameterDefinitions is not { Count: > 0 })
-        {
-            if (parameterValues is { Count: > 0 })
-            {
-                foreach (var valueName in parameterValues.Keys)
-                {
-                    undefinedParameterValues.Add(valueName);
-                }
-            }
-
-            return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
-        }
-
-        var definitionsByName = OverlayReusableActionDefinitionValidator.BuildDefinitionsByName(
-            parameterDefinitions,
-            "parameter");
-
-        if (parameterValues is { Count: > 0 })
-        {
-            foreach (var parameterValue in parameterValues)
-            {
-                if (definitionsByName.ContainsKey(parameterValue.Key))
-                {
-                    resolvedParameterValues[parameterValue.Key] = parameterValue.Value;
-                    continue;
-                }
-
-                undefinedParameterValues.Add(parameterValue.Key);
-            }
-        }
-
-        foreach (var definition in definitionsByName)
-        {
-            var definitionName = definition.Key;
-            if (resolvedParameterValues.ContainsKey(definitionName))
-            {
-                continue;
-            }
-
-            if (definition.Value.Default is not null)
-            {
-                resolvedParameterValues[definitionName] = definition.Value.Default;
-                continue;
-            }
-
-            missingRequiredParameterValues.Add(definitionName);
-        }
-
-        return (resolvedParameterValues, undefinedParameterValues, missingRequiredParameterValues);
-    }
-
-    internal OverlayAction? GetResolvedAction(OverlayDiagnostic overlayDiagnostic, IDictionary<string, string> environmentVariableValues, int actionIndex = 0)
+    internal OverlayAction? GetResolvedAction(OverlayDiagnostic overlayDiagnostic, int actionIndex = 0)
     {
         ArgumentNullException.ThrowIfNull(overlayDiagnostic);
-        ArgumentNullException.ThrowIfNull(environmentVariableValues);
 
         var pointer = OverlayAction.GetPointer(actionIndex);
-        Dictionary<string, string> resolvedParameterValues;
-        Dictionary<string, string> resolvedEnvironmentVariableValues;
-        try
+
+        if (TargetAction is null)
         {
-            var (resolvedParameters, undefinedParameterValues, missingRequiredParameterValues) = ResolveParameterValues();
-            resolvedParameterValues = resolvedParameters;
-            var hasErrors = false;
-
-            if (undefinedParameterValues.Count > 0)
-            {
-                overlayDiagnostic.Errors.Add(new OpenApiError(
-                    pointer,
-                    $"Reusable action reference contains undefined parameter values: {GetOrderedNames(undefinedParameterValues)}."));
-                hasErrors = true;
-            }
-
-            if (missingRequiredParameterValues.Count > 0)
-            {
-                overlayDiagnostic.Errors.Add(new OpenApiError(
-                    pointer,
-                    $"Reusable action reference is missing required parameter values: {GetOrderedNames(missingRequiredParameterValues)}."));
-                hasErrors = true;
-            }
-
-            var (resolvedEnvironmentVariables, missingRequiredEnvironmentVariableValues) = TargetAction!.ResolveEnvironmentVariableValues(environmentVariableValues);
-            resolvedEnvironmentVariableValues = resolvedEnvironmentVariables;
-            if (missingRequiredEnvironmentVariableValues.Count > 0)
-            {
-                overlayDiagnostic.Errors.Add(new OpenApiError(
-                    pointer,
-                    $"Reusable action reference is missing required environment variable values: {GetOrderedNames(missingRequiredEnvironmentVariableValues)}."));
-                hasErrors = true;
-            }
-
-            if (hasErrors)
-            {
-                return null;
-            }
-        }
-        catch (InvalidOperationException ex)
-        {
-            overlayDiagnostic.Errors.Add(new OpenApiError(pointer, ex.Message));
+            overlayDiagnostic.Errors.Add(new OpenApiError(
+                pointer,
+                $"Reusable action reference '{Reference.Reference}' could not be resolved."));
             return null;
         }
 
-        var resolvedTarget = ResolveActionStringProperty(
-            Target,
-            Reference.Target,
-            OverlayConstants.ActionTargetFieldName,
-            pointer,
-            overlayDiagnostic,
-            resolvedEnvironmentVariableValues,
-            resolvedParameterValues);
-        var resolvedDescription = ResolveActionStringProperty(
-            Description,
-            Reference.Description,
-            OverlayConstants.ActionDescriptionFieldName,
-            pointer,
-            overlayDiagnostic,
-            resolvedEnvironmentVariableValues,
-            resolvedParameterValues);
-        var resolvedCopy = ResolveActionStringProperty(
-            Copy,
-            Reference.Copy,
-            OverlayConstants.ActionCopyFieldName,
-            pointer,
-            overlayDiagnostic,
-            resolvedEnvironmentVariableValues,
-            resolvedParameterValues);
-        var resolvedUpdate = ResolveActionUpdateProperty(
-            Update,
-            Reference.Update,
-            pointer,
-            overlayDiagnostic,
-            resolvedEnvironmentVariableValues,
-            resolvedParameterValues);
+        if (string.IsNullOrEmpty(Reference.Target))
+        {
+            overlayDiagnostic.Errors.Add(new OpenApiError(
+                pointer,
+                $"Reusable action reference '{Reference.Reference}' is missing the required '{OverlayConstants.ActionTargetFieldName}' field."));
+            return null;
+        }
 
         return new OverlayAction
         {
-            Target = resolvedTarget,
-            Description = resolvedDescription,
+            Target = Reference.Target,
+            Description = Description,
             Remove = Remove,
-            Update = resolvedUpdate,
-            Copy = resolvedCopy,
+            Update = Update,
+            Copy = Copy,
             Extensions = Extensions
         };
     }
-
-    internal string ReplaceValues(
-        string value,
-        IDictionary<string, string> resolvedEnvironmentVariableValues,
-        IDictionary<string, string> resolvedParameterValues)
-    {
-        ArgumentNullException.ThrowIfNull(value);
-        ArgumentNullException.ThrowIfNull(resolvedEnvironmentVariableValues);
-        ArgumentNullException.ThrowIfNull(resolvedParameterValues);
-
-        if (!value.Contains('%', StringComparison.Ordinal))
-        {
-            return value;
-        }
-
-        return PlaceholderPattern.Replace(
-            value,
-            match =>
-            {
-                var scope = match.Groups["scope"].Value;
-                var key = match.Groups["key"].Value;
-                var source = string.Equals(scope, "env", StringComparison.Ordinal)
-                    ? resolvedEnvironmentVariableValues
-                    : resolvedParameterValues;
-
-                return source.TryGetValue(key, out var resolvedValue)
-                    ? resolvedValue
-                    : match.Value;
-            });
-    }
-
-    private string? ResolveActionStringProperty(
-        string? value,
-        string? overrideValue,
-        string propertyName,
-        string pointer,
-        OverlayDiagnostic overlayDiagnostic,
-        IDictionary<string, string> resolvedEnvironmentVariableValues,
-        IDictionary<string, string> resolvedParameterValues)
-    {
-        if (value is null || overrideValue is not null)
-        {
-            return value;
-        }
-
-        var replacedValue = ReplaceValues(value, resolvedEnvironmentVariableValues, resolvedParameterValues);
-        var unresolvedPlaceholders = GetUnresolvedPlaceholders(replacedValue);
-        if (unresolvedPlaceholders.Count > 0)
-        {
-            overlayDiagnostic.Warnings.Add(new OpenApiError(
-                pointer,
-                $"Reusable action reference contains unresolved value placeholders in '{propertyName}': {GetOrderedNames(unresolvedPlaceholders)}."));
-        }
-
-        return replacedValue;
-    }
-
-    private JsonNode? ResolveActionUpdateProperty(
-        JsonNode? value,
-        JsonNode? overrideValue,
-        string pointer,
-        OverlayDiagnostic overlayDiagnostic,
-        IDictionary<string, string> resolvedEnvironmentVariableValues,
-        IDictionary<string, string> resolvedParameterValues)
-    {
-        if (value is null || overrideValue is not null)
-        {
-            return value;
-        }
-
-        var unresolvedPlaceholders = new HashSet<string>(StringComparer.Ordinal);
-        var replacedValue = ReplaceValuesInJsonNode(
-            value,
-            resolvedEnvironmentVariableValues,
-            resolvedParameterValues,
-            unresolvedPlaceholders);
-
-        if (unresolvedPlaceholders.Count > 0)
-        {
-            overlayDiagnostic.Warnings.Add(new OpenApiError(
-                pointer,
-                $"Reusable action reference contains unresolved value placeholders in '{OverlayConstants.ActionUpdateFieldName}': {GetOrderedNames(unresolvedPlaceholders)}."));
-        }
-
-        return replacedValue;
-    }
-
-    private JsonNode? ReplaceValuesInJsonNode(
-        JsonNode? node,
-        IDictionary<string, string> resolvedEnvironmentVariableValues,
-        IDictionary<string, string> resolvedParameterValues,
-        HashSet<string> unresolvedPlaceholders)
-    {
-        if (node is null)
-        {
-            return null;
-        }
-
-        if (node is JsonObject sourceObject)
-        {
-            var replacedObject = new JsonObject();
-            foreach (var property in sourceObject)
-            {
-                replacedObject[property.Key] = ReplaceValuesInJsonNode(
-                    property.Value,
-                    resolvedEnvironmentVariableValues,
-                    resolvedParameterValues,
-                    unresolvedPlaceholders);
-            }
-
-            return replacedObject;
-        }
-
-        if (node is JsonArray sourceArray)
-        {
-            var replacedArray = new JsonArray();
-            foreach (var item in sourceArray)
-            {
-                replacedArray.Add(ReplaceValuesInJsonNode(
-                    item,
-                    resolvedEnvironmentVariableValues,
-                    resolvedParameterValues,
-                    unresolvedPlaceholders));
-            }
-
-            return replacedArray;
-        }
-
-        if (node is JsonValue valueNode && valueNode.TryGetValue<string>(out var stringValue))
-        {
-            if (!stringValue.Contains('%', StringComparison.Ordinal))
-            {
-                // Create a new JsonValue so the resulting node is not bound to an existing
-                // parent; JsonNode instances may only have a single parent at a time.
-                return JsonValue.Create(stringValue);
-            }
-
-            if (TryResolveStrictPlaceholderValue(
-                stringValue,
-                resolvedEnvironmentVariableValues,
-                resolvedParameterValues,
-                out var strictResolvedValue))
-            {
-                return JsonValue.Create(strictResolvedValue);
-            }
-
-            var replacedStringValue = ReplaceValues(stringValue, resolvedEnvironmentVariableValues, resolvedParameterValues);
-            foreach (var unresolvedPlaceholder in GetUnresolvedPlaceholders(replacedStringValue))
-            {
-                unresolvedPlaceholders.Add(unresolvedPlaceholder);
-            }
-
-            return JsonValue.Create(replacedStringValue);
-        }
-
-        return node.DeepClone();
-    }
-
-    private static bool TryResolveStrictPlaceholderValue(
-        string value,
-        IDictionary<string, string> resolvedEnvironmentVariableValues,
-        IDictionary<string, string> resolvedParameterValues,
-        out string? resolvedValue)
-    {
-        resolvedValue = null;
-        var strictMatch = StrictPlaceholderPattern.Match(value);
-        if (!strictMatch.Success)
-        {
-            return false;
-        }
-
-        var scope = strictMatch.Groups["scope"].Value;
-        var key = strictMatch.Groups["key"].Value;
-        var source = string.Equals(scope, "env", StringComparison.Ordinal)
-            ? resolvedEnvironmentVariableValues
-            : resolvedParameterValues;
-
-        return source.TryGetValue(key, out resolvedValue);
-    }
-
-    private static HashSet<string> GetUnresolvedPlaceholders(string value)
-    {
-        var unresolvedPlaceholders = new HashSet<string>(StringComparer.Ordinal);
-        foreach (Match match in PlaceholderPattern.Matches(value))
-        {
-            unresolvedPlaceholders.Add(match.Value);
-        }
-
-        return unresolvedPlaceholders;
-    }
-
-    private static string GetOrderedNames(HashSet<string> names)
-    {
-        var ordered = names.ToArray();
-        Array.Sort(ordered, StringComparer.Ordinal);
-        return string.Join(", ", ordered);
-    }
-
-    [GeneratedRegex("%(?<scope>env|param)\\.(?<key>[A-Za-z_][A-Za-z0-9_]*)%", RegexOptions.CultureInvariant)]
-    private static partial Regex PlaceholderRegex();
-
-    [GeneratedRegex("^%(?<scope>env|param)\\.(?<key>[A-Za-z_][A-Za-z0-9_]*)%$", RegexOptions.CultureInvariant)]
-    private static partial Regex StrictPlaceholderRegex();
 
     /// <inheritdoc/>
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(
@@ -511,14 +166,6 @@ public partial class OverlayReusableActionReference : IOverlayAction
         writer.WriteStartObject();
 
         writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
-
-        if (Reference.ParameterValues != null)
-        {
-            writer.WriteOptionalMap(
-                OverlayConstants.ReusableActionReferenceXParameterValuesFieldName,
-                Reference.ParameterValues,
-                static (w, n) => w.WriteValue(n));
-        }
 
         if (!string.IsNullOrEmpty(Reference.Target))
         {

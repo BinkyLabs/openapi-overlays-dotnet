@@ -856,13 +856,9 @@ public sealed class OverlayApplyTests : IDisposable
     public void ApplyToDocument_WithReusableActionReference_ShouldResolveAndApplyAction()
     {
         // Arrange
-        const string environmentVariableName = "OVERLAYTESTENV";
-        var previousEnvironmentValue = Environment.GetEnvironmentVariable(environmentVariableName);
-        Environment.SetEnvironmentVariable(environmentVariableName, "env-value");
-        try
+        var overlayDocument = new OverlayDocument
         {
-            var overlayDocument = new OverlayDocument();
-            overlayDocument.Components = new OverlayComponents
+            Components = new OverlayComponents
             {
                 Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
                 {
@@ -870,77 +866,53 @@ public sealed class OverlayApplyTests : IDisposable
                     {
                         Fields = new OverlayAction
                         {
-                            Target = "$.servers[0]",
                             Update = new JsonObject
                             {
-                                ["description"] = "%param.region%-%env.OVERLAYTESTENV%"
+                                ["description"] = "us-server"
                             }
-                        },
-                        Parameters =
-                        [
-                            new OverlayReusableActionParameter
-                            {
-                                Name = "region",
-                                Default = "default-region"
-                            }
-                        ],
-                        EnvironmentVariables =
-                        [
-                            new OverlayReusableActionParameter
-                            {
-                                Name = environmentVariableName
-                            }
-                        ]
-                    }
-                }
-            };
-            overlayDocument.Actions =
-            [
-                new OverlayReusableActionReference("setServerDescription", overlayDocument)
-                {
-                    Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
-                    {
-                        ParameterValues = new Dictionary<string, string>
-                        {
-                            ["region"] = "us"
                         }
                     }
                 }
-            ];
-
-            var jsonNode = new JsonObject
+            }
+        };
+        overlayDocument.Actions =
+        [
+            new OverlayReusableActionReference("setServerDescription", overlayDocument)
             {
-                ["servers"] = new JsonArray
+                Reference = new OverlayReusableActionReferenceItem("setServerDescription", overlayDocument)
                 {
-                    new JsonObject
-                    {
-                        ["url"] = "https://example.com"
-                    }
+                    Target = "$.servers[0]"
                 }
-            };
-            var overlayDiagnostic = new OverlayDiagnostic();
+            }
+        ];
 
-            // Act
-            var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
-
-            // Assert
-            Assert.True(result, "ApplyToDocument should return true when reusable action reference resolves.");
-            Assert.Empty(overlayDiagnostic.Errors);
-            Assert.Empty(overlayDiagnostic.Warnings);
-            Assert.Equal("us-env-value", jsonNode["servers"]?[0]?["description"]?.ToString());
-        }
-        finally
+        var jsonNode = new JsonObject
         {
-            Environment.SetEnvironmentVariable(environmentVariableName, previousEnvironmentValue);
-        }
+            ["servers"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["url"] = "https://example.com"
+                }
+            }
+        };
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        // Act
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        // Assert
+        Assert.True(result, "ApplyToDocument should return true when reusable action reference resolves.");
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+        Assert.Equal("us-server", jsonNode["servers"]?[0]?["description"]?.ToString());
     }
 
     [Fact]
-    public void ApplyToDocument_WithReusableActionReferenceResolutionError_ShouldReturnFalseAndAddDiagnostic()
+    public void ApplyToDocument_WithReusableActionReferenceMissingTarget_ShouldReturnFalseAndAddDiagnostic()
     {
         // Arrange
         var overlayDocument = new OverlayDocument();
-        var missingEnvironmentVariableName = $"MissingRequiredEnv{Guid.NewGuid():N}".ToUpperInvariant();
         overlayDocument.Components = new OverlayComponents
         {
             Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
@@ -949,19 +921,11 @@ public sealed class OverlayApplyTests : IDisposable
                 {
                     Fields = new OverlayAction
                     {
-                        Target = "$.servers[0]",
                         Update = new JsonObject
                         {
                             ["description"] = "value"
                         }
-                    },
-                    EnvironmentVariables =
-                    [
-                        new OverlayReusableActionParameter
-                        {
-                            Name = missingEnvironmentVariableName
-                        }
-                    ]
+                    }
                 }
             }
         };
@@ -989,9 +953,9 @@ public sealed class OverlayApplyTests : IDisposable
         var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
 
         // Assert
-        Assert.False(result, "ApplyToDocument should return false when reusable action reference resolution fails.");
+        Assert.False(result, "ApplyToDocument should return false when reusable action reference is missing target.");
         Assert.Single(overlayDiagnostic.Errors);
-        Assert.Contains("missing required environment variable values", overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
+        Assert.Contains("target", overlayDiagnostic.Errors[0].Message, StringComparison.OrdinalIgnoreCase);
         Assert.Null(jsonNode["servers"]?[0]?["description"]);
     }
 #pragma warning restore BOO002
@@ -1041,7 +1005,6 @@ public sealed class OverlayApplyTests : IDisposable
                 {
                     Fields = new OverlayAction
                     {
-                        Target = "$.info",
                         Update = new JsonObject
                         {
                             ["description"] = "Added by reusable action"
@@ -1053,6 +1016,12 @@ public sealed class OverlayApplyTests : IDisposable
         overlayDocument.Actions =
         [
             new OverlayReusableActionReference(actionKey, overlayDocument)
+            {
+                Reference = new OverlayReusableActionReferenceItem(actionKey, overlayDocument)
+                {
+                    Target = "$.info"
+                }
+            }
         ];
 #pragma warning restore BOO002
 
@@ -1097,11 +1066,11 @@ public sealed class OverlayApplyTests : IDisposable
               actions:
                 '{actionKey}':
                   fields:
-                    target: '$.info'
                     update:
                       description: Added by reusable action
             actions:
               - 'x-$ref': '{encodedReference}'
+                target: '$.info'
             """;
 
         var readResult = await OverlayModelFactory.ParseAsync(overlayYaml, "yaml");
