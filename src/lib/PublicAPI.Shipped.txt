@@ -183,24 +183,11 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Gen
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.EnvironmentVariables.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter!>?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.EnvironmentVariables.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Extensions.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.OverlayReusableAction() -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Parameters.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter!>?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Parameters.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Extensions.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Name.get -> string?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Name.set -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.OverlayReusableActionParameter() -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.OverlayReusableAction!>?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.set -> void
@@ -238,7 +225,6 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.get -> string?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.OverlayReusableActionReferenceItem(string! reusableActionIdentifier, BinkyLabs.OpenApi.Overlays.OverlayDocument? overlayDocument = null) -> void
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.ParameterValues.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Reference.get -> string!
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Remove.get -> bool?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Remove.set -> void
@@ -248,19 +234,13 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.set -> void
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXComponentsFieldName = "x-components" -> string!
-[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionEnvironmentVariablesFieldName = "environmentVariables" -> string!
-[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterDefaultFieldName = "default" -> string!
-[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParameterNameFieldName = "name" -> string!
-[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionParametersFieldName = "parameters" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
-[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXParameterValuesFieldName = "x-parameterValues" -> string!
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXReferenceFieldName = "x-$ref" -> string!
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.ResolveEnvironmentVariableValues(System.Collections.Generic.IDictionary<string!, string!>! environmentVariableValues) -> (System.Collections.Generic.Dictionary<string!, string!>! ResolvedEnvironmentVariableValues, System.Collections.Generic.HashSet<string!>! MissingRequiredEnvironmentVariableValues)
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionParameter.Default.get -> string?
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.ResolveParameterValues() -> (System.Collections.Generic.Dictionary<string!, string!>! ResolvedParameterValues, System.Collections.Generic.HashSet<string!>! UndefinedParameterValues, System.Collections.Generic.HashSet<string!>! MissingRequiredParameterValues)
-[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.ParameterValues.get -> System.Collections.Generic.IDictionary<string!, string!>?
 static BinkyLabs.OpenApi.Overlays.OverlayDocument.Combine(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! documents) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
 [BOO002]static BinkyLabs.OpenApi.Overlays.OverlayComponents.Combine(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! componentsArray) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.get -> BinkyLabs.OpenApi.Overlays.OverlayAction?
 [BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.set -> void
 [BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionFieldsFieldName = "fields" -> string!
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Description.get -> string?
+[BOO002]BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Description.set -> void
+[BOO002]const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionDescriptionFieldName = "description" -> string!
