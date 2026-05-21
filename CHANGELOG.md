@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.0-preview.5](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.4...v3.0.0-preview.5) (2026-05-21)
+
+
+### Features
+
+* aligns reusable actions with the latest iteration of the feature proposal ([0031d33](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0031d330b4147308d24880a7cb095fb177c14025))
+* aligns reusable actions with the latest iteration of the feature proposal ([427669b](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/427669b9062edc3206191af12a1b79a8f65e2c90))
+
 ## [3.0.0-preview.4](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.3...v3.0.0-preview.4) (2026-04-23)
 
 
