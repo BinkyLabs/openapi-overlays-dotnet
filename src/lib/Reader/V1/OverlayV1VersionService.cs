@@ -20,7 +20,6 @@ internal class OverlayV1VersionService : BaseOverlayVersionService
         [typeof(OverlayReusableActionReference)] = OverlayV1Deserializer.LoadReusableActionReference,
         [typeof(OverlayDocument)] = OverlayV1Deserializer.LoadDocument,
         [typeof(OverlayInfo)] = OverlayV1Deserializer.LoadInfo,
-        [typeof(OverlayReusableActionParameter)] = OverlayV1Deserializer.LoadReusableActionParameter,
     };
 
     protected override Dictionary<Type, Func<ParseNode, object?>> Loaders => _loaders;

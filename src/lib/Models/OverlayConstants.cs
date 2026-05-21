@@ -13,41 +13,20 @@ public static class OverlayConstants
     public const string ExtensionFieldNamePrefix = "x-";
 
     /// <summary>
-    /// Field: ReusableActionParameter.Name
-    /// </summary>
-    [Experimental("BOO002")]
-    public const string ReusableActionParameterNameFieldName = "name";
-
-    /// <summary>
-    /// Field: ReusableActionParameter.Default
-    /// </summary>
-    [Experimental("BOO002")]
-    public const string ReusableActionParameterDefaultFieldName = "default";
-    /// <summary>
     /// Field: OverlayReusableAction.Fields
     /// </summary>
     [Experimental("BOO002")]
     public const string ReusableActionFieldsFieldName = "fields";
     /// <summary>
-    /// Field: OverlayReusableAction.Parameters
+    /// Field: OverlayReusableAction.Description
     /// </summary>
     [Experimental("BOO002")]
-    public const string ReusableActionParametersFieldName = "parameters";
-    /// <summary>
-    /// Field: OverlayReusableAction.EnvironmentVariables
-    /// </summary>
-    [Experimental("BOO002")]
-    public const string ReusableActionEnvironmentVariablesFieldName = "environmentVariables";
+    public const string ReusableActionDescriptionFieldName = "description";
     /// <summary>
     /// Field: OverlayReusableActionReference.$ref (serialized as extension for v1/v1.1 compatibility)
     /// </summary>
     [Experimental("BOO002")]
     public const string ReusableActionReferenceXReferenceFieldName = "x-$ref";
-    /// <summary>
-    /// Field: OverlayReusableActionReference.parameterValues (serialized as extension for v1/v1.1 compatibility)
-    /// </summary>
-    [Experimental("BOO002")]
-    public const string ReusableActionReferenceXParameterValuesFieldName = "x-parameterValues";
     /// <summary>
     /// Prefix used to build OverlayReusableActionReference.Reference
     /// </summary>

@@ -43,11 +43,6 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
     }
 
     /// <summary>
-    /// Gets the map of parameter values for the reusable action reference.
-    /// </summary>
-    public IDictionary<string, string>? ParameterValues { get; set; }
-
-    /// <summary>
     /// Gets the computed reusable-action reference pointer.
     /// The <see cref="Id"/> is encoded as a JSON Pointer token per RFC 6901 so that
     /// names containing <c>/</c> or <c>~</c> are represented correctly in the reference.
