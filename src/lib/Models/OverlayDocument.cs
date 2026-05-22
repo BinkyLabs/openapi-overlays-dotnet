@@ -130,12 +130,14 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="input"> The string input.</param>
     /// <param name="format"></param>
     /// <param name="settings"></param>
+    /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <returns></returns>
     public static Task<ReadResult> ParseAsync(string input,
                                    string? format = null,
-                                   OverlayReaderSettings? settings = null)
+                                   OverlayReaderSettings? settings = null,
+                                   CancellationToken cancellationToken = default)
     {
-        return OverlayModelFactory.ParseAsync(input, format, settings);
+        return OverlayModelFactory.ParseAsync(input, format, settings, cancellationToken);
     }
 
     internal bool ApplyToDocument(JsonNode jsonNode, OverlayDiagnostic overlayDiagnostic, bool strict = false)

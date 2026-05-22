@@ -272,7 +272,7 @@ public sealed class OverlayDocumentV1_1Tests
         """;
 
         // Act
-        var (_, diagnostic) = await OverlayDocument.ParseAsync(json);
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(diagnostic);
@@ -313,7 +313,7 @@ public sealed class OverlayDocumentV1_1Tests
         """;
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -369,7 +369,7 @@ public sealed class OverlayDocumentV1_1Tests
         """)!;
 
         // Act
-        var (overlayDocument, parseDiagnostic) = await OverlayDocument.ParseAsync(overlayJson);
+        var (overlayDocument, parseDiagnostic) = await OverlayDocument.ParseAsync(overlayJson, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert parse output
         Assert.NotNull(overlayDocument);
@@ -778,7 +778,7 @@ public sealed class OverlayDocumentV1_1Tests
         """;
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json);
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -808,7 +808,7 @@ public sealed class OverlayDocumentV1_1Tests
         """;
 
         // Act
-        var (overlayDocument, _) = await OverlayDocument.ParseAsync(yaml);
+        var (overlayDocument, _) = await OverlayDocument.ParseAsync(yaml, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(overlayDocument);

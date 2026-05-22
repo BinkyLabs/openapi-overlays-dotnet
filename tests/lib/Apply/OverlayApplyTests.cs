@@ -1073,7 +1073,7 @@ public sealed class OverlayApplyTests : IDisposable
                 target: '$.info'
             """;
 
-        var readResult = await OverlayModelFactory.ParseAsync(overlayYaml, "yaml");
+        var readResult = await OverlayModelFactory.ParseAsync(overlayYaml, "yaml", cancellationToken: TestContext.Current.CancellationToken);
         var overlayDocument = readResult.Document;
         var diags = readResult.Diagnostic;
 

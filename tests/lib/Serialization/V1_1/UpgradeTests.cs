@@ -28,7 +28,7 @@ public class UpgradeV1_1Tests
         }
         """;
         // When
-        var (document, _) = await OverlayDocument.ParseAsync(inputJson);
+        var (document, _) = await OverlayDocument.ParseAsync(inputJson, cancellationToken: TestContext.Current.CancellationToken);
         Assert.NotNull(document);
 
         using var textWriter = new StringWriter();
@@ -66,7 +66,7 @@ public class UpgradeV1_1Tests
         }
         """;
         // When
-        var (document, _) = await OverlayDocument.ParseAsync(inputJson);
+        var (document, _) = await OverlayDocument.ParseAsync(inputJson, cancellationToken: TestContext.Current.CancellationToken);
         Assert.NotNull(document);
 
         using var textWriter = new StringWriter();
