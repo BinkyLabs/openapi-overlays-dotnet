@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.0-preview.6](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.5...v3.0.0-preview.6) (2026-05-22)
+
+
+### Bug Fixes
+
+* adds missing cancellation token parameter ([21f9da9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/21f9da94043ee2faff0eed7626bf6cb214e4edd8))
+* **reader:** add missing CancellationToken parameter to ParseAsync ([52aa492](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/52aa492d3ddba1fe7164ca1248b9dd6741d9fae6))
+
 ## [3.0.0-preview.5](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.4...v3.0.0-preview.5) (2026-05-21)
 
 
