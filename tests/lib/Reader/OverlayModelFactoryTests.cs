@@ -116,7 +116,7 @@ public sealed class OverlayModelFactoryTests
     public async Task CanLoadAStringJsonAndDetectFormatWhenPrecededBySpaces()
     {
         // When
-        var result = await OverlayModelFactory.ParseAsync("   " + documentJson);
+        var result = await OverlayModelFactory.ParseAsync("   " + documentJson, cancellationToken: TestContext.Current.CancellationToken);
 
         // Then
         Assert.NotNull(result);

@@ -73,10 +73,12 @@ public static class OverlayModelFactory
     /// <param name="input">The input string.</param>
     /// <param name="format">The Open API format</param>
     /// <param name="settings">The Overlay reader settings.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <returns>An Overlay document instance.</returns>
     public static async Task<ReadResult> ParseAsync(string input,
                                    string? format = null,
-                                   OverlayReaderSettings? settings = null)
+                                   OverlayReaderSettings? settings = null,
+                                   CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(input);
 
@@ -86,7 +88,7 @@ public static class OverlayModelFactory
         // Copy string into MemoryStream
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
 
-        return await InternalLoadAsync(stream, format, settings);
+        return await InternalLoadAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
     }
 
     private static readonly Lazy<OverlayReaderSettings> DefaultReaderSettings = new(() => new OverlayReaderSettings());
