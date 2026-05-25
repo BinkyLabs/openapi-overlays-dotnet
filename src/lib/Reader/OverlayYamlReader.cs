@@ -93,7 +93,7 @@ public class OverlayYamlReader : IOverlayReader
     {
         var yamlStream = new YamlStream();
         yamlStream.Load(input);
-        return yamlStream is { Documents.Count: > 0 }
+        return yamlStream.Documents.Count > 0
             ? yamlStream.Documents[0].ToJsonNode()
             : throw new InvalidOperationException("No documents found in the YAML stream.");
     }
