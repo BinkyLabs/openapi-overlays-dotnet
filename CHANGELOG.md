@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.0-preview.7](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.6...v3.0.0-preview.7) (2026-05-26)
+
+
+### Features
+
+* **reader:** remove ParseNode infrastructure ([18a45a7](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/18a45a7a6f58418bdd7177444493545c0c27ff02))
+* **reader:** remove ParseNode infrastructure ([ba81fba](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/ba81fbac2542e1f37c7d49f5367675cba77c83f2))
+
 ## [3.0.0-preview.6](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.5...v3.0.0-preview.6) (2026-05-22)
 
 
