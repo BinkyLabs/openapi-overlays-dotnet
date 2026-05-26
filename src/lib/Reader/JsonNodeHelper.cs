@@ -198,16 +198,6 @@ internal static class JsonNodeHelper
         return jsonObject.TryGetPropertyValue("description", out var descriptionNode) ? descriptionNode?.GetScalarValue() : null;
     }
 
-    public static string? GetScalarValue(this JsonObject jsonObject, JsonNode key, ParsingContext context)
-    {
-        var keyValue = key.GetScalarValue() ?? throw new OverlayReaderException("Expected scalar key while parsing.", context);
-        var scalarNode = jsonObject[keyValue] is JsonValue jsonValue
-            ? jsonValue
-            : throw new OverlayReaderException($"Expected scalar while parsing {key.GetScalarValue()}", context);
-
-        return Convert.ToString(scalarNode.GetValue<object>(), CultureInfo.InvariantCulture);
-    }
-
     public static void ParseMap<T>(
         this JsonObject? jsonObject,
         T domainObject,

@@ -153,20 +153,6 @@ public class JsonNodeHelperTests
     }
 
     [Fact]
-    public void GetScalarValue_ByKey_ReturnsValue()
-    {
-        var map = JsonNode.Parse("""{"a":"hi"}""")!.AsObject();
-        Assert.Equal("hi", map.GetScalarValue(JsonValue.Create("a")!, Ctx()));
-    }
-
-    [Fact]
-    public void GetScalarValue_NonScalarKey_Throws()
-    {
-        var map = JsonNode.Parse("""{"a":{}}""")!.AsObject();
-        Assert.Throws<OverlayReaderException>(() => map.GetScalarValue(JsonValue.Create("a")!, Ctx()));
-    }
-
-    [Fact]
     public void ParseMap_CallsFixedFieldMap()
     {
         var holder = new Holder();
