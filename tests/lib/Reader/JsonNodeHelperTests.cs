@@ -53,24 +53,10 @@ public class JsonNodeHelperTests
     }
 
     [Fact]
-    public void CreateSimpleList_ProjectsValues()
-    {
-        var result = JsonNode.Parse("""["a","b"]""")!.CreateSimpleList(static v => v.GetScalarValue(), Ctx());
-        Assert.Equal(["a", "b"], result);
-    }
-
-    [Fact]
-    public void CreateListOfAny_ReturnsItems()
-    {
-        var result = JsonNode.Parse("""[1,2,3]""")!.CreateListOfAny(Ctx());
-        Assert.Equal(3, result.Count);
-    }
-
-    [Fact]
     public void CreateMap_BuildsDictionary()
     {
         var result = JsonNode.Parse("""{"a":{"x":1},"b":{"y":2}}""")!
-            .CreateMap(static (n, _) => n.AsObject().GetReferencePointer() ?? "no-ref", Ctx());
+            .CreateMap(static (n, _) => n.AsObject().Count, Ctx());
         Assert.Equal(2, result.Count);
     }
 
@@ -79,77 +65,6 @@ public class JsonNodeHelperTests
     {
         var result = JsonNode.Parse("""{"a": 1}""")!.CreateMap<object?>(static (n, _) => n, Ctx());
         Assert.Null(result["a"]);
-    }
-
-    [Fact]
-    public void CreateSimpleMap_BuildsDictionary()
-    {
-        var result = JsonNode.Parse("""{"a":"x","b":"y"}""")!
-            .CreateSimpleMap(static v => v.GetScalarValue(), Ctx());
-        Assert.Equal("x", result["a"]);
-        Assert.Equal("y", result["b"]);
-    }
-
-    [Fact]
-    public void CreateSimpleMap_NonScalar_Throws()
-    {
-        Assert.Throws<OverlayReaderException>(() => JsonNode.Parse("""{"a":{}}""")!
-            .CreateSimpleMap(static v => v.GetScalarValue(), Ctx()));
-    }
-
-    [Fact]
-    public void CreateArrayMap_BuildsDictionary()
-    {
-        var result = JsonNode.Parse("""{"a":["x","y"],"b":["z"]}""")!
-            .CreateArrayMap(static v => v.GetScalarValue(), Ctx());
-        Assert.Equal(2, result["a"].Count);
-        Assert.Single(result["b"]);
-    }
-
-    [Fact]
-    public void CreateArrayMap_NonArray_Throws()
-    {
-        Assert.Throws<OverlayReaderException>(() => JsonNode.Parse("""{"a":"x"}""")!
-            .CreateArrayMap(static v => v.GetScalarValue(), Ctx()));
-    }
-
-    [Fact]
-    public void GetRaw_ReturnsJsonString()
-    {
-        Assert.Contains("\"a\"", JsonNode.Parse("""{"a":1}""")!.GetRaw());
-    }
-
-    [Fact]
-    public void Reference_Identifier_Summary_Description_Found()
-    {
-        var map = JsonNode.Parse("""{ "$ref": "#/x", "$id": "id1", "summary": "s", "description": "d" }""")!.AsObject();
-
-        Assert.Equal("#/x", map.GetReferencePointer());
-        Assert.Equal("id1", map.GetJsonSchemaIdentifier());
-        Assert.Equal("s", map.GetSummaryValue());
-        Assert.Equal("d", map.GetDescriptionValue());
-    }
-
-    [Fact]
-    public void Reference_Identifier_Summary_Description_NotFound()
-    {
-        var map = JsonNode.Parse("""{ "k": "v" }""")!.AsObject();
-
-        Assert.Null(map.GetReferencePointer());
-        Assert.Null(map.GetJsonSchemaIdentifier());
-        Assert.Null(map.GetSummaryValue());
-        Assert.Null(map.GetDescriptionValue());
-    }
-
-    [Fact]
-    public void Reference_Identifier_Summary_Description_NullValue_ReturnsNull()
-    {
-        var map = JsonNode.Parse("""{ "$ref": null, "$id": null, "summary": null, "description": null }""")!.AsObject();
-
-        Assert.Null(map.GetReferencePointer());
-        Assert.Null(map.GetJsonSchemaIdentifier());
-        Assert.Null(map.GetSummaryValue());
-        Assert.Null(map.GetDescriptionValue());
     }
 
     [Fact]

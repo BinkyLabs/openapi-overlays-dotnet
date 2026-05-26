@@ -33,34 +33,6 @@ internal static class JsonNodeHelper
             .ToList();
     }
 
-    public static List<JsonNode> CreateListOfAny(this JsonNode? node, ParsingContext context)
-    {
-        if (node is not JsonArray jsonArray)
-        {
-            throw new OverlayReaderException("Cannot create a list from this type of node.", context);
-        }
-
-        return jsonArray.OfType<JsonNode>().Select(static n => n.CreateAny()).Where(static i => i != null).ToList();
-    }
-
-    public static List<T> CreateSimpleList<T>(this JsonNode? node, Func<JsonNode, T> map, ParsingContext context)
-    {
-        if (node is not JsonArray jsonArray)
-        {
-            throw new OverlayReaderException($"Expected list while parsing {typeof(T).Name}", context);
-        }
-
-        return jsonArray.OfType<JsonNode>().Select(n =>
-        {
-            if (n is not JsonValue)
-            {
-                throw new OverlayReaderException($"Expected a value while parsing at {context.GetLocation()}.");
-            }
-
-            return map(n);
-        }).ToList();
-    }
-
     public static Dictionary<string, T> CreateMap<T>(this JsonNode? node, Func<JsonNode, ParsingContext, T> map, ParsingContext context)
     {
         if (node is not JsonObject jsonMap)
@@ -94,72 +66,9 @@ internal static class JsonNodeHelper
         return nodes.ToDictionary(k => k.key, v => v.value);
     }
 
-    public static Dictionary<string, T> CreateSimpleMap<T>(this JsonNode? node, Func<JsonNode, T> map, ParsingContext context)
-    {
-        if (node is not JsonObject jsonMap)
-        {
-            throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", context);
-        }
-
-        var nodes = jsonMap.Select(n =>
-        {
-            var key = n.Key;
-            try
-            {
-                context.StartObject(key);
-                var jsonNode = n.Value is JsonValue value
-                    ? value
-                    : throw new OverlayReaderException($"Expected scalar while parsing {typeof(T).Name}", context);
-
-                return (key, value: map(jsonNode));
-            }
-            finally
-            {
-                context.EndObject();
-            }
-        });
-
-        return nodes.ToDictionary(k => k.key, v => v.value);
-    }
-
-    public static Dictionary<string, HashSet<T>> CreateArrayMap<T>(this JsonNode? node, Func<JsonNode, T> map, ParsingContext context)
-    {
-        if (node is not JsonObject jsonMap)
-        {
-            throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", context);
-        }
-
-        var nodes = jsonMap.Select(n =>
-        {
-            var key = n.Key;
-            try
-            {
-                context.StartObject(key);
-                var arrayNode = n.Value is JsonArray value
-                    ? value
-                    : throw new OverlayReaderException($"Expected array while parsing {typeof(T).Name}", context);
-
-                var values = new HashSet<T>(arrayNode.OfType<JsonNode>().Select(map));
-
-                return (key, values);
-            }
-            finally
-            {
-                context.EndObject();
-            }
-        });
-
-        return nodes.ToDictionary(kvp => kvp.key, kvp => kvp.values);
-    }
-
     public static JsonNode CreateAny(this JsonNode? node)
     {
         return node ?? JsonValue.Create((string?)null)!;
-    }
-
-    public static string GetRaw(this JsonNode node)
-    {
-        return node.ToJsonString();
     }
 
     public static string? GetScalarValue(this JsonNode? node)
@@ -176,26 +85,6 @@ internal static class JsonNodeHelper
             : throw new OverlayReaderException("Expected scalar value.");
 
         return scalarNode.GetValue<T>();
-    }
-
-    public static string? GetReferencePointer(this JsonObject jsonObject)
-    {
-        return jsonObject.TryGetPropertyValue("$ref", out var refNode) ? refNode?.GetScalarValue() : null;
-    }
-
-    public static string? GetJsonSchemaIdentifier(this JsonObject jsonObject)
-    {
-        return jsonObject.TryGetPropertyValue("$id", out var idNode) ? idNode?.GetScalarValue() : null;
-    }
-
-    public static string? GetSummaryValue(this JsonObject jsonObject)
-    {
-        return jsonObject.TryGetPropertyValue("summary", out var summaryNode) ? summaryNode?.GetScalarValue() : null;
-    }
-
-    public static string? GetDescriptionValue(this JsonObject jsonObject)
-    {
-        return jsonObject.TryGetPropertyValue("description", out var descriptionNode) ? descriptionNode?.GetScalarValue() : null;
     }
 
     public static void ParseMap<T>(
