@@ -111,10 +111,9 @@ public sealed class OverlayDocumentTests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(jsonNode, parsingContext);
 
         // Assert
         Assert.NotNull(overlayDocument.Components);
@@ -221,10 +220,9 @@ public sealed class OverlayDocumentTests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(jsonNode, parsingContext);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -496,10 +494,9 @@ public sealed class OverlayDocumentTests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(jsonNode, parsingContext);
 
         // Assert
         Assert.NotNull(overlayDocument);
@@ -891,10 +888,9 @@ public sealed class OverlayDocumentTests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayDocument = OverlayV1Deserializer.LoadDocument(parseNode);
+        var overlayDocument = OverlayV1Deserializer.LoadDocument(jsonNode, parsingContext);
 
         // Assert
         Assert.NotNull(overlayDocument.Actions);

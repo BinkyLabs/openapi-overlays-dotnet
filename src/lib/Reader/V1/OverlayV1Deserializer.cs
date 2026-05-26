@@ -5,24 +5,21 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 internal static partial class OverlayV1Deserializer
 {
     internal static void ParseMap<T>(
-        MapNode mapNode,
+        JsonObject mapNode,
         T domainObject,
         FixedFieldMap<T> fixedFieldMap,
-        PatternFieldMap<T> patternFieldMap)
+        PatternFieldMap<T> patternFieldMap,
+        ParsingContext context)
     {
-        foreach (var propertyNode in mapNode)
-        {
-            propertyNode.ParseField(domainObject, fixedFieldMap, patternFieldMap);
-        }
-
+        mapNode.ParseMap(domainObject, fixedFieldMap, patternFieldMap, context);
     }
-    public static JsonNode LoadAny(ParseNode node)
+    public static JsonNode LoadAny(JsonNode node, ParsingContext context)
     {
         return node.CreateAny();
     }
-    private static IOverlayExtension LoadExtension(string name, ParseNode node, OverlaySpecVersion version)
+    private static IOverlayExtension LoadExtension(string name, JsonNode node, OverlaySpecVersion version, ParsingContext context)
     {
-        if (node.Context.ExtensionParsers is not null && node.Context.ExtensionParsers.TryGetValue(name, out var parser) && parser(
+        if (context.ExtensionParsers is not null && context.ExtensionParsers.TryGetValue(name, out var parser) && parser(
             node.CreateAny(), version) is { } result)
         {
             return result;

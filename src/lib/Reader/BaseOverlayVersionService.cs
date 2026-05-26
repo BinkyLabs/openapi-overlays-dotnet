@@ -1,5 +1,7 @@
 // Licensed under the MIT license.
 
+using System.Text.Json.Nodes;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader;
@@ -12,17 +14,18 @@ internal abstract class BaseOverlayVersionService : IOverlayVersionService
     /// <summary>
     /// Dictionary of type loaders for different overlay elements.
     /// </summary>
-    protected abstract Dictionary<Type, Func<ParseNode, object?>> Loaders { get; }
+    protected abstract Dictionary<Type, Func<JsonNode, ParsingContext, object?>> Loaders { get; }
 
     /// <summary>
     /// Loads an OpenAPI Element from a document fragment
     /// </summary>
     /// <typeparam name="T">Type of element to load</typeparam>
     /// <param name="node">document fragment node</param>
+    /// <param name="context">The current parsing context.</param>
     /// <returns>Instance of OpenAPIElement</returns>
-    public T? LoadElement<T>(ParseNode node) where T : IOpenApiElement
+    public T? LoadElement<T>(JsonNode node, ParsingContext context) where T : IOpenApiElement
     {
-        if (Loaders.TryGetValue(typeof(T), out var loader) && loader(node) is T result)
+        if (Loaders.TryGetValue(typeof(T), out var loader) && loader(node, context) is T result)
         {
             return result;
         }
@@ -30,9 +33,10 @@ internal abstract class BaseOverlayVersionService : IOverlayVersionService
     }
 
     /// <summary>
-    /// Converts a generic RootNode instance into a strongly typed OverlayDocument
+    /// Converts a generic JsonNode instance into a strongly typed OverlayDocument
     /// </summary>
-    /// <param name="rootNode">RootNode containing the information to be converted into an OpenAPI Document</param>
-    /// <returns>Instance of OverlayDocument populated with data from rootNode</returns>
-    public abstract OverlayDocument LoadDocument(RootNode rootNode);
+    /// <param name="jsonNode">JsonNode containing the information to be converted into an OpenAPI Document</param>
+    /// <param name="context">The current parsing context.</param>
+    /// <returns>Instance of OverlayDocument populated with data from jsonNode</returns>
+    public abstract OverlayDocument LoadDocument(JsonNode jsonNode, ParsingContext context);
 }

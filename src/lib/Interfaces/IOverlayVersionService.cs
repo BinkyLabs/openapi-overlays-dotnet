@@ -1,6 +1,8 @@
 ﻿
 // Licensed under the MIT license.
 
+using System.Text.Json.Nodes;
+
 using BinkyLabs.OpenApi.Overlays.Reader;
 
 using Microsoft.OpenApi;
@@ -17,13 +19,15 @@ internal interface IOverlayVersionService
     /// </summary>
     /// <typeparam name="T">Type of element to load</typeparam>
     /// <param name="node">document fragment node</param>
+    /// <param name="context">The current parsing context.</param>
     /// <returns>Instance of OpenAPIElement</returns>
-    T? LoadElement<T>(ParseNode node) where T : IOpenApiElement;
+    T? LoadElement<T>(JsonNode node, ParsingContext context) where T : IOpenApiElement;
 
     /// <summary>
-    /// Converts a generic RootNode instance into a strongly typed OverlayDocument
+    /// Converts a generic JsonNode instance into a strongly typed OverlayDocument
     /// </summary>
-    /// <param name="rootNode">RootNode containing the information to be converted into an OpenAPI Document</param>
-    /// <returns>Instance of OverlayDocument populated with data from rootNode</returns>
-    OverlayDocument LoadDocument(RootNode rootNode);
+    /// <param name="jsonNode">JsonNode containing the information to be converted into an OpenAPI Document</param>
+    /// <param name="context">The current parsing context.</param>
+    /// <returns>Instance of OverlayDocument populated with data from jsonNode</returns>
+    OverlayDocument LoadDocument(JsonNode jsonNode, ParsingContext context);
 }

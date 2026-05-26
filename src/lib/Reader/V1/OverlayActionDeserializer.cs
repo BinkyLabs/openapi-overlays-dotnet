@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -13,7 +15,7 @@ internal static partial class OverlayV1Deserializer
         {
             {
                 s => s.StartsWith(OverlayConstants.ExtensionFieldNamePrefix, StringComparison.OrdinalIgnoreCase),
-                (o, k, n) => o.AddExtension(k, LoadExtension(k, n, version))
+                (o, k, n, c) => o.AddExtension(k, LoadExtension(k, n, version, c))
             }
         };
 
@@ -22,9 +24,9 @@ internal static partial class OverlayV1Deserializer
 
     public static readonly PatternFieldMap<OverlayAction> ActionPatternFields = GetActionPatternFields(OverlaySpecVersion.Overlay1_0);
 
-    public static OverlayAction LoadAction(ParseNode node) =>
-        OverlayAction.LoadActionInternal(node, ActionFixedFields, ActionPatternFields);
+    public static OverlayAction LoadAction(JsonNode node, ParsingContext context) =>
+        OverlayAction.LoadActionInternal(node, context, ActionFixedFields, ActionPatternFields);
 
-    public static OverlayAction LoadActionInternal(ParseNode node, FixedFieldMap<OverlayAction> actionFixedFields, PatternFieldMap<OverlayAction> actionPatternFields)
-        => OverlayAction.LoadActionInternal(node, actionFixedFields, actionPatternFields);
+    public static OverlayAction LoadActionInternal(JsonNode node, ParsingContext context, FixedFieldMap<OverlayAction> actionFixedFields, PatternFieldMap<OverlayAction> actionPatternFields)
+        => OverlayAction.LoadActionInternal(node, context, actionFixedFields, actionPatternFields);
 }

@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
@@ -11,18 +13,18 @@ internal static partial class OverlayV1_1Deserializer
     {
         {
             OverlayConstants.ActionCopyFieldName,
-            (o, v) => o.Copy = v.GetScalarValue()
+            (o, v, _) => o.Copy = v.GetScalarValue()
         }
     };
 
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =
         OverlayV1Deserializer.GetActionPatternFields<OverlayReusableActionReference>(OverlaySpecVersion.Overlay1_1);
 
-    public static OverlayReusableActionReference LoadReusableActionReference(ParseNode node)
+    public static OverlayReusableActionReference LoadReusableActionReference(JsonNode node, ParsingContext context)
     {
-        var mapNode = node.CheckMapNode("ReusableActionReference");
+        var mapNode = node.CheckMapNode("ReusableActionReference", context);
         var action = new OverlayReusableActionReference();
-        OverlayV1Deserializer.ParseMap(mapNode, action, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
+        OverlayV1Deserializer.ParseMap(mapNode, action, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields, context);
         return action;
     }
 }

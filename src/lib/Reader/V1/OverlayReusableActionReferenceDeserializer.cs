@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -7,9 +9,9 @@ internal static partial class OverlayV1Deserializer
 {
     public static readonly FixedFieldMap<OverlayReusableActionReference> ReusableActionReferenceFixedFields = new()
     {
-        { OverlayConstants.ActionTargetFieldName, (o, v) => o.Target = v.GetScalarValue() },
-        { OverlayConstants.ActionDescriptionFieldName, (o, v) => o.Description = v.GetScalarValue() },
-        { OverlayConstants.ActionRemoveFieldName, (o, v) =>
+        { OverlayConstants.ActionTargetFieldName, (o, v, _) => o.Target = v.GetScalarValue() },
+        { OverlayConstants.ActionDescriptionFieldName, (o, v, _) => o.Description = v.GetScalarValue() },
+        { OverlayConstants.ActionRemoveFieldName, (o, v, _) =>
             {
                 if (v.GetScalarValue() is string removeValue && bool.TryParse(removeValue, out var removeBool))
                 {
@@ -17,19 +19,19 @@ internal static partial class OverlayV1Deserializer
                 }
             }
         },
-        { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
-        { OverlayConstants.ActionXCopyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
-        { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v) => o.Reference.Id = OverlayReusableActionReferenceItem.NormalizeReusableActionReferenceId(v.GetScalarValue()) },
+        { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v.CreateAny() },
+        { OverlayConstants.ActionXCopyFieldName, (o, v, _) => o.Copy = v.GetScalarValue() },
+        { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v, _) => o.Reference.Id = OverlayReusableActionReferenceItem.NormalizeReusableActionReferenceId(v.GetScalarValue()) },
     };
 
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =
         GetActionPatternFields<OverlayReusableActionReference>(OverlaySpecVersion.Overlay1_0);
 
-    public static OverlayReusableActionReference LoadReusableActionReference(ParseNode node)
+    public static OverlayReusableActionReference LoadReusableActionReference(JsonNode node, ParsingContext context)
     {
-        var mapNode = node.CheckMapNode("ReusableActionReference");
+        var mapNode = node.CheckMapNode("ReusableActionReference", context);
         var action = new OverlayReusableActionReference();
-        ParseMap(mapNode, action, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields);
+        ParseMap(mapNode, action, ReusableActionReferenceFixedFields, ReusableActionReferencePatternFields, context);
         return action;
     }
 }

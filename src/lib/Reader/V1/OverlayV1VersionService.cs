@@ -1,6 +1,8 @@
 ﻿
 // Licensed under the MIT license.
 
+using System.Text.Json.Nodes;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -11,7 +13,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 #pragma warning disable BOO002
 internal class OverlayV1VersionService : BaseOverlayVersionService
 {
-    private static readonly Dictionary<Type, Func<ParseNode, object?>> _loaders = new()
+    private static readonly Dictionary<Type, Func<JsonNode, ParsingContext, object?>> _loaders = new()
     {
         [typeof(JsonNodeExtension)] = OverlayV1Deserializer.LoadAny,
         [typeof(OverlayAction)] = OverlayV1Deserializer.LoadAction,
@@ -22,11 +24,11 @@ internal class OverlayV1VersionService : BaseOverlayVersionService
         [typeof(OverlayInfo)] = OverlayV1Deserializer.LoadInfo,
     };
 
-    protected override Dictionary<Type, Func<ParseNode, object?>> Loaders => _loaders;
+    protected override Dictionary<Type, Func<JsonNode, ParsingContext, object?>> Loaders => _loaders;
 
-    public override OverlayDocument LoadDocument(RootNode rootNode)
+    public override OverlayDocument LoadDocument(JsonNode jsonNode, ParsingContext context)
     {
-        return OverlayV1Deserializer.LoadDocument(rootNode.GetMap());
+        return OverlayV1Deserializer.LoadDocument(jsonNode, context);
     }
 }
 #pragma warning restore BOO002

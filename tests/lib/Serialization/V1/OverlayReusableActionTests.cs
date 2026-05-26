@@ -87,10 +87,9 @@ public class OverlayReusableActionV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var action = OverlayV1Deserializer.LoadReusableAction(parseNode);
+        var action = OverlayV1Deserializer.LoadReusableAction(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Reusable description", action.Description);

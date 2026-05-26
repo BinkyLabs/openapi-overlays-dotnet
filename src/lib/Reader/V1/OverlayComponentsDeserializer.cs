@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
@@ -9,23 +11,24 @@ internal static partial class OverlayV1Deserializer
     {
         {
             OverlayConstants.ComponentsActionsFieldName,
-            (o, v) => o.Actions = v.CreateMap<OverlayReusableAction>(n => LoadReusableAction(n))
+            (o, v, c) => o.Actions = v.CreateMap<OverlayReusableAction>(LoadReusableAction, c)
         }
     };
 
     public static readonly PatternFieldMap<OverlayComponents> ComponentsPatternFields = new();
 
-    public static OverlayComponents LoadComponents(ParseNode node) =>
-        LoadComponentsInternal(node, ComponentsFixedFields, ComponentsPatternFields);
+    public static OverlayComponents LoadComponents(JsonNode node, ParsingContext context) =>
+        LoadComponentsInternal(node, context, ComponentsFixedFields, ComponentsPatternFields);
 
     public static OverlayComponents LoadComponentsInternal(
-        ParseNode node,
+        JsonNode node,
+        ParsingContext context,
         FixedFieldMap<OverlayComponents> componentsFixedFields,
         PatternFieldMap<OverlayComponents> componentsPatternFields)
     {
-        var mapNode = node.CheckMapNode("Components");
+        var mapNode = node.CheckMapNode("Components", context);
         var components = new OverlayComponents();
-        ParseMap(mapNode, components, componentsFixedFields, componentsPatternFields);
+        ParseMap(mapNode, components, componentsFixedFields, componentsPatternFields, context);
 
         return components;
     }

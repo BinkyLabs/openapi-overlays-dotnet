@@ -87,11 +87,10 @@ public class OverlayInfoV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
 
         // Act
-        var overlayInfo = OverlayV1Deserializer.LoadInfo(parseNode);
+        var overlayInfo = OverlayV1Deserializer.LoadInfo(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Overlay", overlayInfo.Title);
@@ -111,10 +110,9 @@ public class OverlayInfoV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayInfo = OverlayV1Deserializer.LoadInfo(parseNode);
+        var overlayInfo = OverlayV1Deserializer.LoadInfo(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Overlay", overlayInfo.Title);
@@ -135,10 +133,9 @@ public class OverlayInfoV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayInfo = OverlayV1Deserializer.LoadInfo(parseNode);
+        var overlayInfo = OverlayV1Deserializer.LoadInfo(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Overlay", overlayInfo.Title);
