@@ -49,8 +49,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override Dictionary<string, T> CreateMap<T>(Func<MapNode, T> map)
         {
-            var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
-            var nodes = jsonMap.Select(
+            var nodes = _node.Select(
                 n =>
                 {
 
@@ -79,8 +78,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override Dictionary<string, T> CreateSimpleMap<T>(Func<ValueNode, T> map)
         {
-            var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
-            var nodes = jsonMap.Select(
+            var nodes = _node.Select(
                 n =>
                 {
                     var key = n.Key;
@@ -103,9 +101,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override Dictionary<string, HashSet<T>> CreateArrayMap<T>(Func<ValueNode, T> map)
         {
-            var jsonMap = _node ?? throw new OverlayReaderException($"Expected map while parsing {typeof(T).Name}", Context);
-
-            var nodes = jsonMap.Select(n =>
+            var nodes = _node.Select(n =>
             {
                 var key = n.Key;
                 try
@@ -188,15 +184,11 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
         public string? GetScalarValue(ValueNode key)
         {
             var keyValue = key.GetScalarValue();
-            if (keyValue is not null)
-            {
-                var scalarNode = _node[keyValue] is JsonValue jsonValue
-                        ? jsonValue
-                        : throw new OverlayReaderException($"Expected scalar while parsing {key.GetScalarValue()}", Context);
+            var scalarNode = _node[keyValue] is JsonValue jsonValue
+                    ? jsonValue
+                    : throw new OverlayReaderException($"Expected scalar while parsing {key.GetScalarValue()}", Context);
 
-                return Convert.ToString(scalarNode?.GetValue<object>(), CultureInfo.InvariantCulture);
-            }
-            return null;
+            return Convert.ToString(scalarNode.GetValue<object>(), CultureInfo.InvariantCulture);
         }
 
         /// <summary>

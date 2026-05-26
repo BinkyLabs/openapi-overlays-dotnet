@@ -23,11 +23,6 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override List<T> CreateList<T>(Func<MapNode, T> map)
         {
-            if (_nodeList == null)
-            {
-                throw new OverlayReaderException($"Expected list while parsing {typeof(T).Name}");
-            }
-
             var list = _nodeList
                 .OfType<JsonObject>()
                 .Select(n => map(new MapNode(Context, n)))
@@ -48,11 +43,6 @@ namespace BinkyLabs.OpenApi.Overlays.Reader
 
         public override List<T> CreateSimpleList<T>(Func<ValueNode, T> map)
         {
-            if (_nodeList == null)
-            {
-                throw new OverlayReaderException($"Expected list while parsing {typeof(T).Name}");
-            }
-
             return _nodeList.OfType<JsonNode>().Select(n => map(new(Context, n))).ToList();
         }
 
