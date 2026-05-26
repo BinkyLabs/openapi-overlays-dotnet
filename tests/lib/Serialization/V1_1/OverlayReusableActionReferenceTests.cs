@@ -382,10 +382,9 @@ public class OverlayReusableActionReferenceV1_1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var reference = OverlayV1_1Deserializer.LoadReusableActionReference(parseNode);
+        var reference = OverlayV1_1Deserializer.LoadReusableActionReference(jsonNode, parsingContext);
 
         // Assert
         Assert.NotNull(reference.Reference);

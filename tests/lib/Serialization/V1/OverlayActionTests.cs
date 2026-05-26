@@ -139,11 +139,10 @@ public class OverlayActionV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
+        var overlayAction = OverlayV1Deserializer.LoadAction(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -169,10 +168,9 @@ public class OverlayActionV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
+        var overlayAction = OverlayV1Deserializer.LoadAction(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -199,10 +197,9 @@ public class OverlayActionV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
+        var overlayAction = OverlayV1Deserializer.LoadAction(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -229,10 +226,9 @@ public class OverlayActionV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var overlayAction = OverlayV1Deserializer.LoadAction(parseNode);
+        var overlayAction = OverlayV1Deserializer.LoadAction(jsonNode, parsingContext);
 
         // Assert
         Assert.Equal("Test Target", overlayAction.Target);
@@ -253,10 +249,9 @@ public class OverlayActionV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act + Assert
-        Assert.Throws<InvalidOperationException>(() => OverlayV1Deserializer.LoadAction(parseNode));
+        Assert.Throws<InvalidOperationException>(() => OverlayV1Deserializer.LoadAction(jsonNode, parsingContext));
     }
 
     [Fact]

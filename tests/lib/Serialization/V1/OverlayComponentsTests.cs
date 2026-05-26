@@ -89,10 +89,9 @@ public class OverlayComponentsV1Tests
         """;
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
-        var parseNode = new MapNode(parsingContext, jsonNode);
 
         // Act
-        var components = OverlayV1Deserializer.LoadComponents(parseNode);
+        var components = OverlayV1Deserializer.LoadComponents(jsonNode, parsingContext);
 
         // Assert
         Assert.NotNull(components.Actions);

@@ -51,22 +51,23 @@ public class OverlayAction : IOverlayAction
     {
         return new FixedFieldMap<OverlayAction>
         {
-            { OverlayConstants.ActionTargetFieldName, (o, v) => o.Target = v.GetScalarValue() },
-            { OverlayConstants.ActionDescriptionFieldName, (o, v) => o.Description = v.GetScalarValue() },
-            { OverlayConstants.ActionRemoveFieldName, (o, v) => o.Remove = v.GetScalarValue<bool>() },
-            { OverlayConstants.ActionUpdateFieldName, (o, v) => o.Update = v.CreateAny() },
-            { copyFieldName, (o, v) => o.Copy = v.GetScalarValue() },
+            { OverlayConstants.ActionTargetFieldName, (o, v, _) => o.Target = v.GetScalarValue() },
+            { OverlayConstants.ActionDescriptionFieldName, (o, v, _) => o.Description = v.GetScalarValue() },
+            { OverlayConstants.ActionRemoveFieldName, (o, v, _) => o.Remove = v.GetScalarValue<bool>() },
+            { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v },
+            { copyFieldName, (o, v, _) => o.Copy = v.GetScalarValue() },
         };
     }
 
     internal static OverlayAction LoadActionInternal(
-        ParseNode node,
+        JsonNode node,
+        ParsingContext context,
         FixedFieldMap<OverlayAction> actionFixedFields,
         PatternFieldMap<OverlayAction> actionPatternFields)
     {
-        var mapNode = node.CheckMapNode("Action");
+        var mapNode = node.CheckMapNode("Action", context);
         var action = new OverlayAction();
-        OverlayV1Deserializer.ParseMap(mapNode, action, actionFixedFields, actionPatternFields);
+        OverlayV1Deserializer.ParseMap(mapNode, action, actionFixedFields, actionPatternFields, context);
 
         return action;
     }
