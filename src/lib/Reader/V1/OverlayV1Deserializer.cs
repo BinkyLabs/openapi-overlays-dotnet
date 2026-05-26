@@ -13,20 +13,21 @@ internal static partial class OverlayV1Deserializer
     {
         mapNode.ParseMap(domainObject, fixedFieldMap, patternFieldMap, context);
     }
-    public static JsonNode LoadAny(JsonNode node, ParsingContext context)
+
+    public static JsonNode? LoadAny(JsonNode node, ParsingContext context)
     {
-        return node.CreateAny();
+        return node;
     }
     private static IOverlayExtension LoadExtension(string name, JsonNode node, OverlaySpecVersion version, ParsingContext context)
     {
         if (context.ExtensionParsers is not null && context.ExtensionParsers.TryGetValue(name, out var parser) && parser(
-            node.CreateAny(), version) is { } result)
+            node, version) is { } result)
         {
             return result;
         }
         else
         {
-            return new JsonNodeExtension(node.CreateAny());
+            return new JsonNodeExtension(node);
         }
     }
 }

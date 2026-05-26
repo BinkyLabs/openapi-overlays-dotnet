@@ -19,7 +19,7 @@ internal static partial class OverlayV1Deserializer
                 }
             }
         },
-        { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v.CreateAny() },
+        { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v },
         { OverlayConstants.ActionXCopyFieldName, (o, v, _) => o.Copy = v.GetScalarValue() },
         { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v, _) => o.Reference.Id = OverlayReusableActionReferenceItem.NormalizeReusableActionReferenceId(v.GetScalarValue()) },
     };

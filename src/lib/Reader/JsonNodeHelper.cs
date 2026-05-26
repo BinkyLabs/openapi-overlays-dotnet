@@ -66,11 +66,6 @@ internal static class JsonNodeHelper
         return nodes.ToDictionary(k => k.key, v => v.value);
     }
 
-    public static JsonNode CreateAny(this JsonNode? node)
-    {
-        return node ?? JsonValue.Create((string?)null)!;
-    }
-
     public static string? GetScalarValue(this JsonNode? node)
     {
         var scalarNode = node is JsonValue value ? value : throw new OpenApiException("Expected scalar value.");

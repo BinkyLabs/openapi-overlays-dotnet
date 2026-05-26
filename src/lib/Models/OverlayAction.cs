@@ -54,7 +54,7 @@ public class OverlayAction : IOverlayAction
             { OverlayConstants.ActionTargetFieldName, (o, v, _) => o.Target = v.GetScalarValue() },
             { OverlayConstants.ActionDescriptionFieldName, (o, v, _) => o.Description = v.GetScalarValue() },
             { OverlayConstants.ActionRemoveFieldName, (o, v, _) => o.Remove = v.GetScalarValue<bool>() },
-            { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v.CreateAny() },
+            { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v },
             { copyFieldName, (o, v, _) => o.Copy = v.GetScalarValue() },
         };
     }
