@@ -10,6 +10,8 @@ on:
 jobs:
   check-secrets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       has-secrets: ${{ steps.check.outputs.has-secrets }}
     steps:
