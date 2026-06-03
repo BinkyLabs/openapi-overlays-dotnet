@@ -83,29 +83,17 @@ jobs:
           $branch = "${{ github.ref_name }}"
           git merge origin/$branch -m "Merge $branch into promote branch"
       
-      - name: Run promote unshipped script
-        shell: pwsh
-        run: |
-          & .\scripts\promoteUnshipped.ps1
-      
-      - name: Check for changes
-        id: check_changes
-        shell: pwsh
-        run: |
-          $changes = git diff --name-only -- "*Shipped.txt"
-          if ($changes) {
-            echo "has_changes=true" >> $env:GITHUB_OUTPUT
-            Write-Host "Changed files: $changes"
-          } else {
-            echo "has_changes=false" >> $env:GITHUB_OUTPUT
-            Write-Host "No changes detected"
-          }
+      - name: Promote public API exports
+        id: promote
+        uses: BinkyLabs/public-api-promote@v1.0.1
+        with:
+          unshipped-glob: src/**/*.Unshipped.txt
       
       - name: Commit and push changes
-        if: steps.check_changes.outputs.has_changes == 'true'
+        if: steps.promote.outputs.changed == 'true'
         shell: pwsh
         run: |
-          git add *hipped.txt
+          git add -- '*Shipped.txt' '*Unshipped.txt'
           git commit -m "chore: promote shipped APIs"
           
           $branch = "${{ github.ref_name }}"
@@ -113,7 +101,7 @@ jobs:
           git push -u origin HEAD:$prBranch
       
       - name: Create new PR
-        if: steps.check_pr.outputs.pr_exists == 'false' && steps.check_changes.outputs.has_changes == 'true'
+        if: steps.check_pr.outputs.pr_exists == 'false' && steps.promote.outputs.changed == 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -122,5 +110,5 @@ jobs:
           $prBranch = "promote-shipped-apis-$branch"
           $title = "automatic promotion of shipped APIs for $branch"
           
-          gh pr create --title "$title" --base "$branch" --head "$prBranch" --body "Automatically promotes unshipped APIs to shipped after running the promotion script."
+          gh pr create --title "$title" --base "$branch" --head "$prBranch" --body "Automatically promotes unshipped APIs to shipped with the public-api-promote action."
       

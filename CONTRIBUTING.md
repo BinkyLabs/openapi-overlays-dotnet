@@ -89,13 +89,13 @@ dotnet format --diagnostics RS0016
 git checkout *.cs
 ```
 
-### Move items from unshipped to unshipped document
+### Move items from unshipped to shipped document
 
-```pwsh
-. ./scripts/promoteUnshipped.ps1
+```shell
+gh workflow run promote-shipped-apis.yml
 ```
 
-> Note: the promotion of APIs is automated through the dedicated workflow and should result in pull requests being automatically opened.
+> Note: promotion is automated through the dedicated workflow and should result in pull requests being opened automatically on `main` and `support/v2`. You can also trigger the workflow manually from GitHub Actions or with the GitHub CLI command above.
 
 
 ## Reporting Bugs
