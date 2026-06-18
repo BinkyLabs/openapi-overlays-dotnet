@@ -16,7 +16,7 @@ jobs:
     name: Apply Single Overlay
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Apply OpenAPI Overlay
         uses: BinkyLabs/openapi-overlays-dotnet@v2
@@ -36,7 +36,7 @@ jobs:
     name: Apply Multiple Overlays
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Apply Multiple OpenAPI Overlays
         uses: BinkyLabs/openapi-overlays-dotnet@v2
