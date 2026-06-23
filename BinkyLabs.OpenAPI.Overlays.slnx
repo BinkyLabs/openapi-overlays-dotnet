@@ -12,4 +12,8 @@
     <Project Path="tests/lib/BinkyLabs.OpenApi.Overlays.Tests.csproj" />
     <Project Path="tests/tool/BinkyLabs.OpenApi.Overlays.Cli.Tests.csproj" />
   </Folder>
+  <Folder Name="/performance/">
+    <Project Path="performance/benchmark/PerformanceBenchmarks.csproj" />
+    <Project Path="performance/resultsComparer/ResultsComparer.csproj" />
+  </Folder>
 </Solution>
