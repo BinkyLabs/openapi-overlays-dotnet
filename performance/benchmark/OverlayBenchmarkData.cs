@@ -23,9 +23,10 @@ internal static class OverlayBenchmarkData
             throw new InvalidOperationException($"Failed to load overlay: {string.Join(Environment.NewLine, diagnostic?.Errors.Select(static e => e.Message) ?? [])}");
         }
 
-        if (diagnostic?.Errors.Count > 0)
+        var errors = diagnostic?.Errors;
+        if (errors is { Count: > 0 })
         {
-            throw new InvalidOperationException($"Overlay contains diagnostics: {string.Join(Environment.NewLine, diagnostic.Errors.Select(static e => e.Message))}");
+            throw new InvalidOperationException($"Overlay contains diagnostics: {string.Join(Environment.NewLine, errors.Select(static e => e.Message))}");
         }
 
         return document;
