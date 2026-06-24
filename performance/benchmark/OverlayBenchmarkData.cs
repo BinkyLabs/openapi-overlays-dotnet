@@ -33,6 +33,16 @@ internal static class OverlayBenchmarkData
 
     private static string GetExamplePath(string fileName)
     {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("Example file name must be a non-empty relative path.", nameof(fileName));
+        }
+
+        if (Path.IsPathRooted(fileName))
+        {
+            throw new ArgumentException("Example file name must be a relative path.", nameof(fileName));
+        }
+
         return Path.Combine(GetRepositoryRoot(), TestsPathSegment, LibraryTestsPathSegment, SpecificationPathSegment, ExamplesPathSegment, fileName);
     }
 
