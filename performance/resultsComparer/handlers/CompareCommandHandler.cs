@@ -66,16 +66,13 @@ internal sealed class CompareCommandHandler : AsynchronousCommandLineAction
                 hasErrors = true;
             }
 
-            foreach (var comparisonPolicy in comparisonPolicies)
+            foreach (var comparisonPolicy in comparisonPolicies.Where(policy => !policy.Equals(existingBenchmarkResult.Value, newBenchmarkResult)))
             {
-                if (!comparisonPolicy.Equals(existingBenchmarkResult.Value, newBenchmarkResult))
-                {
-                    logger.LogError(
-                        "Benchmark result for {ExistingBenchmarkResultKey} does not match the existing benchmark result (original!=new). {ErrorMessage}",
-                        existingBenchmarkResult.Key,
-                        comparisonPolicy.GetErrorMessage(existingBenchmarkResult.Value, newBenchmarkResult));
-                    hasErrors = true;
-                }
+                logger.LogError(
+                    "Benchmark result for {ExistingBenchmarkResultKey} does not match the existing benchmark result (original!=new). {ErrorMessage}",
+                    existingBenchmarkResult.Key,
+                    comparisonPolicy.GetErrorMessage(existingBenchmarkResult.Value, newBenchmarkResult));
+                hasErrors = true;
             }
         }
 
