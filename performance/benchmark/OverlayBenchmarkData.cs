@@ -51,7 +51,7 @@ internal static class OverlayBenchmarkData
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "BinkyLabs.OpenAPI.Overlays.slnx")))
+            if (File.Exists(Path.Join(current.FullName, "BinkyLabs.OpenAPI.Overlays.slnx")))
             {
                 return current.FullName;
             }
