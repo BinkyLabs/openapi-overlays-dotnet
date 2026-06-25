@@ -71,7 +71,6 @@ internal static class OverlayCliApp
     private static Option<bool> CreateWarningsAsErrorsOption()
     {
         var warningsAsErrorsOption = new Option<bool>("--warnings-as-errors") { Description = "Treat warnings as errors" };
-        warningsAsErrorsOption.Aliases.Add("--treat-warnings-as-errors");
         return warningsAsErrorsOption;
     }
 
