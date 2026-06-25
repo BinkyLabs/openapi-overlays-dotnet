@@ -69,10 +69,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 8.x
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v5
         with:
