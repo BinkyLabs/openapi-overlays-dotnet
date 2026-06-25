@@ -13,6 +13,7 @@ using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
 using Microsoft.OpenApi.YamlReader;
 
+using SharpYaml;
 using SharpYaml.Serialization;
 
 namespace BinkyLabs.OpenApi.Overlays.Cli;
