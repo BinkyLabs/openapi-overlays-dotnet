@@ -184,7 +184,27 @@ internal static class OverlayCliApp
             await Console.Out.WriteLineAsync("Operation was cancelled.");
             return 130;
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            return 1;
+        }
+        catch (IOException ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            return 1;
+        }
+        catch (OpenApiReaderException ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            return 1;
+        }
+        catch (JsonException ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            return 1;
+        }
+        catch (YamlException ex)
         {
             await Console.Error.WriteLineAsync($"Error: {ex.Message}");
             return 1;
