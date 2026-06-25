@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.0.0-preview.8](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.7...v3.0.0-preview.8) (2026-06-25)
+
+
+### Features
+
+* **tool:** add overlay validate command ([5f4a6b4](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/5f4a6b4d93b66f5efc925b1004b8d17fa3c80942))
+* **tool:** add overlay validate command ([954d92f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/954d92ff58d235043ed4f985c098ba800f142f4a))
+
+
+### Bug Fixes
+
+* 'Generic catch clause' ([c1822c0](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/c1822c053c57275ca153f274cf1d7de8c7cc16a9))
+* adds mising import ([1c49f24](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/1c49f24db32ec5481dee97763cc7273619845265))
+
+
+### Performance Improvements
+
+* **benchmark:** update baseline results for net10.0 on Linux x64 ([f944596](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f944596afad9da81dcd270b03e09b720901700f4))
+
 ## [3.0.0-preview.7](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.6...v3.0.0-preview.7) (2026-05-26)
 
 
