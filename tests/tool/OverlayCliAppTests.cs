@@ -17,14 +17,14 @@ public sealed class OverlayCliAppTests : IDisposable
 {
     private const string jsonExtension = ".json";
     private const string yamlExtension = ".yaml";
-    private readonly string _tempInputFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
-    private readonly string _tempOverlayFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
-    private readonly string _tempInvalidOverlayFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
-    private readonly string _tempOutputFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempInputFileJson = Path.Join(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempOverlayFileJson = Path.Join(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempInvalidOverlayFileJson = Path.Join(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempOutputFileJson = Path.Join(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
 
-    private readonly string _tempInputFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
-    private readonly string _tempOverlayFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
-    private readonly string _tempOutputFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
+    private readonly string _tempInputFileYaml = Path.Join(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
+    private readonly string _tempOverlayFileYaml = Path.Join(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
+    private readonly string _tempOutputFileYaml = Path.Join(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
 
     private readonly string _validOpenApiJson =
         """
