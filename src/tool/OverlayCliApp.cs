@@ -26,6 +26,8 @@ internal static class OverlayCliApp
         rootCommand.Add(applyCommand);
         var applyAndNormalizeCommand = CreateApplyCommand("apply-and-normalize", "Apply one or more overlays to an OpenAPI document, and normalize the output with OpenAPI.net", ApplyOverlaysAndNormalizeAsync);
         rootCommand.Add(applyAndNormalizeCommand);
+        var validateCommand = CreateValidateCommand();
+        rootCommand.Add(validateCommand);
         return await rootCommand.Parse(args).InvokeAsync(cancellationToken: cancellationToken);
     }
 
@@ -64,6 +66,39 @@ internal static class OverlayCliApp
         var strictOption = new Option<bool>("--strict") { Description = "Treat targets that match zero nodes as errors instead of warnings" };
         strictOption.Aliases.Add("-s");
         return strictOption;
+    }
+
+    private static Option<bool> CreateWarningsAsErrorsOption()
+    {
+        var warningsAsErrorsOption = new Option<bool>("--warnings-as-errors") { Description = "Treat warnings as errors" };
+        warningsAsErrorsOption.Aliases.Add("--treat-warnings-as-errors");
+        return warningsAsErrorsOption;
+    }
+
+    private static Command CreateValidateCommand()
+    {
+        var validateCommand = new Command("validate", "Validate an Overlay document and report errors and warnings");
+        var overlayArgument = new Argument<string>("overlay") { Description = "Path or URL to the Overlay document" };
+        var warningsAsErrorsOption = CreateWarningsAsErrorsOption();
+
+        validateCommand.Add(overlayArgument);
+        validateCommand.Add(warningsAsErrorsOption);
+
+        validateCommand.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var overlay = parseResult.GetValue(overlayArgument);
+            var warningsAsErrors = parseResult.GetValue(warningsAsErrorsOption);
+
+            if (string.IsNullOrEmpty(overlay))
+            {
+                await Console.Error.WriteLineAsync("Error: Overlay argument is required.");
+                return 1;
+            }
+
+            return await ValidateOverlayAsync(overlay, warningsAsErrors, cancellationToken).ConfigureAwait(false);
+        });
+
+        return validateCommand;
     }
 
     private static Command CreateApplyCommand(string name, string description, Func<string, string[], string, bool, CancellationToken, Task> applyAsync)
@@ -111,6 +146,75 @@ internal static class OverlayCliApp
         });
 
         return applyCommand;
+    }
+
+    private static async Task<int> ValidateOverlayAsync(string overlay, bool warningsAsErrors, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Console.Out.WriteLineAsync($"Validating overlay: {overlay}");
+
+            if (!IsHttpUrl(overlay) && !File.Exists(overlay))
+            {
+                await Console.Error.WriteLineAsync($"Error: Overlay file '{overlay}' does not exist.");
+                return 1;
+            }
+
+            var (_, diagnostic) = await OverlayDocument.LoadFromUrlAsync(overlay, token: cancellationToken).ConfigureAwait(false);
+            diagnostic ??= new OverlayDiagnostic();
+
+            DisplayDiagnostics("Errors", diagnostic.Errors, Console.Error);
+            DisplayDiagnostics("Warnings", diagnostic.Warnings, warningsAsErrors ? Console.Error : Console.Out);
+
+            if (diagnostic.Errors.Count > 0)
+            {
+                return 1;
+            }
+
+            if (warningsAsErrors && diagnostic.Warnings.Count > 0)
+            {
+                await Console.Error.WriteLineAsync("Warnings were treated as errors.");
+                return 1;
+            }
+
+            await Console.Out.WriteLineAsync("Overlay document is valid.");
+            return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            await Console.Out.WriteLineAsync("Operation was cancelled.");
+            return 130;
+        }
+        catch (Exception ex)
+        {
+            await Console.Error.WriteLineAsync($"Error: {ex.Message}");
+            return 1;
+        }
+    }
+
+    private static bool IsHttpUrl(string value) =>
+        value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+        value.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+
+    private static void DisplayDiagnostics(string title, IList<OpenApiError> diagnostics, TextWriter writer)
+    {
+        if (diagnostics.Count == 0)
+        {
+            return;
+        }
+
+        writer.WriteLine($"{title}:");
+        foreach (var diagnostic in diagnostics)
+        {
+            writer.WriteLine($"  - {FormatDiagnostic(diagnostic)}");
+        }
+    }
+
+    private static string FormatDiagnostic(OpenApiError diagnostic)
+    {
+        return string.IsNullOrEmpty(diagnostic.Pointer) ?
+            diagnostic.Message :
+            $"{diagnostic.Pointer}: {diagnostic.Message}";
     }
 
     private static async Task HandleCommandAsync(

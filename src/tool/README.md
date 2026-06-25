@@ -20,6 +20,20 @@ clio apply pathOrUrlToInputDescription --overlay pathOrUrlToOverlay -out pathFor
 
 > Note: the overlay argument can be specified multiple times, the order matters.
 
+### Validate an overlay
+
+The validate command loads an Overlay document and prints any errors or warnings.
+
+```shell
+clio validate pathOrUrlToOverlay
+```
+
+Use `--warnings-as-errors` to return an error exit code when warnings are present.
+
+```shell
+clio validate pathOrUrlToOverlay --warnings-as-errors
+```
+
 ### Apply and normalize
 
 The apply command applies the overlay actions to an OpenAPI description and normalizes the description based on OpenAPI.net rules and fields ordering.

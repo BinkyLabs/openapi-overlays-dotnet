@@ -19,6 +19,7 @@ public sealed class OverlayCliAppTests : IDisposable
     private const string yamlExtension = ".yaml";
     private readonly string _tempInputFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
     private readonly string _tempOverlayFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
+    private readonly string _tempInvalidOverlayFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
     private readonly string _tempOutputFileJson = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + jsonExtension);
 
     private readonly string _tempInputFileYaml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + yamlExtension);
@@ -102,10 +103,18 @@ x-custom-extension:
   someProperty: someValue
 """;
 
+    private readonly string _invalidOverlayJson =
+    """
+    {
+        "overlay": "1.0.0"
+    }
+    """;
+
     public OverlayCliAppTests()
     {
         File.WriteAllText(_tempInputFileJson, _validOpenApiJson); // Minimal valid OpenAPI JSON
         File.WriteAllText(_tempOverlayFileJson, _validOverlayJson); // Minimal valid overlay
+        File.WriteAllText(_tempInvalidOverlayFileJson, _invalidOverlayJson); // Invalid overlay missing required fields
         File.WriteAllText(_tempInputFileYaml, _validOpenApiYaml); // Minimal valid OpenAPI YAML
         File.WriteAllText(_tempOverlayFileYaml, _validOverlayYaml); // Minimal valid
     }
@@ -114,6 +123,7 @@ x-custom-extension:
     {
         if (File.Exists(_tempInputFileJson)) File.Delete(_tempInputFileJson);
         if (File.Exists(_tempOverlayFileJson)) File.Delete(_tempOverlayFileJson);
+        if (File.Exists(_tempInvalidOverlayFileJson)) File.Delete(_tempInvalidOverlayFileJson);
         if (File.Exists(_tempOutputFileJson)) File.Delete(_tempOutputFileJson);
         if (File.Exists(_tempInputFileYaml)) File.Delete(_tempInputFileYaml);
         if (File.Exists(_tempOverlayFileYaml)) File.Delete(_tempOverlayFileYaml);
@@ -143,6 +153,27 @@ x-custom-extension:
         Assert.NotNull(openApiDocument);
         Assert.NotNull(diags);
         Assert.Empty(diags.Errors);
+    }
+
+    [Fact]
+    public async Task RunAsync_ValidateValidOverlay_ReturnsOK()
+    {
+        var result = await OverlayCliApp.RunAsync(["validate", _tempOverlayFileJson], TestContext.Current.CancellationToken);
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public async Task RunAsync_ValidateValidOverlayWithWarningsAsErrors_ReturnsOK()
+    {
+        var result = await OverlayCliApp.RunAsync(["validate", _tempOverlayFileYaml, "--warnings-as-errors"], TestContext.Current.CancellationToken);
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public async Task RunAsync_ValidateInvalidOverlay_ReturnsError()
+    {
+        var result = await OverlayCliApp.RunAsync(["validate", _tempInvalidOverlayFileJson], TestContext.Current.CancellationToken);
+        Assert.Equal(1, result);
     }
 
     [Fact]
