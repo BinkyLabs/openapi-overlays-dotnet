@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.0.0-preview.9](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.8...v3.0.0-preview.9) (2026-07-16)
+
+
+### Bug Fixes
+
+* **lib:** add [BOO002] prefix to Components API declarations for analyzer 5.6.0 ([d306f71](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d306f71b319af47b64275dd55817e09016d3cda9))
+
+
+### Performance Improvements
+
+* update benchmark results for Microsoft.OpenApi 3.9.0 ([6110aaa](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6110aaaa9e963fec9bc284df687a665dca95d6bf))
+
 ## [3.0.0-preview.8](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.7...v3.0.0-preview.8) (2026-06-25)
 
 
