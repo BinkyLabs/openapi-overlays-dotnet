@@ -16,17 +16,17 @@ jobs:
     name: Apply Single Overlay
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Apply OpenAPI Overlay
-        uses: BinkyLabs/openapi-overlays-dotnet@v2
+        uses: BinkyLabs/openapi-overlays-dotnet@1263c8d8e7be7292aeee5281c6f239bee55b57cf # v2.6.0
         with:
           input: 'openapi.yaml'
           overlays: 'overlay.yaml'
           output: 'openapi-modified.yaml'
 
       - name: Upload modified OpenAPI document
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: openapi-single-overlay
           path: openapi-modified.yaml
@@ -36,10 +36,10 @@ jobs:
     name: Apply Multiple Overlays
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Apply Multiple OpenAPI Overlays
-        uses: BinkyLabs/openapi-overlays-dotnet@v2
+        uses: BinkyLabs/openapi-overlays-dotnet@1263c8d8e7be7292aeee5281c6f239bee55b57cf # v2.6.0
         with:
           input: 'openapi.yaml'
           overlays: |
@@ -50,7 +50,7 @@ jobs:
           command: 'apply-and-normalize'
 
       - name: Upload modified OpenAPI document
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: openapi-multiple-overlays
           path: openapi-complete.yaml
