@@ -4,7 +4,6 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
-#pragma warning disable BOO002
 internal static partial class OverlayV1Deserializer
 {
     public static readonly FixedFieldMap<OverlayReusableActionReference> ReusableActionReferenceFixedFields = new()
@@ -35,4 +34,3 @@ internal static partial class OverlayV1Deserializer
         return action;
     }
 }
-#pragma warning restore BOO002

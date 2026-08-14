@@ -21,4 +21,9 @@ public interface IOverlaySerializable
     /// </summary>
     /// <param name="writer">A Microsoft.OpenAPI writer</param>
     void SerializeAsV1_1(IOpenApiWriter writer);
+    /// <summary>
+    /// Serializes the object to the OpenAPI Overlay v1.2 format.
+    /// </summary>
+    /// <param name="writer">A Microsoft.OpenAPI writer</param>
+    void SerializeAsV1_2(IOpenApiWriter writer);
 }

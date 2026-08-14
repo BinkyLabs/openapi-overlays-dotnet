@@ -1,14 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
-
-using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
 /// Represents the serialized reusable Action Reference payload fields.
 /// </summary>
-[Experimental("BOO002")]
 public class OverlayReusableActionReferenceItem : IOverlayExtensible
 {
     /// <summary>

@@ -9,7 +9,6 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-#pragma warning disable BOO002
 public class OverlayReusableActionV1Tests
 {
     [Fact]
@@ -98,4 +97,3 @@ public class OverlayReusableActionV1Tests
         Assert.True(action.Fields.Remove);
     }
 }
-#pragma warning restore BOO002
