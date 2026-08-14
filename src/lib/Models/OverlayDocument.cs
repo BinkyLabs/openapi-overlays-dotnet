@@ -37,7 +37,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the reusable components available to this overlay document.
     /// </summary>
-    [Experimental("BOO002")]
     public OverlayComponents? Components { get; set; }
 
     /// <inheritdoc/>
@@ -47,7 +46,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, (w, obj) => obj.SerializeAsV1(w));
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, (w, obj) => obj.SerializeAsV1_1(w));
-#pragma warning disable BOO002
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_2, (w, obj) => obj.SerializeAsV1_2(w));
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
         SetUnsetReferenceHostDocuments();
@@ -76,8 +76,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
-#pragma warning restore BOO002
-#pragma warning disable BOO002
     internal void SetUnsetReferenceHostDocuments()
     {
         if (Actions is not { Count: > 0 })
@@ -90,7 +88,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             reusableActionReference.Reference.HostDocument = this;
         }
     }
-#pragma warning restore BOO002
 
     private static readonly Dictionary<OverlaySpecVersion, string> SpecVersionToStringMap = new()
     {
@@ -171,7 +168,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             return concreteAction;
         }
-#pragma warning disable BOO002
         if (action is OverlayReusableActionReference reusableActionReference)
         {
             return reusableActionReference.GetResolvedAction(overlayDiagnostic, index);
@@ -182,7 +178,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                 OverlayAction.GetPointer(index),
                 $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
         );
-#pragma warning restore BOO002
 
         return null;
     }
@@ -396,8 +391,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var lastDocument = documents[^1];
         // Merge actions from all documents
         var actions = new List<IOverlayAction>(documents.SelectMany(static d => d.Actions ?? Array.Empty<IOverlayAction>()));
-
-#pragma warning disable BOO002
         return new OverlayDocument
         {
             Info = lastDocument.Info,
@@ -409,8 +402,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                             null
         };
     }
-#pragma warning restore BOO002
-#pragma warning disable BOO002
+
     internal Dictionary<string, string> GetUnresolvedReusableActionReferences()
     {
         var unresolvedReferences = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -437,7 +429,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         return unresolvedReferences;
     }
-#pragma warning restore BOO002
 
     private static string FormatUnresolvedReusableActionReferences(Dictionary<string, string> unresolvedActionReferences)
     {

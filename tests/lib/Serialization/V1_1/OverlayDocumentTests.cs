@@ -15,7 +15,6 @@ namespace BinkyLabs.OpenApi.Overlays.Tests;
 public sealed class OverlayDocumentV1_1Tests
 {
     [Fact]
-#pragma warning disable BOO002
     public void SerializeAsV1_1_WithComponents_ShouldWriteCorrectJson()
     {
         // Arrange
@@ -82,10 +81,8 @@ public sealed class OverlayDocumentV1_1Tests
         // Assert
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
     }
-#pragma warning restore BOO002
 
     [Fact]
-#pragma warning disable BOO002
     public void Deserialize_WithComponents_ShouldSetPropertiesCorrectly()
     {
         // Arrange
@@ -129,7 +126,6 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("https://api.example.com", action.Fields.Update["url"]?.GetValue<string>());
         Assert.Equal("Sets the server URL", action.Description);
     }
-#pragma warning restore BOO002
 
     [Fact]
     public void SerializeAsV1_1_ShouldWriteCorrectJson()
@@ -281,7 +277,6 @@ public sealed class OverlayDocumentV1_1Tests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public async Task Deserialize_WithReusableActionReference_ShouldSetHostDocument()
     {
         // Arrange
@@ -321,7 +316,6 @@ public sealed class OverlayDocumentV1_1Tests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public async Task ParseAndApply_WithReusableActionReference_ShouldResolveTargetActionFromHostDocument()
     {
         // Arrange
@@ -387,10 +381,8 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Empty(applyDiagnostic.Warnings);
         Assert.Null(targetDocument["paths"]?["/pets"]?["get"]?["responses"]?["404"]?["description"]);
     }
-#pragma warning restore BOO002
 
     [Fact]
-#pragma warning disable BOO002
     public void SerializeAsV1_1_WithUnresolvedReusableActionReference_ShouldThrow()
     {
         // Arrange
@@ -422,7 +414,6 @@ public sealed class OverlayDocumentV1_1Tests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public void SerializeAsV1_1_WithReusableActionReferenceWithoutHostDocument_ShouldSetHostDocument()
     {
         // Arrange
@@ -468,8 +459,6 @@ public sealed class OverlayDocumentV1_1Tests
         var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
         Assert.Same(overlayDocument, reference.Reference.HostDocument);
     }
-#pragma warning restore BOO002
-#pragma warning restore BOO002
 
     [Fact]
     public void SerializeAsV1_1_WithUpdate_ShouldWriteCorrectJson()
@@ -896,7 +885,6 @@ public sealed class OverlayDocumentV1_1Tests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public void CombineWith_MergesComponents()
     {
         // Given
@@ -934,10 +922,8 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("2.0.0", result.Components.Actions["setVersion"].Fields?.Update?.GetValue<string>());
         Assert.Equal("$.info.description", result.Components.Actions["setDescription"].Fields?.Target);
     }
-#pragma warning restore BOO002
 
     [Fact]
-#pragma warning disable BOO002
     public void Deserialize_WithReusableActionReference_ShouldCreateReferenceAction()
     {
         // Arrange
@@ -970,5 +956,4 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
     }
-#pragma warning restore BOO002
 }

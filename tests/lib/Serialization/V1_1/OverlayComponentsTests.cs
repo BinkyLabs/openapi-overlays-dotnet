@@ -9,7 +9,6 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-#pragma warning disable BOO002
 public class OverlayComponentsV1_1Tests
 {
     [Fact]
@@ -137,4 +136,3 @@ public class OverlayComponentsV1_1Tests
         Assert.Equal("$.info.description", result.Actions["setDescription"].Fields?.Target);
     }
 }
-#pragma warning restore BOO002

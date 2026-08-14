@@ -9,7 +9,6 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-#pragma warning disable BOO002
 public class OverlayReusableActionV1_1Tests
 {
     [Fact]
@@ -118,4 +117,3 @@ public class OverlayReusableActionV1_1Tests
         Assert.Equal("$.paths['/pets']", action.Fields.Copy);
     }
 }
-#pragma warning restore BOO002

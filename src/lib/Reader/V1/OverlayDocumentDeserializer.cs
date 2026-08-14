@@ -4,7 +4,6 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
-#pragma warning disable BOO002
 internal static partial class OverlayV1Deserializer
 {
     public static readonly FixedFieldMap<OverlayDocument> DocumentFixedFields = new()
@@ -39,4 +38,3 @@ internal static partial class OverlayV1Deserializer
             : LoadAction(mapNode, context);
     }
 }
-#pragma warning restore BOO002
