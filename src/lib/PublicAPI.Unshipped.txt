@@ -11,6 +11,8 @@ BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_1(Microsoft.OpenApi.I
 BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayReusableAction
@@ -64,7 +66,9 @@ BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.get -> Syst
 BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.set -> void
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_2 = 3 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentSelfFieldName = "$self" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXComponentsFieldName = "x-components" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXSelfFieldName = "x-$self" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionDescriptionFieldName = "description" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionFieldsFieldName = "fields" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
