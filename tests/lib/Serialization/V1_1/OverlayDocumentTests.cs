@@ -35,7 +35,6 @@ public sealed class OverlayDocumentV1_1Tests
                         {
                             Fields = new OverlayAction
                             {
-                                Target = "$.servers[0]",
                                 Update = JsonNode.Parse("""
                                 {
                                     "url": "https://api.example.com"
@@ -61,7 +60,6 @@ public sealed class OverlayDocumentV1_1Tests
                 "actions": {
                     "setServerUrl": {
                         "fields": {
-                            "target": "$.servers[0]",
                             "update": {
                                 "url": "https://api.example.com"
                             }
