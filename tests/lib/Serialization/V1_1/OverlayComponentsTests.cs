@@ -26,7 +26,6 @@ public class OverlayComponentsV1_1Tests
                         Description = "Sets the server URL",
                         Fields = new OverlayAction
                         {
-                            Target = "$.servers[0]",
                             Update = JsonNode.Parse("""
                             {
                                 "url": "https://api.example.com"
@@ -47,7 +46,6 @@ public class OverlayComponentsV1_1Tests
         "setServerUrl": {
             "description": "Sets the server URL",
             "fields": {
-                "target": "$.servers[0]",
                 "update": {
                     "url": "https://api.example.com"
                 }
