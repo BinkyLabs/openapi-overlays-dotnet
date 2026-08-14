@@ -363,7 +363,6 @@ public sealed class OverlayDocumentTests
                     {
                         Fields = new OverlayAction
                         {
-                            Target = "$.paths['/pets'].get.responses.404",
                             Remove = true
                         }
                     }
