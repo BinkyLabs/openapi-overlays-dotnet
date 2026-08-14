@@ -94,4 +94,14 @@ public static class OverlayConstants
     /// Field: OverlayInfo.Description (v1.1)
     /// </summary>
     public const string InfoDescriptionFieldName = "description";
+
+    /// <summary>
+    /// Field: OverlayDocument.Self (v1.2)
+    /// </summary>
+    public const string DocumentSelfFieldName = "$self";
+
+    /// <summary>
+    /// Field: OverlayDocument.Self (v1.2)
+    /// </summary>
+    public const string DocumentXSelfFieldName = "x-$self";
 }
