@@ -142,23 +142,27 @@ public class OverlayReusableActionReference : IOverlayAction
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(
         writer,
         OverlaySpecVersion.Overlay1_0,
+        OverlayConstants.ReusableActionReferenceXReferenceFieldName,
         OverlayConstants.ActionXCopyFieldName);
 
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(
         writer,
         OverlaySpecVersion.Overlay1_1,
+        OverlayConstants.ReusableActionReferenceXReferenceFieldName,
         OverlayConstants.ActionCopyFieldName);
 
     /// <inheritdoc/>
     public void SerializeAsV1_2(IOpenApiWriter writer) => SerializeInternal(
         writer,
         OverlaySpecVersion.Overlay1_2,
+        OverlayConstants.ReusableActionReferenceReferenceFieldName,
         OverlayConstants.ActionCopyFieldName);
 
     private void SerializeInternal(
         IOpenApiWriter writer,
         OverlaySpecVersion version,
+        string referenceFieldName,
         string copyFieldName)
     {
         ArgumentNullException.ThrowIfNull(writer);
@@ -170,7 +174,7 @@ public class OverlayReusableActionReference : IOverlayAction
 
         writer.WriteStartObject();
 
-        writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
+        writer.WriteProperty(referenceFieldName, Reference.Reference);
 
         if (!string.IsNullOrEmpty(Reference.Target))
         {
