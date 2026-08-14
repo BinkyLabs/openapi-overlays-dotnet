@@ -66,11 +66,13 @@ BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.get -> Syst
 BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Update.set -> void
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_2 = 3 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentComponentsFieldName = "components" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentSelfFieldName = "$self" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXComponentsFieldName = "x-components" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXSelfFieldName = "x-$self" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionDescriptionFieldName = "description" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionFieldsFieldName = "fields" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceReferenceFieldName = "$ref" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXReferenceFieldName = "x-$ref" -> string!
 static BinkyLabs.OpenApi.Overlays.OverlayComponents.Combine(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! componentsArray) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
