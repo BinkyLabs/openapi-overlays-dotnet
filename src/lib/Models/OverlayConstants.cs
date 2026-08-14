@@ -19,7 +19,11 @@ public static class OverlayConstants
     /// </summary>
     public const string ReusableActionDescriptionFieldName = "description";
     /// <summary>
-    /// Field: OverlayReusableActionReference.$ref (serialized as extension for v1/v1.1 compatibility)
+    /// Field: OverlayReusableActionReference.$ref (v1.2)
+    /// </summary>
+    public const string ReusableActionReferenceReferenceFieldName = "$ref";
+    /// <summary>
+    /// Field: OverlayReusableActionReference.$ref (v1/v1.1)
     /// </summary>
     public const string ReusableActionReferenceXReferenceFieldName = "x-$ref";
     /// <summary>
@@ -69,7 +73,11 @@ public static class OverlayConstants
     /// </summary>
     public const string DocumentActionsFieldName = "actions";
     /// <summary>
-    /// Field: OverlayDocument.Components (serialized as extension for v1/v1.1 compatibility)
+    /// Field: OverlayDocument.Components (v1.2)
+    /// </summary>
+    public const string DocumentComponentsFieldName = "components";
+    /// <summary>
+    /// Field: OverlayDocument.Components (v1/v1.1)
     /// </summary>
     public const string DocumentXComponentsFieldName = "x-components";
 

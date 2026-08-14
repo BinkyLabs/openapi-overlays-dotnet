@@ -77,7 +77,10 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         }
         if (Components != null)
         {
-            writer.WriteRequiredObject(OverlayConstants.DocumentXComponentsFieldName, Components, serializeAction);
+            writer.WriteRequiredObject(
+                version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentComponentsFieldName : OverlayConstants.DocumentXComponentsFieldName,
+                Components,
+                serializeAction);
         }
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
