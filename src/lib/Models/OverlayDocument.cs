@@ -16,9 +16,14 @@ namespace BinkyLabs.OpenApi.Overlays;
 public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 {
     /// <summary>
-    /// Gets or sets the overlay version. Default is "1.1.0".
+    /// Gets or sets the overlay version. Default is "1.2.0".
     /// </summary>
-    public string? Overlay { get; internal set; } = "1.1.0";
+    public string? Overlay { get; internal set; } = "1.2.0";
+
+    /// <summary>
+    /// Gets or sets the overlay $self reference. Default is null.
+    /// </summary>
+    public string? Self { get; set; }
 
     /// <summary>
     /// Gets or sets the overlay info object.
@@ -65,6 +70,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             writer.WriteRequiredObject(OverlayConstants.DocumentInfoFieldName, Info, serializeAction);
         }
         writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
+        writer.WriteProperty(version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentSelfFieldName : OverlayConstants.DocumentXSelfFieldName, Self);
         if (Actions != null)
         {
             writer.WriteRequiredCollection<IOverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
@@ -93,6 +99,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     {
         { OverlaySpecVersion.Overlay1_0, "1.0.0" },
         { OverlaySpecVersion.Overlay1_1, "1.1.0" },
+        { OverlaySpecVersion.Overlay1_2, "1.2.0" }
     };
 
     /// <summary>

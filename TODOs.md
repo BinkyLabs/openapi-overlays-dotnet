@@ -5,6 +5,7 @@
 - [ ] release please configuration is stable
 - [ ] deserialization
 - [ ] 1.2 test infrastructure
-- [ ] document self field
+- [x] document self field
 - [ ] self resolution
 - [ ] extend should not contain fragments
+- [ ] document self serialization tests
