@@ -11,7 +11,6 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// <summary>
 /// Represents a reusable action reference action with local overrides.
 /// </summary>
-[Experimental("BOO002")]
 public class OverlayReusableActionReference : IOverlayAction
 {
     /// <summary>
@@ -149,6 +148,12 @@ public class OverlayReusableActionReference : IOverlayAction
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(
         writer,
         OverlaySpecVersion.Overlay1_1,
+        OverlayConstants.ActionCopyFieldName);
+
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) => SerializeInternal(
+        writer,
+        OverlaySpecVersion.Overlay1_2,
         OverlayConstants.ActionCopyFieldName);
 
     private void SerializeInternal(

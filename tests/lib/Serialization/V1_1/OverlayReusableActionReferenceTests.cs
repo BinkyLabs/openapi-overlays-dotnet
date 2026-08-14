@@ -9,7 +9,6 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-#pragma warning disable BOO002
 public class OverlayReusableActionReferenceV1_1Tests
 {
     [Fact]
@@ -397,4 +396,3 @@ public class OverlayReusableActionReferenceV1_1Tests
         Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
     }
 }
-#pragma warning restore BOO002

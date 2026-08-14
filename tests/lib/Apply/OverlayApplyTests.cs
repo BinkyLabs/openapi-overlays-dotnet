@@ -852,7 +852,6 @@ public sealed class OverlayApplyTests : IDisposable
     }
 
     [Fact]
-#pragma warning disable BOO002
     public void ApplyToDocument_WithReusableActionReference_ShouldResolveAndApplyAction()
     {
         // Arrange
@@ -958,7 +957,6 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Contains("target", overlayDiagnostic.Errors[0].Message, StringComparison.OrdinalIgnoreCase);
         Assert.Null(jsonNode["servers"]?[0]?["description"]);
     }
-#pragma warning restore BOO002
 
     [Fact]
     public void ApplyToDocument_ShouldAddErrorForUnsupportedActionType()
@@ -978,25 +976,20 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.False(result, "ApplyToDocument should return false for an unsupported action type.");
         Assert.Single(overlayDiagnostic.Errors);
         Assert.Equal("/actions/0", overlayDiagnostic.Errors[0].Pointer);
-#pragma warning disable BOO002
         Assert.Contains(nameof(OverlayAction), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
         Assert.Contains(nameof(OverlayReusableActionReference), overlayDiagnostic.Errors[0].Message, StringComparison.Ordinal);
-#pragma warning restore BOO002
     }
 
     [Theory]
     [InlineData("my/action", "my~1action")]
     [InlineData("my~action", "my~0action")]
     [InlineData("my/~action", "my~1~0action")]
-#pragma warning disable BOO002
     public void ApplyToDocument_WithReusableActionReferenceContainingSpecialCharacters_ShouldResolveAndApplyAction(
         string actionKey,
         string encodedKey)
-#pragma warning restore BOO002
     {
         // Arrange
         var overlayDocument = new OverlayDocument();
-#pragma warning disable BOO002
         overlayDocument.Components = new OverlayComponents
         {
             Actions = new Dictionary<string, OverlayReusableAction>(StringComparer.Ordinal)
@@ -1023,7 +1016,6 @@ public sealed class OverlayApplyTests : IDisposable
                 }
             }
         ];
-#pragma warning restore BOO002
 
         var jsonNode = new JsonObject
         {
@@ -1039,10 +1031,8 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Equal("Added by reusable action", jsonNode["info"]?["description"]?.ToString());
 
-#pragma warning disable BOO002
         // Verify the serialized reference uses the correctly encoded form
         var referenceItem = ((OverlayReusableActionReference)overlayDocument.Actions[0]).Reference;
-#pragma warning restore BOO002
         Assert.Equal($"#/components/actions/{encodedKey}", referenceItem.Reference);
     }
 
@@ -1050,11 +1040,9 @@ public sealed class OverlayApplyTests : IDisposable
     [InlineData("my/action", "#/components/actions/my~1action")]
     [InlineData("my~action", "#/components/actions/my~0action")]
     [InlineData("my/~action", "#/components/actions/my~1~0action")]
-#pragma warning disable BOO002
     public async Task ApplyToDocument_WithDeserializedReusableActionReferenceContainingSpecialCharacters_ShouldResolveAndApplyAction(
         string actionKey,
         string encodedReference)
-#pragma warning restore BOO002
     {
         // Arrange – build an in-memory overlay YAML that uses the encoded reference
         var overlayYaml = $"""
@@ -1106,6 +1094,7 @@ public sealed class OverlayApplyTests : IDisposable
         public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
         public void SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter writer) { }
         public void SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter writer) { }
+        public void SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter writer) { }
     }
 
     public void Dispose()
