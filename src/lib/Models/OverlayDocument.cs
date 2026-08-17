@@ -23,7 +23,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the overlay $self reference. Default is null.
     /// </summary>
-    public string? Self { get; set; }
+    public Uri? Self { get; set; }
 
     /// <summary>
     /// Gets or sets the overlay info object.
@@ -75,7 +75,10 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             writer.WriteRequiredObject(OverlayConstants.DocumentInfoFieldName, Info, serializeAction);
         }
         writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
-        writer.WriteProperty(version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentSelfFieldName : OverlayConstants.DocumentXSelfFieldName, Self);
+        if (Self != null)
+        {
+            writer.WriteProperty(version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentSelfFieldName : OverlayConstants.DocumentXSelfFieldName, Self?.ToString());
+        }
         if (Actions != null)
         {
             writer.WriteRequiredCollection<IOverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
