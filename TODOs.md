@@ -8,4 +8,4 @@
 - [x] document self field
 - [ ] self resolution
 - [ ] extend should not contain fragments
-- [ ] document self serialization tests
+- [x] document self serialization tests

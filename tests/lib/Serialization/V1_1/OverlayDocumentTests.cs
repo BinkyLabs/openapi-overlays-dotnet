@@ -81,6 +81,43 @@ public sealed class OverlayDocumentV1_1Tests
     }
 
     [Fact]
+    public void SerializeAsV1_1_WithSelf_ShouldWriteCorrectJson()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Self = "https://example.com/overlays/test",
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        var expectedJson = """
+        {
+            "overlay": "1.1.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-$self": "https://example.com/overlays/test"
+        }
+        """;
+
+        // Act
+        overlayDocument.SerializeAsV1_1(writer);
+        var jsonResult = textWriter.ToString();
+        var jsonResultObject = JsonNode.Parse(jsonResult);
+        var expectedJsonObject = JsonNode.Parse(expectedJson);
+
+        // Assert
+        Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+
+    [Fact]
     public void Deserialize_WithComponents_ShouldSetPropertiesCorrectly()
     {
         // Arrange
