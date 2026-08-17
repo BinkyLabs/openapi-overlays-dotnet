@@ -33,7 +33,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the value of the 'extends' property.
     /// </summary>
-    public string? Extends { get; set; }
+    public Uri? Extends { get; set; }
 
     /// <summary>
     /// Gets or sets the list of actions for the overlay.
@@ -63,7 +63,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
         }
 
-        if (!string.IsNullOrEmpty(Extends) && Extends.Contains('#'))
+        if (Extends != null && Extends.Fragment.Length > 0)
         {
             throw new InvalidOperationException($"The 'extends' property must not contain a fragment identifier ('#'). Found: '{Extends}'");
         }
@@ -74,10 +74,13 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             writer.WriteRequiredObject(OverlayConstants.DocumentInfoFieldName, Info, serializeAction);
         }
-        writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
+        if (Extends != null)
+        {
+            writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends.ToString());
+        }
         if (Self != null)
         {
-            writer.WriteProperty(version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentSelfFieldName : OverlayConstants.DocumentXSelfFieldName, Self?.ToString());
+            writer.WriteProperty(version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentSelfFieldName : OverlayConstants.DocumentXSelfFieldName, Self.ToString());
         }
         if (Actions != null)
         {
@@ -211,11 +214,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfJsonNode> ApplyToExtendedDocumentAsync(string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(Extends))
+        if (Extends is null)
         {
             throw new InvalidOperationException("The 'extends' property must be set to apply the overlay to an extended document.");
         }
-        return await ApplyToDocumentAsync(Extends, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
+        return await ApplyToDocumentAsync(Extends.ToString(), format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -229,12 +232,12 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfOpenApiDocument> ApplyToExtendedDocumentAndLoadAsync(string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(Extends))
+        if (Extends is null)
         {
             throw new InvalidOperationException("The 'extends' property must be set to apply the overlay to an extended document.");
         }
         var jsonResult = await ApplyToExtendedDocumentAsync(format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-        return LoadDocument(jsonResult, new Uri(Extends), format ?? string.Empty, readerSettings);
+        return LoadDocument(jsonResult, Extends, format ?? string.Empty, readerSettings);
     }
 
     /// <summary>
@@ -249,7 +252,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfJsonNode> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(documentPathOrUri);
+        ArgumentNullException.ThrowIfNull(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
 
         // Load the document from the specified path or URI
@@ -291,7 +294,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
-            uri = new Uri(documentPathOrUri);
+            uri = new (documentPathOrUri);
         }
         else
         {

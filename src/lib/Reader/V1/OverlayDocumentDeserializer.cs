@@ -9,7 +9,7 @@ internal static partial class OverlayV1Deserializer
     public static readonly FixedFieldMap<OverlayDocument> DocumentFixedFields = new()
     {
         { OverlayConstants.DocumentOverlayFieldName, (o, v, _) => o.Overlay = v.GetScalarValue() },
-        { OverlayConstants.DocumentExtendsFieldName, (o, v, _) => o.Extends = v.GetScalarValue() },
+        { OverlayConstants.DocumentExtendsFieldName, (o, v, _) => o.Extends = v.GetScalarValue<Uri>() },
         { OverlayConstants.DocumentInfoFieldName, (o, v, c) => o.Info = LoadInfo(v, c) },
         { OverlayConstants.DocumentActionsFieldName, (o, v, c) => o.Actions = v.CreateList<IOverlayAction>(LoadActionOrReference, c) },
         { OverlayConstants.DocumentXComponentsFieldName, (o, v, c) => o.Components = LoadComponents(v, c) }
