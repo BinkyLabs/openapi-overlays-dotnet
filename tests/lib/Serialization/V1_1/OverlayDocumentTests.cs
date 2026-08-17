@@ -132,7 +132,7 @@ public sealed class OverlayDocumentV1_1Tests
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
-    
+
         // Then
         var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1_1(writer));
     }

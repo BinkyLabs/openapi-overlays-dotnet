@@ -109,7 +109,7 @@ public class OverlayReusableActionV1Tests
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
-    
+
         // Then
         Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1(writer));
     }
