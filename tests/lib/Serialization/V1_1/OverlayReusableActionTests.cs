@@ -116,4 +116,21 @@ public class OverlayReusableActionV1_1Tests
         Assert.NotNull(action.Fields);
         Assert.Equal("$.paths['/pets']", action.Fields.Copy);
     }
+    [Fact]
+    public void UsingTargetIsProhibitedForReusableActions()
+    {
+        // Given
+        var action = new OverlayReusableAction
+        {
+            Fields = new OverlayAction
+            {
+                Target = "Foo"
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+    
+        // Then
+        Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1_1(writer));
+    }
 }
