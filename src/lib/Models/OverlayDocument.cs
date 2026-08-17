@@ -294,7 +294,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
-            uri = new (documentPathOrUri);
+            uri = new(documentPathOrUri);
         }
         else
         {

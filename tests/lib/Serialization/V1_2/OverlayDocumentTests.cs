@@ -83,7 +83,7 @@ public sealed class OverlayDocumentV1_2Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new ("x-extends"),
+            Extends = new("x-extends"),
             Actions =
             [
                 new OverlayAction
@@ -180,7 +180,7 @@ public sealed class OverlayDocumentV1_2Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new ("base.yaml#fragment")
+            Extends = new("base.yaml#fragment")
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
