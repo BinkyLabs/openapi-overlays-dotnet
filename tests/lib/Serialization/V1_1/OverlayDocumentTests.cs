@@ -86,7 +86,7 @@ public sealed class OverlayDocumentV1_1Tests
         // Arrange
         var overlayDocument = new OverlayDocument
         {
-            Self = "https://example.com/overlays/test",
+            Self = new("https://example.com/overlays/test"),
             Info = new OverlayInfo
             {
                 Title = "Test Overlay",
