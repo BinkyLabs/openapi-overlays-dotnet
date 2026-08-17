@@ -1,6 +1,6 @@
 # TODOs
 
-- [ ] unit test for fields target prohibited
+- [x] unit test for fields target prohibited
 - [ ] review override behaviour
 - [ ] release please configuration is stable
 - [ ] deserialization
