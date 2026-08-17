@@ -63,7 +63,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
         }
 
-        if (Extends != null && Extends.Fragment.Length > 0)
+        if (Extends is { IsAbsoluteUri: true, Fragment.Length: > 0 })
         {
             throw new InvalidOperationException($"The 'extends' property must not contain a fragment identifier ('#'). Found: '{Extends}'");
         }

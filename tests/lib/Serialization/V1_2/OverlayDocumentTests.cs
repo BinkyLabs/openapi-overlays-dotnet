@@ -83,7 +83,7 @@ public sealed class OverlayDocumentV1_2Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new("x-extends"),
+            Extends = new("./x-extends", UriKind.RelativeOrAbsolute),
             Actions =
             [
                 new OverlayAction
@@ -108,7 +108,7 @@ public sealed class OverlayDocumentV1_2Tests
                 "title": "Test Overlay",
                 "version": "1.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -180,7 +180,7 @@ public sealed class OverlayDocumentV1_2Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new("base.yaml#fragment")
+            Extends = new("https://foo.bar/base.yaml#fragment", UriKind.RelativeOrAbsolute)
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -284,7 +284,7 @@ public sealed class OverlayDocumentV1_2Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new("file://x-extends.json"),
+            Extends = new("./x-extends", UriKind.RelativeOrAbsolute),
             Actions =
             [
                 new OverlayAction
@@ -305,7 +305,7 @@ public sealed class OverlayDocumentV1_2Tests
                 "title": "Test Overlay",
                 "version": "1.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
