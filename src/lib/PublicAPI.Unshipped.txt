@@ -11,7 +11,7 @@ BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_1(Microsoft.OpenApi.I
 BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
-BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.get -> System.Uri?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
