@@ -128,7 +128,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new("base.yaml#fragment")
+            Extends = new("https://foo.bar/base.yaml#fragment", UriKind.RelativeOrAbsolute)
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -193,7 +193,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new Uri("x-extends"),
+            Extends = new Uri("./x-extends", UriKind.RelativeOrAbsolute),
             Actions =
             [
                 new OverlayAction
@@ -218,7 +218,7 @@ public sealed class OverlayDocumentV1_1Tests
                 "title": "Test Overlay",
                 "version": "1.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -254,7 +254,7 @@ public sealed class OverlayDocumentV1_1Tests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -282,7 +282,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("1.0.0", overlayDocument.Overlay);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
-        Assert.Equal(new("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions!.ContainsKey("x-custom-extension"));
         var extensionNodeValue = Assert.IsType<JsonNodeExtension>(overlayDocument.Extensions["x-custom-extension"]);
@@ -532,7 +532,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new("x-extends"),
+            Extends = new("./x-extends", UriKind.RelativeOrAbsolute),
             Actions =
             [
                 new OverlayAction
@@ -554,7 +554,7 @@ public sealed class OverlayDocumentV1_1Tests
                 "title": "Test Overlay",
                 "version": "1.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -617,7 +617,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("1.0.0", overlayDocument.Overlay);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
-        Assert.Equal(new Uri("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new Uri("x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
 
         // Assert the 2 actions
         Assert.NotNull(overlayDocument.Actions);
@@ -654,7 +654,7 @@ public sealed class OverlayDocumentV1_1Tests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "x-custom-extension": {
                 "someProperty": "someValue"
             },
@@ -684,7 +684,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("1.0.0", overlayDocument.Overlay);
-        Assert.Equal(new("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
         var extension = overlayDocument.Extensions["x-custom-extension"];
@@ -731,7 +731,7 @@ public sealed class OverlayDocumentV1_1Tests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "x-custom-extension": {
                 "someProperty": "someValue"
             },
@@ -763,7 +763,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("1.0.0", overlayDocument.Overlay);
-        Assert.Equal(new("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
         var extension = overlayDocument.Extensions["x-custom-extension"];
@@ -879,7 +879,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Overlay 1",
                 Version = "1.0.0"
             },
-            Extends = new("base.yaml")
+            Extends = new("./base.yaml", UriKind.RelativeOrAbsolute)
         };
         var overlayDocument2 = new OverlayDocument
         {
@@ -888,7 +888,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Overlay 2",
                 Version = "1.0.1"
             },
-            Extends = new("base2.yaml")
+            Extends = new("./base2.yaml", UriKind.RelativeOrAbsolute)
         };
 
         // When
@@ -897,7 +897,7 @@ public sealed class OverlayDocumentV1_1Tests
         // Then
         Assert.Equal("Overlay 2", result.Info?.Title);
         Assert.Equal("1.0.1", result.Info?.Version);
-        Assert.Equal(new("base2.yaml"), result.Extends);
+        Assert.Equal(new("./base2.yaml", UriKind.RelativeOrAbsolute), result.Extends);
         Assert.NotNull(result.Actions);
         Assert.Empty(result.Actions);
     }
