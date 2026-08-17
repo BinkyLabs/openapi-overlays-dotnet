@@ -63,4 +63,21 @@ public class OverlayReusableActionV1_2Tests
         Assert.True(jsonResultObject.ContainsKey("fields"), "The serialized JSON should contain a 'fields' property.");
         Assert.NotNull(jsonResultObject["fields"]!.AsObject());
     }
+    [Fact]
+    public void UsingTargetIsProhibitedForReusableActions()
+    {
+        // Given
+        var action = new OverlayReusableAction
+        {
+            Fields = new OverlayAction
+            {
+                Target = "Foo"
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+    
+        // Then
+        Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1_2(writer));
+    }
 }
