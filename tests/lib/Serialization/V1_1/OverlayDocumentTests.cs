@@ -128,7 +128,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new ("base.yaml#fragment")
+            Extends = new("base.yaml#fragment")
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
@@ -282,7 +282,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("1.0.0", overlayDocument.Overlay);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
-        Assert.Equal(new ("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new("x-extends"), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions!.ContainsKey("x-custom-extension"));
         var extensionNodeValue = Assert.IsType<JsonNodeExtension>(overlayDocument.Extensions["x-custom-extension"]);
@@ -532,7 +532,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = new ("x-extends"),
+            Extends = new("x-extends"),
             Actions =
             [
                 new OverlayAction
@@ -684,7 +684,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("1.0.0", overlayDocument.Overlay);
-        Assert.Equal(new ("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new("x-extends"), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
         var extension = overlayDocument.Extensions["x-custom-extension"];
@@ -763,7 +763,7 @@ public sealed class OverlayDocumentV1_1Tests
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("1.0.0", overlayDocument.Overlay);
-        Assert.Equal(new ("x-extends"), overlayDocument.Extends);
+        Assert.Equal(new("x-extends"), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
         var extension = overlayDocument.Extensions["x-custom-extension"];
@@ -879,7 +879,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Overlay 1",
                 Version = "1.0.0"
             },
-            Extends = new ("base.yaml")
+            Extends = new("base.yaml")
         };
         var overlayDocument2 = new OverlayDocument
         {
@@ -888,7 +888,7 @@ public sealed class OverlayDocumentV1_1Tests
                 Title = "Overlay 2",
                 Version = "1.0.1"
             },
-            Extends = new ("base2.yaml")
+            Extends = new("base2.yaml")
         };
 
         // When
@@ -897,7 +897,7 @@ public sealed class OverlayDocumentV1_1Tests
         // Then
         Assert.Equal("Overlay 2", result.Info?.Title);
         Assert.Equal("1.0.1", result.Info?.Version);
-        Assert.Equal(new ("base2.yaml"), result.Extends);
+        Assert.Equal(new("base2.yaml"), result.Extends);
         Assert.NotNull(result.Actions);
         Assert.Empty(result.Actions);
     }
