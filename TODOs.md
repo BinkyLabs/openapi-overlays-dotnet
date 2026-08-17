@@ -7,5 +7,5 @@
 - [x] 1.2 test infrastructure
 - [x] document self field
 - [ ] self resolution
-- [ ] extend should not contain fragments
+- [x] extend should not contain fragments
 - [x] document self serialization tests
