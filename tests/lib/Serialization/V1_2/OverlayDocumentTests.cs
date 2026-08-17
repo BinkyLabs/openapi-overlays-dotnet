@@ -170,6 +170,26 @@ public sealed class OverlayDocumentV1_2Tests
     }
 
     [Fact]
+    public void ExtendsShouldNotContainFragments()
+    {
+        // Given
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Extends = "base.yaml#fragment"
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+    
+        // Then
+        var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1_2(writer));
+    }
+
+    [Fact]
     public void SerializeAsV1_2_WithUnresolvedReusableActionReference_ShouldThrow()
     {
         // Arrange

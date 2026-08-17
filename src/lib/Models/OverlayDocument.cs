@@ -63,6 +63,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
         }
 
+        if (!string.IsNullOrEmpty(Extends) && Extends.Contains('#'))
+        {
+            throw new InvalidOperationException($"The 'extends' property must not contain a fragment identifier ('#'). Found: '{Extends}'");
+        }
+
         writer.WriteStartObject();
         writer.WriteRequiredProperty(OverlayConstants.DocumentOverlayFieldName, SpecVersionToStringMap[version]);
         if (Info != null)
