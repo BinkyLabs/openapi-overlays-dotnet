@@ -231,7 +231,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
     private IEnumerable<Uri> GetSelfMatchingCandidates(Uri? baseUri)
     {
-        if (baseUri is { IsAbsoluteUri: false})
+        if (baseUri is { IsAbsoluteUri: false })
         {
             throw new ArgumentException("Base URI must be absolute.", nameof(baseUri));
         }
