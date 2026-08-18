@@ -173,10 +173,12 @@ public class OverlayReusableActionReference : IOverlayAction
 
         writer.WriteProperty(referenceFieldName, Reference.Reference);
 
-        if (!string.IsNullOrEmpty(Reference.Target))
+        if (string.IsNullOrEmpty(Reference.Target))
         {
-            writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Reference.Target);
+            throw new InvalidOperationException($"'{nameof(Reference.Target)}' cannot be null or empty when serializing a reusable action reference.");
         }
+
+        writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Reference.Target);
 
         if (!string.IsNullOrEmpty(Reference.Description))
         {
