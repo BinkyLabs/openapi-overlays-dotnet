@@ -169,6 +169,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var i = 0;
         var result = true;
         SetUnsetReferenceHostDocuments();
+        // TODO: pass base uri
+        ValidateTargetSelf(jsonNode, overlayDiagnostic, null);
         foreach (var action in Actions)
         {
             var overlayAction = ResolveAction(action, overlayDiagnostic, i);
@@ -181,6 +183,80 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             i++;
         }
         return result;
+    }
+
+    /// <summary>
+    /// Validates that the target document's self URI matches the extends URI.
+    /// </summary>
+    /// <param name="targetDocument">The target OpenAPI document as a JsonNode.</param>
+    /// <param name="overlayDiagnostic">The diagnostic object to collect validation errors.</param>
+    /// <param name="baseUri">The program base URI to resolve relative extends URIs.</param>
+    /// <remarks>
+    /// The rules are:
+    /// - If the target document does not have a self URI, no validation is performed.
+    /// - If the target document self URI is absolute it must match either:
+    ///    1. the absolute extends URI.
+    ///    2. the combination of the relative extends URI and the absolute overlay self URI.
+    ///    3. the combination of the relative extends URI and the absolute base URI (program context).
+    ///    4. the combination of the relative extends URI and the relative overlay self URI and the absolute base URI (program context).
+    /// </remarks>
+    private void ValidateTargetSelf(JsonNode targetDocument, OverlayDiagnostic overlayDiagnostic, Uri? baseUri)
+    {
+        if (Extends is null)
+        {
+            return; // No extends property, nothing to validate
+        }
+        if (targetDocument is not JsonObject targetObject ||
+            !targetObject.TryGetPropertyValue(OverlayConstants.DocumentSelfFieldName, out var selfJsonNode) ||
+            selfJsonNode is not JsonValue selfJsonValue ||
+            !selfJsonValue.TryGetValue<string>(out var self) ||
+            !Uri.TryCreate(self, UriKind.RelativeOrAbsolute, out var selfUri))
+        {
+            return; // Self property is missing or invalid
+        }
+
+        var absoluteValueToCheck = Extends.IsAbsoluteUri || baseUri is null ? Extends : new Uri(baseUri, Extends);
+
+        if (GetSelfMatchingCandidates(baseUri).Contains(selfUri))
+        {
+            return; // The target document's self URI matches one of the valid candidates
+        }
+
+        overlayDiagnostic.Errors.Add(
+            new OpenApiError(
+                OverlayConstants.DocumentSelfFieldName,
+                $"The target document's self URI '{selfUri}' does not match the extends URI '{absoluteValueToCheck}'."));
+
+    }
+
+    private IEnumerable<Uri> GetSelfMatchingCandidates(Uri? baseUri)
+    {
+        if (baseUri is { IsAbsoluteUri: false})
+        {
+            throw new ArgumentException("Base URI must be absolute.", nameof(baseUri));
+        }
+
+        if (Extends is null)
+        {
+            yield break; // No extends property, no candidates
+        }
+
+        if (Extends.IsAbsoluteUri)
+        {
+            yield return Extends; // Absolute extends URI is a candidate
+        }
+        if (!Extends.IsAbsoluteUri && Self is { IsAbsoluteUri: true })
+        {
+            yield return new Uri(Self, Extends); // Relative extends URI resolved against overlay self URI
+        }
+        if (!Extends.IsAbsoluteUri && baseUri is not null)
+        {
+            yield return new Uri(baseUri, Extends); // Relative extends URI resolved against base URI
+        }
+        if (!Extends.IsAbsoluteUri && Self is { IsAbsoluteUri: true } && baseUri is not null)
+        {
+            yield return new Uri(baseUri, new Uri(Self, Extends)); // Relative extends URI resolved against overlay self URI and then base URI
+        }
     }
 
     private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)

@@ -73,6 +73,98 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Null(jsonNode["info"]?["title"]);
     }
+
+    [Fact]
+    public void ApplyToDocument_ShouldAcceptTargetSelfMatchingAbsoluteExtends()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("https://example.com/openapi.yaml"));
+        var jsonNode = CreateTargetDocument("https://example.com/openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldAcceptTargetSelfMatchingRelativeExtendsResolvedAgainstOverlaySelf()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("../openapi.yaml", UriKind.Relative),
+            new Uri("https://example.com/overlays/overlay.yaml"));
+        var jsonNode = CreateTargetDocument("https://example.com/openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldReportTargetSelfNotMatchingExtends()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("https://example.com/openapi.yaml"));
+        var jsonNode = CreateTargetDocument("https://example.com/other.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        var error = Assert.Single(overlayDiagnostic.Errors);
+        Assert.Equal("$self", error.Pointer);
+        Assert.Equal(
+            "The target document's self URI 'https://example.com/other.yaml' does not match the extends URI 'https://example.com/openapi.yaml'.",
+            error.Message);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("https://[invalid")]
+    public void ApplyToDocument_ShouldSkipTargetSelfValidationWhenSelfIsMissingOrInvalid(string? targetSelf)
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("https://example.com/openapi.yaml"));
+        var jsonNode = CreateTargetDocument(targetSelf);
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldSkipTargetSelfValidationWhenSelfIsNotAString()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("https://example.com/openapi.yaml"));
+        var jsonNode = CreateTargetDocument(null);
+        jsonNode["$self"] = 42;
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldSkipTargetSelfValidationWhenExtendsIsMissing()
+    {
+        var overlayDocument = CreateOverlayDocument();
+        var jsonNode = CreateTargetDocument("https://example.com/openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+    }
+
     [Fact]
     public async Task ShouldApplyTheOverlayToAnOpenApiDocumentFromYaml()
     {
@@ -1082,6 +1174,45 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.True(result, $"ApplyToDocument should succeed for encoded reference '{encodedReference}'.");
         Assert.Empty(overlayDiagnostic.Errors);
         Assert.Equal("Added by reusable action", jsonNode["info"]?["description"]?.ToString());
+    }
+
+    private static OverlayDocument CreateOverlayDocument(Uri? extends = null, Uri? self = null)
+    {
+        return new OverlayDocument
+        {
+            Extends = extends,
+            Self = self,
+            Actions =
+            [
+                new OverlayAction
+                {
+                    Target = "$.info",
+                    Update = new JsonObject
+                    {
+                        ["description"] = "Updated description"
+                    }
+                }
+            ]
+        };
+    }
+
+    private static JsonObject CreateTargetDocument(string? self)
+    {
+        var document = new JsonObject
+        {
+            ["info"] = new JsonObject
+            {
+                ["title"] = "Test title",
+                ["version"] = "1.0.0"
+            }
+        };
+
+        if (self is not null)
+        {
+            document["$self"] = self;
+        }
+
+        return document;
     }
 
     private sealed class UnsupportedAction : IOverlayAction
