@@ -104,6 +104,84 @@ public sealed class OverlayApplyTests : IDisposable
     }
 
     [Fact]
+    public async Task LoadFromStreamAsync_ShouldResolveRelativeExtendsAgainstBaseUri()
+    {
+        using var stream = CreateOverlayStream("openapi.yaml");
+        var baseUri = new Uri("https://example.com/overlays/overlay.yaml");
+        var readResult = await OverlayDocument.LoadFromStreamAsync(
+            stream,
+            baseUri: baseUri,
+            cancellationToken: TestContext.Current.CancellationToken);
+        var overlayDocument = Assert.IsType<OverlayDocument>(readResult.Document);
+        var jsonNode = CreateTargetDocument("https://example.com/overlays/openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public async Task LoadFromStreamAsync_ShouldRejectRelativeBaseUri()
+    {
+        using var stream = CreateOverlayStream("openapi.yaml");
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => OverlayDocument.LoadFromStreamAsync(
+                stream,
+                baseUri: new Uri("overlays/overlay.yaml", UriKind.Relative),
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("baseUri", exception.ParamName);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldRejectRelativeBaseUriDuringTargetSelfValidation()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("openapi.yaml", UriKind.Relative));
+        overlayDocument.BaseUri = new Uri("overlays/overlay.yaml", UriKind.Relative);
+        var jsonNode = CreateTargetDocument("https://example.com/openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var exception = Assert.Throws<ArgumentException>(
+            () => overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic));
+
+        Assert.Equal("BaseUri", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task LoadFromUrlAsync_ShouldResolveRelativeExtendsAgainstFilePath()
+    {
+        var overlayPath = Path.ChangeExtension(Path.GetTempFileName(), ".json");
+        try
+        {
+            await File.WriteAllTextAsync(
+                overlayPath,
+                CreateOverlayJson("openapi.yaml"),
+                TestContext.Current.CancellationToken);
+            var readResult = await OverlayDocument.LoadFromUrlAsync(
+                overlayPath,
+                token: TestContext.Current.CancellationToken);
+            var overlayDocument = Assert.IsType<OverlayDocument>(readResult.Document);
+            var overlayUri = new Uri(Path.GetFullPath(overlayPath), UriKind.Absolute);
+            var targetUri = new Uri(overlayUri, "openapi.yaml");
+            var jsonNode = CreateTargetDocument(targetUri.AbsoluteUri);
+            var overlayDiagnostic = new OverlayDiagnostic();
+
+            var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+            Assert.True(result);
+            Assert.Empty(overlayDiagnostic.Warnings);
+        }
+        finally
+        {
+            File.Delete(overlayPath);
+        }
+    }
+
+    [Fact]
     public void ApplyToDocument_ShouldReportTargetSelfNotMatchingExtends()
     {
         var overlayDocument = CreateOverlayDocument(
@@ -117,7 +195,7 @@ public sealed class OverlayApplyTests : IDisposable
         var error = Assert.Single(overlayDiagnostic.Warnings);
         Assert.Equal("$self", error.Pointer);
         Assert.Equal(
-            "The target document's self URI 'https://example.com/other.yaml' does not match the extends URI 'https://example.com/openapi.yaml'.",
+            "The target document's self URI 'https://example.com/other.yaml' does not match one of the resolved extends URIs 'https://example.com/openapi.yaml'.",
             error.Message);
     }
 
@@ -1213,6 +1291,29 @@ public sealed class OverlayApplyTests : IDisposable
         }
 
         return document;
+    }
+
+    private static MemoryStream CreateOverlayStream(string extends)
+    {
+        return new MemoryStream(System.Text.Encoding.UTF8.GetBytes(CreateOverlayJson(extends)));
+    }
+
+    private static string CreateOverlayJson(string extends)
+    {
+        return $$"""
+            {
+              "overlay": "1.2.0",
+              "extends": "{{extends}}",
+              "actions": [
+                {
+                  "target": "$.info",
+                  "update": {
+                    "description": "Updated description"
+                  }
+                }
+              ]
+            }
+            """;
     }
 
     private sealed class UnsupportedAction : IOverlayAction
