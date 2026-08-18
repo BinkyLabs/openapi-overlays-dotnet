@@ -1,5 +1,8 @@
 using System.Text.Json.Nodes;
 
+using BinkyLabs.OpenApi.Overlays.Reader;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
@@ -58,5 +61,35 @@ public class OverlayComponentsV1_2Tests
 
         // Assert
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+
+    [Fact]
+    public void Deserialize_ShouldSetPropertiesCorrectly()
+    {
+        var json = """
+        {
+            "actions": {
+                "setServerUrl": {
+                    "fields": {
+                        "target": "$.servers[0]",
+                        "copy": "$.servers[1]"
+                    },
+                    "description": "Sets the server URL"
+                }
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var components = OverlayV1_2Deserializer.LoadComponents(jsonNode, parsingContext);
+
+        Assert.NotNull(components.Actions);
+        Assert.Single(components.Actions);
+        var action = components.Actions["setServerUrl"];
+        Assert.Equal("Sets the server URL", action.Description);
+        Assert.NotNull(action.Fields);
+        Assert.Equal("$.servers[0]", action.Fields.Target);
+        Assert.Equal("$.servers[1]", action.Fields.Copy);
     }
 }

@@ -1,5 +1,8 @@
 using System.Text.Json.Nodes;
 
+using BinkyLabs.OpenApi.Overlays.Reader;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
@@ -79,5 +82,47 @@ public class OverlayReusableActionV1_2Tests
 
         // Then
         Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1_2(writer));
+    }
+
+    [Fact]
+    public void Deserialize_ShouldSetPropertiesCorrectly()
+    {
+        var json = """
+        {
+            "description": "Reusable description",
+            "fields": {
+                "description": "Test Description",
+                "remove": true
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var action = OverlayV1_2Deserializer.LoadReusableAction(jsonNode, parsingContext);
+
+        Assert.Equal("Reusable description", action.Description);
+        Assert.NotNull(action.Fields);
+        Assert.Equal("Test Description", action.Fields.Description);
+        Assert.True(action.Fields.Remove);
+    }
+
+    [Fact]
+    public void Deserialize_WithCopyField_ShouldSetCopy()
+    {
+        var json = """
+        {
+            "fields": {
+                "copy": "$.paths['/pets']"
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var action = OverlayV1_2Deserializer.LoadReusableAction(jsonNode, parsingContext);
+
+        Assert.NotNull(action.Fields);
+        Assert.Equal("$.paths['/pets']", action.Fields.Copy);
     }
 }
