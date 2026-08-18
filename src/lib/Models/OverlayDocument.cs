@@ -245,9 +245,15 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             yield return Extends; // Absolute or relative extends URI is a candidate
         }
-        if (Extends is { IsAbsoluteUri: false } && Self is not null)
+        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: true })
         {
-            yield return new Uri(Self, Extends); // Relative extends URI resolved against overlay self URI
+            yield return new Uri(Self, Extends); // Relative extends URI resolved against overlay absolute self URI
+        }
+        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: false })
+        {
+            var root = new Uri("https://relative.invalid/", UriKind.Absolute); // Use a dummy root URI to resolve relative URIs
+            var resolved = new Uri(new Uri(root, Self), Extends);
+            yield return root.MakeRelativeUri(resolved); // Relative extends URI resolved against overlay relative self URI
         }
         if (Extends is { IsAbsoluteUri: false } && BaseUri is not null)
         {
@@ -333,39 +339,50 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         var candidates = GetTargetCandidates(documentPathOrUri).ToArray();
 
+        Stream input = Stream.Null;
         foreach (var candidate in candidates)
         {
             // Load the document from the specified path or URI
-            Stream input;
-            if (candidate.AbsoluteUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                candidate.AbsoluteUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            if (candidate.IsAbsoluteUri &&
+                (candidate.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) ||
+                candidate.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase)))
             {
                 try
                 {
                     using var response = await readerSettings.HttpClient.GetAsync(candidate, cancellationToken).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
-                    input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                    using var webStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                    input = new MemoryStream();
+                    await webStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+                    input.Position = 0;
+                    break;
                 }
                 catch when (candidate != candidates.Last())
                 {
                     continue; // Try the next candidate if this one fails
                 }
             }
-            else if (Path.Exists(candidate.LocalPath))
+            else if (Path.Exists(candidate.OriginalString))
             {
                 input = new MemoryStream();
-                using var fileStream = new FileStream(candidate.LocalPath, FileMode.Open, FileAccess.Read);
+                using var fileStream = new FileStream(candidate.OriginalString, FileMode.Open, FileAccess.Read);
                 await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+                input.Position = 0;
+                break;
             }
             else
             {
                 continue;
             }
-            var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-            await input.DisposeAsync().ConfigureAwait(false);
-            return result;
+            
         }
-        throw new FileNotFoundException($"The OpenAPI document '{documentPathOrUri}' could not be found.");
+        if (input == Stream.Null)
+        {
+            throw new FileNotFoundException($"The OpenAPI document '{documentPathOrUri}' could not be found.");
+        }
+        var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
+        await input.DisposeAsync().ConfigureAwait(false);
+        return result;
     }
 
     private IEnumerable<Uri> GetTargetCandidates(string documentPathOrUri)
