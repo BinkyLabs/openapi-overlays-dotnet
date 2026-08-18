@@ -158,6 +158,61 @@ public sealed class OverlayModelFactoryTests
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
     }
 
+    [Fact]
+    public async Task LoadFromStreamAsync_SetsBaseUri()
+    {
+        using var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(documentJson));
+        var baseUri = new Uri("https://example.com/overlays/overlay.json");
+
+        var result = await OverlayModelFactory.LoadFromStreamAsync(
+            memoryStream,
+            baseUri: baseUri,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result.Document);
+        Assert.Equal(baseUri, result.Document.BaseUri);
+    }
+
+    [Fact]
+    public async Task LoadFromStreamAsync_RejectsRelativeBaseUri()
+    {
+        using var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(documentJson));
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => OverlayModelFactory.LoadFromStreamAsync(
+                memoryStream,
+                baseUri: new Uri("overlays/overlay.json", UriKind.Relative),
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("baseUri", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task LoadFormUrlAsync_SetsAbsoluteFileBaseUri()
+    {
+        var overlayPath = Path.ChangeExtension(Path.GetTempFileName(), ".json");
+        try
+        {
+            await File.WriteAllTextAsync(
+                overlayPath,
+                documentJson,
+                TestContext.Current.CancellationToken);
+
+            var result = await OverlayModelFactory.LoadFormUrlAsync(
+                overlayPath,
+                token: TestContext.Current.CancellationToken);
+
+            Assert.NotNull(result.Document);
+            Assert.Equal(
+                new Uri(Path.GetFullPath(overlayPath), UriKind.Absolute),
+                result.Document.BaseUri);
+        }
+        finally
+        {
+            File.Delete(overlayPath);
+        }
+    }
+
     public sealed class AsyncOnlyStream : Stream
     {
         private readonly Stream _innerStream;
