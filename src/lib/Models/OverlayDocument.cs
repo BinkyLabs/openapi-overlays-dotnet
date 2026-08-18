@@ -331,24 +331,61 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         ArgumentNullException.ThrowIfNull(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
 
-        // Load the document from the specified path or URI
-        Stream input;
-        if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        var candidates = GetTargetCandidates(documentPathOrUri).ToArray();
+
+        foreach(var candidate in candidates)
         {
-            using var response = await readerSettings.HttpClient.GetAsync(documentPathOrUri, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            // Load the document from the specified path or URI
+            Stream input;
+            if (candidate.AbsoluteUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                candidate.AbsoluteUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    using var response = await readerSettings.HttpClient.GetAsync(candidate, cancellationToken).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch when (candidate != candidates.Last())
+                {
+                    continue; // Try the next candidate if this one fails
+                }
+            }
+            else if (Path.Exists(candidate.LocalPath))
+            {
+                input = new MemoryStream();
+                using var fileStream = new FileStream(candidate.LocalPath, FileMode.Open, FileAccess.Read);
+                await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                continue;
+            }
+            var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
+            await input.DisposeAsync().ConfigureAwait(false);
+            return result;
         }
-        else
+        throw new FileNotFoundException($"The OpenAPI document '{documentPathOrUri}' could not be found.");
+    }
+
+    private IEnumerable<Uri> GetTargetCandidates(string documentPathOrUri)
+    {
+        if (!Uri.TryCreate(documentPathOrUri, UriKind.RelativeOrAbsolute, out var result))
         {
-            input = new MemoryStream();
-            using var fileStream = new FileStream(documentPathOrUri, FileMode.Open, FileAccess.Read);
-            await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+            throw new ArgumentException($"The provided document path or URI '{documentPathOrUri}' is not a valid URI.", nameof(documentPathOrUri));
         }
-        var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-        await input.DisposeAsync().ConfigureAwait(false);
-        return result;
+
+        yield return result; // Absolute or relative URI is a candidate
+
+        if (!result.IsAbsoluteUri && BaseUri is { IsAbsoluteUri: true })
+        {
+            yield return new Uri(BaseUri, result); // Absolute URI resolved against base URI
+        }
+
+        if (!result.IsAbsoluteUri && Self is { IsAbsoluteUri: true })
+        {
+            yield return new Uri(Self, result); // Absolute URI resolved against overlay self URI
+        }
     }
 
     /// <summary>
