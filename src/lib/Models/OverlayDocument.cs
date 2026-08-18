@@ -374,7 +374,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             {
                 continue;
             }
-            
+
         }
         if (input == Stream.Null)
         {
