@@ -222,7 +222,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             return; // The target document's self URI matches one of the valid candidates
         }
 
-        overlayDiagnostic.Errors.Add(
+        overlayDiagnostic.Warnings.Add(
             new OpenApiError(
                 OverlayConstants.DocumentSelfFieldName,
                 $"The target document's self URI '{selfUri}' does not match the extends URI '{absoluteValueToCheck}'."));
