@@ -53,7 +53,8 @@ public class OverlayReusableActionReferenceV1_2Tests
         {
             Reference = new OverlayReusableActionReferenceItem
             {
-                Id = "errorResponse"
+                Id = "errorResponse",
+                Target = "$.some.target",
             },
             TargetAction = new OverlayReusableAction
             {
@@ -73,7 +74,8 @@ public class OverlayReusableActionReferenceV1_2Tests
         var expectedJson =
 """
 {
-    "$ref": "#/components/actions/errorResponse"
+    "$ref": "#/components/actions/errorResponse",
+    "target": "$.some.target"
 }
 """;
 
@@ -85,6 +87,26 @@ public class OverlayReusableActionReferenceV1_2Tests
 
         // Assert
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+
+    [Fact]
+    public void SerializeAsV1_2_ShouldThrowOnMissingReferenceTarget()
+    {
+        // Arrange
+        var reference = new OverlayReusableActionReference
+        {
+            Reference = new OverlayReusableActionReferenceItem
+            {
+                Id = "errorResponse"
+            }
+        };
+
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Act + Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => reference.SerializeAsV1_2(writer));
+        Assert.Contains("cannot be null or empty", exception.Message);
     }
 
     [Theory]
