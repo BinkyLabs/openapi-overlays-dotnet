@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
@@ -464,6 +465,69 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(openApiDiagnostic.Errors);
         Assert.Equal("Updated summary", document.Paths["/test"]?.Operations?.Values?.FirstOrDefault()?.Summary);
     }
+
+    [Fact]
+    public async Task ApplyToDocumentAsync_WithRelativeTarget_ShouldResolveAgainstBaseUri()
+    {
+        var targetUri = new Uri("https://example.com/overlays/target.json");
+        var handler = new TestHttpMessageHandler(request =>
+        {
+            Assert.Equal(targetUri, request.RequestUri);
+            return CreateTargetResponse();
+        });
+        using var httpClient = new HttpClient(handler);
+        var overlayDocument = CreateOverlayDocument();
+        overlayDocument.BaseUri = new Uri("https://example.com/overlays/overlay.json");
+
+        var result = await overlayDocument.ApplyToDocumentAsync(
+            "target.json",
+            readerSettings: new OverlayReaderSettings { HttpClient = httpClient },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccessful);
+        Assert.Empty(result.Diagnostic.Errors);
+        Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
+        Assert.Equal([targetUri], handler.RequestUris);
+    }
+
+    [Fact]
+    public async Task ApplyToDocumentAsync_WhenBaseUriTargetFails_ShouldResolveAgainstSelf()
+    {
+        var baseTargetUri = new Uri("https://cdn.example.com/overlays/target.json");
+        var selfTargetUri = new Uri("https://example.com/overlays/target.json");
+        var handler = new TestHttpMessageHandler(request =>
+            request.RequestUri == baseTargetUri
+                ? new HttpResponseMessage(HttpStatusCode.NotFound)
+                : CreateTargetResponse());
+        using var httpClient = new HttpClient(handler);
+        var overlayDocument = CreateOverlayDocument(self: new Uri("https://example.com/overlays/overlay.json"));
+        overlayDocument.BaseUri = new Uri("https://cdn.example.com/overlays/overlay.json");
+
+        var result = await overlayDocument.ApplyToDocumentAsync(
+            "target.json",
+            readerSettings: new OverlayReaderSettings { HttpClient = httpClient },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccessful);
+        Assert.Empty(result.Diagnostic.Errors);
+        Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
+        Assert.Equal([baseTargetUri, selfTargetUri], handler.RequestUris);
+    }
+
+    [Fact]
+    public async Task ApplyToDocumentAsync_WhenNoTargetCandidateExists_ShouldThrowFileNotFoundException()
+    {
+        var overlayDocument = CreateOverlayDocument();
+        var missingTarget = $"missing-{Guid.NewGuid():N}.json";
+
+        var exception = await Assert.ThrowsAsync<FileNotFoundException>(
+            () => overlayDocument.ApplyToDocumentAsync(
+                missingTarget,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Contains(missingTarget, exception.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task ApplyToDocumentAsync_ContinuesToTheNextActionWhenOneFails()
     {
@@ -1346,6 +1410,38 @@ public sealed class OverlayApplyTests : IDisposable
               ]
             }
             """;
+    }
+
+    private static HttpResponseMessage CreateTargetResponse()
+    {
+        const string targetDocument =
+            """
+            {
+              "openapi": "3.1.0",
+              "info": {
+                "title": "Test API",
+                "version": "1.0.0"
+              },
+              "paths": {}
+            }
+            """;
+
+        return new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(targetDocument, System.Text.Encoding.UTF8, "application/json")
+        };
+    }
+
+    private sealed class TestHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responseFactory) : HttpMessageHandler
+    {
+        public List<Uri> RequestUris { get; } = [];
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Assert.NotNull(request.RequestUri);
+            RequestUris.Add(request.RequestUri);
+            return Task.FromResult(responseFactory(request));
+        }
     }
 
     private sealed class UnsupportedAction : IOverlayAction
