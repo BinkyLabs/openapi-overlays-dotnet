@@ -9,4 +9,4 @@
 - [ ] self resolution
 - [x] extend should not contain fragments
 - [x] document self serialization tests
-- [ ] target next to ref is required
+- [x] target next to ref is required

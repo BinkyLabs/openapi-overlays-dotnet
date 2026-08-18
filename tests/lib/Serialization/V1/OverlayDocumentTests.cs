@@ -429,7 +429,8 @@ public sealed class OverlayDocumentTests
                 {
                     Reference = new OverlayReusableActionReferenceItem
                     {
-                        Id = "errorResponse"
+                        Id = "errorResponse",
+                        Target = "$.paths['/pets'].get.responses.404"
                     }
                 }
             ]
