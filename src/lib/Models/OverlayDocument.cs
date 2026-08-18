@@ -116,6 +116,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         { OverlaySpecVersion.Overlay1_2, "1.2.0" }
     };
 
+    internal Uri? BaseUri { get; set; }
+
     /// <summary>
     /// Parses a local file path or Url into an Open API document.
     /// </summary>
@@ -134,11 +136,13 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="stream">Stream containing OpenAPI description to parse.</param>
     /// <param name="format">The OpenAPI format to use during parsing.</param>
     /// <param name="settings">The OpenApi reader settings.</param>
+    /// <param name="baseUri">The base URI to use for resolving $self and extends.</param>
     /// <param name="cancellationToken">Propagates information about operation cancelling.</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadFromStreamAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    /// <exception cref="ArgumentException">Thrown if the baseUri is not absolute.</exception>
+    public static async Task<ReadResult> LoadFromStreamAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, Uri? baseUri = null, CancellationToken cancellationToken = default)
     {
-        return await OverlayModelFactory.LoadFromStreamAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
+        return await OverlayModelFactory.LoadFromStreamAsync(stream, format, settings, baseUri, cancellationToken).ConfigureAwait(false);
     }
 
 
@@ -169,8 +173,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var i = 0;
         var result = true;
         SetUnsetReferenceHostDocuments();
-        // TODO: pass base uri
-        ValidateTargetSelf(jsonNode, overlayDiagnostic, null);
+        ValidateTargetSelf(jsonNode, overlayDiagnostic);
         foreach (var action in Actions)
         {
             var overlayAction = ResolveAction(action, overlayDiagnostic, i);
@@ -190,7 +193,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// </summary>
     /// <param name="targetDocument">The target OpenAPI document as a JsonNode.</param>
     /// <param name="overlayDiagnostic">The diagnostic object to collect validation errors.</param>
-    /// <param name="baseUri">The program base URI to resolve relative extends URIs.</param>
     /// <remarks>
     /// The rules are:
     /// - If the target document does not have a self URI, no validation is performed.
@@ -200,7 +202,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     ///    3. the combination of the relative extends URI and the absolute base URI (program context).
     ///    4. the combination of the relative extends URI and the relative overlay self URI and the absolute base URI (program context).
     /// </remarks>
-    private void ValidateTargetSelf(JsonNode targetDocument, OverlayDiagnostic overlayDiagnostic, Uri? baseUri)
+    private void ValidateTargetSelf(JsonNode targetDocument, OverlayDiagnostic overlayDiagnostic)
     {
         if (Extends is null)
         {
@@ -215,9 +217,9 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             return; // Self property is missing or invalid
         }
 
-        var absoluteValueToCheck = Extends.IsAbsoluteUri || baseUri is null ? Extends : new Uri(baseUri, Extends);
+        var selfMatchingCandidates = GetSelfMatchingCandidates();
 
-        if (GetSelfMatchingCandidates(baseUri).Contains(selfUri))
+        if (selfMatchingCandidates.Contains(selfUri))
         {
             return; // The target document's self URI matches one of the valid candidates
         }
@@ -225,15 +227,15 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         overlayDiagnostic.Warnings.Add(
             new OpenApiError(
                 OverlayConstants.DocumentSelfFieldName,
-                $"The target document's self URI '{selfUri}' does not match the extends URI '{absoluteValueToCheck}'."));
+                $"The target document's self URI '{selfUri}' does not match one of the resolved extends URIs '{string.Join(", ", GetSelfMatchingCandidates())}'."));
 
     }
 
-    private IEnumerable<Uri> GetSelfMatchingCandidates(Uri? baseUri)
+    private IEnumerable<Uri> GetSelfMatchingCandidates()
     {
-        if (baseUri is { IsAbsoluteUri: false })
+        if (BaseUri is { IsAbsoluteUri: false })
         {
-            throw new ArgumentException("Base URI must be absolute.", nameof(baseUri));
+            throw new ArgumentException("Base URI must be absolute.", nameof(BaseUri));
         }
 
         if (Extends is null)
@@ -249,13 +251,13 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             yield return new Uri(Self, Extends); // Relative extends URI resolved against overlay self URI
         }
-        if (!Extends.IsAbsoluteUri && baseUri is not null)
+        if (!Extends.IsAbsoluteUri && BaseUri is not null)
         {
-            yield return new Uri(baseUri, Extends); // Relative extends URI resolved against base URI
+            yield return new Uri(BaseUri, Extends); // Relative extends URI resolved against base URI
         }
-        if (!Extends.IsAbsoluteUri && Self is { IsAbsoluteUri: true } && baseUri is not null)
+        if (!Extends.IsAbsoluteUri && Self is { IsAbsoluteUri: true } && BaseUri is not null)
         {
-            yield return new Uri(baseUri, new Uri(Self, Extends)); // Relative extends URI resolved against overlay self URI and then base URI
+            yield return new Uri(BaseUri, new Uri(Self, Extends)); // Relative extends URI resolved against overlay self URI and then base URI
         }
     }
 
@@ -492,7 +494,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             Info = lastDocument.Info,
             Extensions = lastDocument.Extensions?.ToDictionary(StringComparer.Ordinal),
-            Extends = lastDocument.Extends,
+            Extends = lastDocument.Extends ?? documents.Select(static d => d.Extends).FirstOrDefault(static e => e is not null),
+            Self = lastDocument.Self ?? documents.Select(static d => d.Self).FirstOrDefault(static s => s is not null),
             Actions = actions,
             Components = documents.Select(static x => x.Components).OfType<OverlayComponents>().ToArray() is { Length: > 0 } components ?
                             OverlayComponents.Combine(components) :
