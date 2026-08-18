@@ -333,7 +333,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         var candidates = GetTargetCandidates(documentPathOrUri).ToArray();
 
-        foreach(var candidate in candidates)
+        foreach (var candidate in candidates)
         {
             // Load the document from the specified path or URI
             Stream input;
