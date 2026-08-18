@@ -1,5 +1,8 @@
 using System.Text.Json.Nodes;
 
+using BinkyLabs.OpenApi.Overlays.Reader;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
@@ -115,5 +118,36 @@ public class OverlayReusableActionReferenceV1_2Tests
         // Act + Assert
         var exception = Assert.Throws<InvalidOperationException>(() => reference.SerializeAsV1_2(writer));
         Assert.Contains("cannot be null or empty", exception.Message);
+    }
+
+    [Fact]
+    public void Deserialize_ShouldSetPropertiesCorrectly()
+    {
+        var json = """
+        {
+            "$ref": "#/components/actions/errorResponse",
+            "target": "$.paths['/pets'].get.responses",
+            "description": "Override Description",
+            "remove": false,
+            "copy": "$.paths['/pets'].post.responses",
+            "update": {
+                "404": {
+                    "description": "Not found"
+                }
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var reference = OverlayV1_2Deserializer.LoadReusableActionReference(jsonNode, parsingContext);
+
+        Assert.Equal("errorResponse", reference.Reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
+        Assert.Equal("Override Description", reference.Description);
+        Assert.False(reference.Remove);
+        Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
+        Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
     }
 }

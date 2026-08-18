@@ -1,5 +1,8 @@
 using System.Text.Json.Nodes;
 
+using BinkyLabs.OpenApi.Overlays.Reader;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
+
 using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
@@ -73,6 +76,44 @@ public sealed class OverlayDocumentV1_2Tests
     }
 
     [Fact]
+    public void Deserialize_WithComponents_ShouldSetPropertiesCorrectly()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "components": {
+                "actions": {
+                    "setServerUrl": {
+                        "fields": {
+                            "target": "$.servers[0]",
+                            "copy": "$.servers[1]"
+                        },
+                        "description": "Sets the server URL"
+                    }
+                }
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var overlayDocument = OverlayV1_2Deserializer.LoadDocument(jsonNode, parsingContext);
+
+        Assert.NotNull(overlayDocument.Components);
+        Assert.NotNull(overlayDocument.Components.Actions);
+        var action = Assert.Single(overlayDocument.Components.Actions);
+        Assert.Equal("setServerUrl", action.Key);
+        Assert.Equal("Sets the server URL", action.Value.Description);
+        Assert.NotNull(action.Value.Fields);
+        Assert.Equal("$.servers[0]", action.Value.Fields.Target);
+        Assert.Equal("$.servers[1]", action.Value.Fields.Copy);
+    }
+
+    [Fact]
     public void SerializeAsV1_2_ShouldWriteCorrectJson()
     {
         // Arrange
@@ -133,6 +174,58 @@ public sealed class OverlayDocumentV1_2Tests
     }
 
     [Fact]
+    public void Deserialize_ShouldSetPropertiesCorrectly()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "extends": "./x-extends",
+            "$self": "https://example.com/overlays/test",
+            "actions": [
+                {
+                    "target": "Test Target",
+                    "description": "Test Description",
+                    "remove": true
+                },
+                {
+                    "target": "Test Target 2",
+                    "description": "Test Description 2",
+                    "remove": false
+                }
+            ],
+            "x-custom-extension": {
+                "someProperty": "someValue"
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var overlayDocument = OverlayV1_2Deserializer.LoadDocument(jsonNode, parsingContext);
+
+        Assert.Equal("1.2.0", overlayDocument.Overlay);
+        Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
+        Assert.Equal("2.0.0", overlayDocument.Info?.Version);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
+        Assert.Equal(new("https://example.com/overlays/test"), overlayDocument.Self);
+        Assert.NotNull(overlayDocument.Extensions);
+        var extensionNodeValue = Assert.IsType<JsonNodeExtension>(overlayDocument.Extensions["x-custom-extension"]);
+        Assert.Equal("someValue", extensionNodeValue.Node["someProperty"]?.GetValue<string>());
+        Assert.NotNull(overlayDocument.Actions);
+        Assert.Equal(2, overlayDocument.Actions.Count);
+        Assert.Equal("Test Target", overlayDocument.Actions[0].Target);
+        Assert.Equal("Test Description", overlayDocument.Actions[0].Description);
+        Assert.True(overlayDocument.Actions[0].Remove);
+        Assert.Equal("Test Target 2", overlayDocument.Actions[1].Target);
+        Assert.Equal("Test Description 2", overlayDocument.Actions[1].Description);
+        Assert.False(overlayDocument.Actions[1].Remove);
+    }
+
+    [Fact]
     public void SerializeAsV1_2_WithSelf_ShouldWriteCorrectJson()
     {
         // Arrange
@@ -167,6 +260,30 @@ public sealed class OverlayDocumentV1_2Tests
 
         // Assert
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+
+    [Fact]
+    public async Task ParseAsync_WithV1_2_ShouldReturnDocument()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "$self": "https://example.com/overlays/test"
+        }
+        """;
+
+        var (overlayDocument, diagnostic) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(diagnostic);
+        Assert.Equal(OverlaySpecVersion.Overlay1_2, diagnostic.SpecificationVersion);
+        Assert.Equal("1.2.0", overlayDocument.Overlay);
+        Assert.Equal(new("https://example.com/overlays/test"), overlayDocument.Self);
+        Assert.Empty(diagnostic.Errors);
     }
 
     [Fact]
@@ -264,6 +381,100 @@ public sealed class OverlayDocumentV1_2Tests
         // Assert
         var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
         Assert.Same(overlayDocument, reference.Reference.HostDocument);
+    }
+
+    [Fact]
+    public async Task Deserialize_WithUnresolvedReusableActionReference_ShouldAddDiagnosticError()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "$ref": "#/components/actions/missingAction"
+                }
+            ]
+        }
+        """;
+
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(diagnostic);
+        Assert.Contains(
+            diagnostic.Errors,
+            static e => e.Pointer == "/actions/0" &&
+                        e.Message.Contains("#/components/actions/missingAction", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Deserialize_WithReusableActionReference_ShouldSetHostDocument()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "components": {
+                "actions": {
+                    "errorResponse": {
+                        "fields": {
+                            "remove": true
+                        }
+                    }
+                }
+            },
+            "actions": [
+                {
+                    "$ref": "#/components/actions/errorResponse"
+                }
+            ]
+        }
+        """;
+
+        var (overlayDocument, diagnostic) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(diagnostic);
+        Assert.Empty(diagnostic.Errors);
+        Assert.NotNull(overlayDocument);
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Same(overlayDocument, reference.Reference.HostDocument);
+    }
+
+    [Fact]
+    public void Deserialize_WithReusableActionReference_ShouldCreateReferenceAction()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "actions": [
+                {
+                    "$ref": "#/components/actions/errorResponse",
+                    "target": "$.paths['/pets'].get.responses"
+                }
+            ]
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var overlayDocument = OverlayV1_2Deserializer.LoadDocument(jsonNode, parsingContext);
+
+        Assert.NotNull(overlayDocument.Actions);
+        var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
+        Assert.Equal("errorResponse", reference.Reference.Id);
+        Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
+        Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
     }
 
     [Fact]
