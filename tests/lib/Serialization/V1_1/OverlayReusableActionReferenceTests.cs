@@ -22,13 +22,6 @@ public class OverlayReusableActionReferenceV1_1Tests
                 Id = "errorResponse",
                 Target = "$.paths['/pets'].get.responses",
                 Description = "Override Description",
-                Remove = false,
-                Update = JsonNode.Parse("""
-                {
-                    "summary": "Updated summary"
-                }
-                """),
-                Copy = "$.paths['/pets'].post.responses"
             }
         };
 
@@ -40,11 +33,7 @@ public class OverlayReusableActionReferenceV1_1Tests
 {
     "x-$ref": "#/components/actions/errorResponse",
     "target": "$.paths['/pets'].get.responses",
-    "description": "Override Description",
-    "update": {
-        "summary": "Updated summary"
-    },
-    "copy": "$.paths['/pets'].post.responses"
+    "description": "Override Description"
 }
 """;
 
@@ -166,7 +155,7 @@ public class OverlayReusableActionReferenceV1_1Tests
             Fields = new OverlayAction
             {
                 Description = "Target Description",
-                Remove = false,
+                Remove = true,
                 Update = JsonNode.Parse("""{ "x": 1 }"""),
                 Copy = "$.other"
             }
@@ -178,9 +167,6 @@ public class OverlayReusableActionReferenceV1_1Tests
                 Id = "errorResponse",
                 Target = "$.overridden",
                 Description = "Local Description",
-                Remove = true,
-                Update = JsonNode.Parse("""{ "x": 2 }"""),
-                Copy = "$.localCopy"
             },
             TargetAction = targetAction,
         };
@@ -189,8 +175,8 @@ public class OverlayReusableActionReferenceV1_1Tests
         Assert.Equal("$.overridden", reference.Target);
         Assert.Equal("Local Description", reference.Description);
         Assert.True(reference.Remove);
-        Assert.Equal(2, reference.Update?["x"]?.GetValue<int>());
-        Assert.Equal("$.localCopy", reference.Copy);
+        Assert.Equal(1, reference.Update?["x"]?.GetValue<int>());
+        Assert.Equal("$.other", reference.Copy);
     }
 
     [Fact]
@@ -203,7 +189,7 @@ public class OverlayReusableActionReferenceV1_1Tests
             Fields = new OverlayAction
             {
                 Description = "Resolved reusable action",
-                Remove = false,
+                Remove = true,
                 Update = JsonNode.Parse("""
                 {
                     "404": {
@@ -232,7 +218,6 @@ public class OverlayReusableActionReferenceV1_1Tests
             {
                 Target = "$.paths['/pets'].get.responses"
             },
-            Remove = true
         };
 
         // Assert
@@ -369,14 +354,7 @@ public class OverlayReusableActionReferenceV1_1Tests
         {
             "x-$ref": "#/components/actions/errorResponse",
             "target": "$.paths['/pets'].get.responses",
-            "description": "Override Description",
-            "remove": false,
-            "copy": "$.paths['/pets'].post.responses",
-            "update": {
-                "404": {
-                    "description": "Not found"
-                }
-            }
+            "description": "Override Description"
         }
         """;
         var jsonNode = JsonNode.Parse(json)!;
@@ -391,8 +369,8 @@ public class OverlayReusableActionReferenceV1_1Tests
         Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
         Assert.Equal("Override Description", reference.Description);
-        Assert.False(reference.Remove);
-        Assert.Equal("$.paths['/pets'].post.responses", reference.Copy);
-        Assert.Equal("Not found", reference.Update?["404"]?["description"]?.GetValue<string>());
+        Assert.Null(reference.Remove);
+        Assert.Null(reference.Copy);
+        Assert.Null(reference.Update);
     }
 }

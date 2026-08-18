@@ -1,7 +1,7 @@
 # TODOs
 
 - [x] unit test for fields target prohibited
-- [ ] review override behaviour
+- [x] review override behaviour
 - [ ] release please configuration is stable
 - [x] deserialization
 - [x] 1.2 test infrastructure
@@ -9,3 +9,4 @@
 - [ ] self resolution
 - [x] extend should not contain fragments
 - [x] document self serialization tests
+- [ ] target next to ref is required

@@ -10,10 +10,6 @@ internal static partial class OverlayV1_1Deserializer
         OverlayV1Deserializer.ReusableActionReferenceFixedFields,
         [OverlayConstants.ActionXCopyFieldName])
     {
-        {
-            OverlayConstants.ActionCopyFieldName,
-            (o, v, _) => o.Copy = v.GetScalarValue()
-        }
     };
 
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =
