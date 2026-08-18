@@ -114,7 +114,7 @@ public sealed class OverlayApplyTests : IDisposable
         var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
 
         Assert.True(result);
-        var error = Assert.Single(overlayDiagnostic.Errors);
+        var error = Assert.Single(overlayDiagnostic.Warnings);
         Assert.Equal("$self", error.Pointer);
         Assert.Equal(
             "The target document's self URI 'https://example.com/other.yaml' does not match the extends URI 'https://example.com/openapi.yaml'.",
