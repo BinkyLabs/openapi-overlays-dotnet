@@ -2,7 +2,7 @@
 
 - [x] unit test for fields target prohibited
 - [x] review override behaviour
-- [ ] release please configuration is stable
+- [x] release please configuration is stable
 - [x] deserialization
 - [x] 1.2 test infrastructure
 - [x] document self field
