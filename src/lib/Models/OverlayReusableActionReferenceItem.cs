@@ -56,21 +56,6 @@ public class OverlayReusableActionReferenceItem : IOverlayExtensible
     /// </summary>
     public string? Description { get; set; }
 
-    /// <summary>
-    /// The remove override.
-    /// </summary>
-    public bool? Remove { get; set; }
-
-    /// <summary>
-    /// The update override.
-    /// </summary>
-    public JsonNode? Update { get; set; }
-
-    /// <summary>
-    /// The copy override.
-    /// </summary>
-    public string? Copy { get; set; }
-
     /// <inheritdoc/>
     public IDictionary<string, IOverlayExtension>? Extensions { get; set; }
 

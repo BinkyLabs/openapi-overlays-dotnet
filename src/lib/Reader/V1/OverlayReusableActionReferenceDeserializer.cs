@@ -10,16 +10,6 @@ internal static partial class OverlayV1Deserializer
     {
         { OverlayConstants.ActionTargetFieldName, (o, v, _) => o.Target = v.GetScalarValue() },
         { OverlayConstants.ActionDescriptionFieldName, (o, v, _) => o.Description = v.GetScalarValue() },
-        { OverlayConstants.ActionRemoveFieldName, (o, v, _) =>
-            {
-                if (v.GetScalarValue() is string removeValue && bool.TryParse(removeValue, out var removeBool))
-                {
-                    o.Remove = removeBool;
-                }
-            }
-        },
-        { OverlayConstants.ActionUpdateFieldName, (o, v, _) => o.Update = v },
-        { OverlayConstants.ActionXCopyFieldName, (o, v, _) => o.Copy = v.GetScalarValue() },
         { OverlayConstants.ReusableActionReferenceXReferenceFieldName, (o, v, _) => o.Reference.Id = OverlayReusableActionReferenceItem.NormalizeReusableActionReferenceId(v.GetScalarValue()) },
     };
 

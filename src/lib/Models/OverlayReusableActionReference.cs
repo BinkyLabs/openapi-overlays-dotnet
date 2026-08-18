@@ -80,22 +80,19 @@ public class OverlayReusableActionReference : IOverlayAction
     /// <inheritdoc/>
     public bool? Remove
     {
-        get => Reference.Remove ?? TargetAction?.Fields?.Remove;
-        set => Reference.Remove = value;
+        get => TargetAction?.Fields?.Remove;
     }
 
     /// <inheritdoc/>
     public JsonNode? Update
     {
-        get => Reference.Update ?? TargetAction?.Fields?.Update;
-        set => Reference.Update = value;
+        get => TargetAction?.Fields?.Update;
     }
 
     /// <inheritdoc/>
     public string? Copy
     {
-        get => Reference.Copy ?? TargetAction?.Fields?.Copy;
-        set => Reference.Copy = value;
+        get => TargetAction?.Fields?.Copy;
     }
 
     /// <inheritdoc/>
@@ -184,21 +181,6 @@ public class OverlayReusableActionReference : IOverlayAction
         if (!string.IsNullOrEmpty(Reference.Description))
         {
             writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Reference.Description);
-        }
-
-        if (Reference.Remove.HasValue)
-        {
-            writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, Reference.Remove, false);
-        }
-
-        if (Reference.Update != null)
-        {
-            writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, Reference.Update, static (w, s) => w.WriteAny(s));
-        }
-
-        if (!string.IsNullOrEmpty(Reference.Copy))
-        {
-            writer.WriteProperty(copyFieldName, Reference.Copy);
         }
 
         writer.WriteOverlayExtensions(Reference.Extensions, version);
