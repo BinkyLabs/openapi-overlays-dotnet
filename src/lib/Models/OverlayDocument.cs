@@ -201,6 +201,9 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     ///    2. the combination of the relative extends URI and the absolute overlay self URI.
     ///    3. the combination of the relative extends URI and the absolute base URI (program context).
     ///    4. the combination of the relative extends URI and the relative overlay self URI and the absolute base URI (program context).
+    /// - If the target document self URI is relative, it must match either:
+    ///    1. the relative extends URI.
+    ///    2. the combination of the relative extends URI and the relative overlay self URI.
     /// </remarks>
     private void ValidateTargetSelf(JsonNode targetDocument, OverlayDiagnostic overlayDiagnostic)
     {
@@ -238,24 +241,19 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new ArgumentException("Base URI must be absolute.", nameof(BaseUri));
         }
 
-        if (Extends is null)
+        if (Extends is not null)
         {
-            yield break; // No extends property, no candidates
+            yield return Extends; // Absolute or relative extends URI is a candidate
         }
-
-        if (Extends.IsAbsoluteUri)
-        {
-            yield return Extends; // Absolute extends URI is a candidate
-        }
-        if (!Extends.IsAbsoluteUri && Self is { IsAbsoluteUri: true })
+        if (Extends is { IsAbsoluteUri: false } && Self is not null)
         {
             yield return new Uri(Self, Extends); // Relative extends URI resolved against overlay self URI
         }
-        if (!Extends.IsAbsoluteUri && BaseUri is not null)
+        if (Extends is { IsAbsoluteUri: false } && BaseUri is not null)
         {
             yield return new Uri(BaseUri, Extends); // Relative extends URI resolved against base URI
         }
-        if (!Extends.IsAbsoluteUri && Self is { IsAbsoluteUri: true } && BaseUri is not null)
+        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: true } && BaseUri is not null)
         {
             yield return new Uri(BaseUri, new Uri(Self, Extends)); // Relative extends URI resolved against overlay self URI and then base URI
         }

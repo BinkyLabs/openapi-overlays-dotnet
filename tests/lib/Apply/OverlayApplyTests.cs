@@ -103,6 +103,38 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Errors);
     }
 
+    [Theory]
+    [InlineData("openapi.yaml")]
+    [InlineData("../openapi.yaml")]
+    [InlineData("specifications/openapi.yaml")]
+    public void ApplyToDocument_ShouldAcceptRelativeTargetSelfMatchingRelativeExtends(string relativeUri)
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri(relativeUri, UriKind.Relative));
+        var jsonNode = CreateTargetDocument(relativeUri);
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void ApplyToDocument_ShouldAcceptRelativeTargetSelfMatchingExtendsResolvedAgainstRelativeOverlaySelf()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("../openapi.yaml", UriKind.Relative),
+            new Uri("overlays/overlay.yaml", UriKind.Relative));
+        var jsonNode = CreateTargetDocument("openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
     [Fact]
     public async Task LoadFromStreamAsync_ShouldResolveRelativeExtendsAgainstBaseUri()
     {
