@@ -63,10 +63,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
         }
 
-        if (Extends is { OriginalString: var originalString } && originalString.Contains('#'))
-        {
-            throw new InvalidOperationException($"The 'extends' property must not contain a fragment identifier ('#'). Found: '{Extends}'");
-        }
+        ThrowIfDocumentUriContainsFragment(Extends, OverlayConstants.DocumentExtendsFieldName);
+        ThrowIfDocumentUriContainsFragment(Self, OverlayConstants.DocumentSelfFieldName);
 
         writer.WriteStartObject();
         writer.WriteRequiredProperty(OverlayConstants.DocumentOverlayFieldName, SpecVersionToStringMap[version]);
@@ -236,32 +234,14 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
     private IEnumerable<Uri> GetSelfMatchingCandidates()
     {
-        if (BaseUri is { IsAbsoluteUri: false })
-        {
-            throw new ArgumentException("Base URI must be absolute.", nameof(BaseUri));
-        }
-
         if (Extends is not null)
         {
             yield return Extends; // Absolute or relative extends URI is a candidate
         }
-        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: true })
+
+        if (Extends is { IsAbsoluteUri: false } && GetEffectiveBaseUri() is Uri effectiveBaseUri)
         {
-            yield return new Uri(Self, Extends); // Relative extends URI resolved against overlay absolute self URI
-        }
-        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: false })
-        {
-            var root = new Uri("https://relative.invalid/", UriKind.Absolute); // Use a dummy root URI to resolve relative URIs
-            var resolved = new Uri(new Uri(root, Self), Extends);
-            yield return root.MakeRelativeUri(resolved); // Relative extends URI resolved against overlay relative self URI
-        }
-        if (Extends is { IsAbsoluteUri: false } && BaseUri is not null)
-        {
-            yield return new Uri(BaseUri, Extends); // Relative extends URI resolved against base URI
-        }
-        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: true } && BaseUri is not null)
-        {
-            yield return new Uri(BaseUri, new Uri(Self, Extends)); // Relative extends URI resolved against overlay self URI and then base URI
+            yield return new Uri(effectiveBaseUri, Extends);
         }
     }
 
@@ -392,16 +372,44 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new ArgumentException($"The provided document path or URI '{documentPathOrUri}' is not a valid URI.", nameof(documentPathOrUri));
         }
 
-        yield return result; // Absolute or relative URI is a candidate
-
-        if (!result.IsAbsoluteUri && BaseUri is { IsAbsoluteUri: true })
+        if (result.IsAbsoluteUri)
         {
-            yield return new Uri(BaseUri, result); // Absolute URI resolved against base URI
+            yield return result;
+            yield break;
         }
 
-        if (!result.IsAbsoluteUri && Self is { IsAbsoluteUri: true })
+        if (GetEffectiveBaseUri() is Uri effectiveBaseUri)
         {
-            yield return new Uri(Self, result); // Absolute URI resolved against overlay self URI
+            yield return new Uri(effectiveBaseUri, result);
+        }
+
+        yield return result;
+    }
+
+    private Uri? GetEffectiveBaseUri()
+    {
+        if (BaseUri is { IsAbsoluteUri: false })
+        {
+            throw new ArgumentException("Base URI must be absolute.", nameof(BaseUri));
+        }
+
+        if (Self is null)
+        {
+            return BaseUri;
+        }
+
+        return Self.IsAbsoluteUri
+            ? Self
+            : BaseUri is null
+                ? null
+                : new Uri(BaseUri, Self);
+    }
+
+    private static void ThrowIfDocumentUriContainsFragment(Uri? uri, string propertyName)
+    {
+        if (uri is { OriginalString: var originalString } && originalString.Contains('#', StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"The '{propertyName}' property must not contain a fragment identifier ('#'). Found: '{uri}'");
         }
     }
 
