@@ -36,7 +36,7 @@ clio validate pathOrUrlToOverlay --warnings-as-errors
 
 ### Apply and normalize
 
-The apply command applies the overlay actions to an OpenAPI description and normalizes the description based on OpenAPI.net rules and fields ordering.
+The apply-and-normalize command applies the overlay actions to an OpenAPI description and normalizes the description based on OpenAPI.net rules and field ordering.
 
 ```shell
 clio apply-and-normalize pathOrUrlToInputDescription --overlay pathOrUrlToOverlay -out pathForResultingDescription
