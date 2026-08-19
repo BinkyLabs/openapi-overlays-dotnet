@@ -63,8 +63,9 @@ public class OverlayReusableActionV1_2Tests
         var jsonResultObject = JsonNode.Parse(jsonResult)!.AsObject();
 
         // Assert
-        Assert.True(jsonResultObject.ContainsKey("fields"), "The serialized JSON should contain a 'fields' property.");
-        Assert.NotNull(jsonResultObject["fields"]!.AsObject());
+        Assert.True(jsonResultObject.TryGetPropertyValue("fields", out var fields), "The serialized JSON should contain a 'fields' property.");
+        Assert.NotNull(fields);
+        Assert.NotNull(fields.AsObject());
     }
     [Fact]
     public void UsingTargetIsProhibitedForReusableActions()
