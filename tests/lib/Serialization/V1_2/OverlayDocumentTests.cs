@@ -304,6 +304,61 @@ public sealed class OverlayDocumentV1_2Tests
 
         // Then
         var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1_2(writer));
+        Assert.Contains("'extends' property must not contain a fragment identifier", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SelfShouldNotContainFragments()
+    {
+        // Given
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Self = new("https://foo.bar/overlay.yaml#fragment", UriKind.RelativeOrAbsolute)
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Then
+        var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1_2(writer));
+        Assert.Contains("'$self' property must not contain a fragment identifier", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Deserialize_WithDocumentUriFragments_ShouldReportErrors()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "2.0.0"
+            },
+            "extends": "https://example.com/openapi.yaml#fragment",
+            "$self": "https://example.com/overlays/test.yaml#fragment",
+            "actions": [
+                {
+                    "target": "Test Target",
+                    "description": "Test Description",
+                    "remove": true
+                }
+            ]
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var overlayDocument = OverlayV1_2Deserializer.LoadDocument(jsonNode, parsingContext);
+
+        Assert.NotNull(overlayDocument.Extends);
+        Assert.NotNull(overlayDocument.Self);
+        Assert.Equal(2, parsingContext.Diagnostic.Errors.Count);
+        Assert.Contains(parsingContext.Diagnostic.Errors, static error => error.Pointer == "#/extends" && error.Message.Contains("must not contain a fragment identifier", StringComparison.Ordinal));
+        Assert.Contains(parsingContext.Diagnostic.Errors, static error => error.Pointer == "#/$self" && error.Message.Contains("must not contain a fragment identifier", StringComparison.Ordinal));
     }
 
     [Fact]

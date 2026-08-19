@@ -127,7 +127,8 @@ public sealed class OverlayApplyTests : IDisposable
         var overlayDocument = CreateOverlayDocument(
             new Uri("../openapi.yaml", UriKind.Relative),
             new Uri("overlays/overlay.yaml", UriKind.Relative));
-        var jsonNode = CreateTargetDocument("openapi.yaml");
+        overlayDocument.BaseUri = new Uri("https://example.com/root.yaml");
+        var jsonNode = CreateTargetDocument("https://example.com/openapi.yaml");
         var overlayDiagnostic = new OverlayDiagnostic();
 
         var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
@@ -491,7 +492,7 @@ public sealed class OverlayApplyTests : IDisposable
     }
 
     [Fact]
-    public async Task ApplyToDocumentAsync_WhenBaseUriTargetFails_ShouldResolveAgainstSelf()
+    public async Task ApplyToDocumentAsync_WithSelfAndBaseUri_ShouldResolveAgainstSelf()
     {
         var baseTargetUri = new Uri("https://cdn.example.com/overlays/target.json");
         var selfTargetUri = new Uri("https://example.com/overlays/target.json");
@@ -511,7 +512,31 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.True(result.IsSuccessful);
         Assert.Empty(result.Diagnostic.Errors);
         Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
-        Assert.Equal([baseTargetUri, selfTargetUri], handler.RequestUris);
+        Assert.Equal([selfTargetUri], handler.RequestUris);
+    }
+
+    [Fact]
+    public async Task ApplyToDocumentAsync_WithRelativeSelf_ShouldResolveSelfAgainstBaseUri()
+    {
+        var targetUri = new Uri("https://example.com/overlays/target.json");
+        var handler = new TestHttpMessageHandler(request =>
+        {
+            Assert.Equal(targetUri, request.RequestUri);
+            return CreateTargetResponse();
+        });
+        using var httpClient = new HttpClient(handler);
+        var overlayDocument = CreateOverlayDocument(self: new Uri("overlays/overlay.json", UriKind.Relative));
+        overlayDocument.BaseUri = new Uri("https://example.com/root.json");
+
+        var result = await overlayDocument.ApplyToDocumentAsync(
+            "target.json",
+            readerSettings: new OverlayReaderSettings { HttpClient = httpClient },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccessful);
+        Assert.Empty(result.Diagnostic.Errors);
+        Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
+        Assert.Equal([targetUri], handler.RequestUris);
     }
 
     [Fact]
