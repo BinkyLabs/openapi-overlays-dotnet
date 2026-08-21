@@ -1,18 +1,16 @@
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
-using BinkyLabs.OpenApi.Overlays.Reader.V1;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
 
 using Microsoft.OpenApi;
 
-using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
-
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public class OverlayReusableActionV1Tests
+public class OverlayReusableActionV1_2Tests
 {
     [Fact]
-    public void SerializeAsV1_ShouldWriteCorrectJson()
+    public void SerializeAsV1_2_ShouldWriteCorrectJson()
     {
         // Arrange
         var action = new OverlayReusableAction
@@ -39,7 +37,7 @@ public class OverlayReusableActionV1Tests
 """;
 
         // Act
-        action.SerializeAsV1(writer);
+        action.SerializeAsV1_2(writer);
         var jsonResult = textWriter.ToString();
         var jsonResultObject = JsonNode.Parse(jsonResult);
         var expectedJsonObject = JsonNode.Parse(expectedJson);
@@ -49,52 +47,25 @@ public class OverlayReusableActionV1Tests
     }
 
     [Fact]
-    public void SerializeAsV1_WithoutDescription_ShouldOmitDescription()
+    public void SerializeAsV1_2_WithNullFields_ShouldWriteEmptyFieldsObject()
     {
         // Arrange
         var action = new OverlayReusableAction
         {
-            Fields = new OverlayAction
-            {
-                Remove = true,
-            }
+            Fields = null,
         };
         using var textWriter = new StringWriter();
         var writer = new OpenApiJsonWriter(textWriter);
 
         // Act
-        action.SerializeAsV1(writer);
+        action.SerializeAsV1_2(writer);
         var jsonResult = textWriter.ToString();
         var jsonResultObject = JsonNode.Parse(jsonResult)!.AsObject();
 
         // Assert
-        Assert.False(jsonResultObject.ContainsKey("description"), "Description should not be serialized when null.");
-    }
-
-    [Fact]
-    public void Deserialize_ShouldSetPropertiesCorrectly()
-    {
-        // Arrange
-        var json = """
-        {
-            "description": "Reusable description",
-            "fields": {
-                "description": "Test Description",
-                "remove": true
-            }
-        }
-        """;
-        var jsonNode = JsonNode.Parse(json)!;
-        var parsingContext = new ParsingContext(new());
-
-        // Act
-        var action = OverlayV1Deserializer.LoadReusableAction(jsonNode, parsingContext);
-
-        // Assert
-        Assert.Equal("Reusable description", action.Description);
-        Assert.NotNull(action.Fields);
-        Assert.Equal("Test Description", action.Fields.Description);
-        Assert.True(action.Fields.Remove);
+        Assert.True(jsonResultObject.TryGetPropertyValue("fields", out var fields), "The serialized JSON should contain a 'fields' property.");
+        Assert.NotNull(fields);
+        Assert.NotNull(fields.AsObject());
     }
     [Fact]
     public void UsingTargetIsProhibitedForReusableActions()
@@ -111,6 +82,48 @@ public class OverlayReusableActionV1Tests
         var writer = new OpenApiJsonWriter(textWriter);
 
         // Then
-        Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1(writer));
+        Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1_2(writer));
+    }
+
+    [Fact]
+    public void Deserialize_ShouldSetPropertiesCorrectly()
+    {
+        var json = """
+        {
+            "description": "Reusable description",
+            "fields": {
+                "description": "Test Description",
+                "remove": true
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var action = OverlayV1_2Deserializer.LoadReusableAction(jsonNode, parsingContext);
+
+        Assert.Equal("Reusable description", action.Description);
+        Assert.NotNull(action.Fields);
+        Assert.Equal("Test Description", action.Fields.Description);
+        Assert.True(action.Fields.Remove);
+    }
+
+    [Fact]
+    public void Deserialize_WithCopyField_ShouldSetCopy()
+    {
+        var json = """
+        {
+            "fields": {
+                "copy": "$.paths['/pets']"
+            }
+        }
+        """;
+        var jsonNode = JsonNode.Parse(json)!;
+        var parsingContext = new ParsingContext(new());
+
+        var action = OverlayV1_2Deserializer.LoadReusableAction(jsonNode, parsingContext);
+
+        Assert.NotNull(action.Fields);
+        Assert.Equal("$.paths['/pets']", action.Fields.Copy);
     }
 }

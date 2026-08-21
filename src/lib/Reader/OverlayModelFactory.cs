@@ -17,7 +17,7 @@ namespace BinkyLabs.OpenApi.Overlays;
 public static class OverlayModelFactory
 {
     /// <summary>
-    /// Loads the input URL and parses it into an Open API document.
+    /// Loads the input URL and parses it into an Overlay document.
     /// </summary>
     /// <param name="url">The path to the Overlay file</param>
     /// <param name="settings"> The Overlay reader settings.</param>
@@ -31,21 +31,32 @@ public static class OverlayModelFactory
         var (stream, format) = await RetrieveStreamAndFormatAsync(url, settings, token).ConfigureAwait(false);
         using (stream)
         {
-            return await LoadFromStreamAsync(stream, format, settings, token).ConfigureAwait(false);
+            var baseUri = new Uri(url, UriKind.RelativeOrAbsolute);
+            if (!baseUri.IsAbsoluteUri && !url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                baseUri = new Uri(Path.GetFullPath(url), UriKind.Absolute);
+            }
+            return await LoadFromStreamAsync(stream, format, settings, baseUri, token).ConfigureAwait(false);
         }
     }
 
     /// <summary>
-    /// Loads the input stream and parses it into an Open API document.  If the stream is not buffered and it contains yaml, it will be buffered before parsing.
+    /// Loads the input stream and parses it into an Overlay document.  If the stream is not buffered and it contains yaml, it will be buffered before parsing.
     /// </summary>
     /// <param name="input">The input stream.</param>
     /// <param name="settings"> The Overlay reader settings.</param>
+    /// <param name="baseUri">The base URI to use for resolving $self and extends.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
-    /// <param name="format">The Open API format</param>
+    /// <param name="format">The Overlay format</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadFromStreamAsync(Stream input, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    /// <exception cref="ArgumentException">Thrown if the baseUri is not absolute.</exception>
+    public static async Task<ReadResult> LoadFromStreamAsync(Stream input, string? format = null, OverlayReaderSettings? settings = null, Uri? baseUri = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(input);
+        if (baseUri is { IsAbsoluteUri: false })
+        {
+            throw new ArgumentException("Base URI must be absolute.", nameof(baseUri));
+        }
 
         settings ??= new OverlayReaderSettings();
 
@@ -64,14 +75,15 @@ public static class OverlayModelFactory
             await preparedStream.DisposeAsync().ConfigureAwait(false);
         }
 
+        result.Document?.BaseUri = baseUri;
         return result;
     }
 
     /// <summary>
-    /// Reads the input string and parses it into an Open API document.
+    /// Reads the input string and parses it into an Overlay document.
     /// </summary>
     /// <param name="input">The input string.</param>
-    /// <param name="format">The Open API format</param>
+    /// <param name="format">The Overlay format</param>
     /// <param name="settings">The Overlay reader settings.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <returns>An Overlay document instance.</returns>

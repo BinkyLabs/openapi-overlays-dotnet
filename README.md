@@ -164,67 +164,7 @@ var jsonResult = textWriter.ToString();
 
 ## Experimental features
 
-This library implements the following experimental features:
-
-### Reusable Actions (Preview)
-
-> **Note**: Reusable Actions are an experimental, preview feature. When using this library with ReusableActions, you must suppress the **BOO002** diagnostic code in your build configuration, as this feature is not yet part of the official OpenAPI Overlay Specification.
-
-Reusable Actions allow you to define action templates in the `components.actions` section that can be referenced and reused multiple times throughout your overlay. This reduces duplication and makes overlays more maintainable.
-
-#### Simple Example
-
-This example shows how a reusable action can provide shared update content while each reference supplies its own target:
-
-**Source OpenAPI:**
-
-```yaml
-openapi: 3.2.0
-info:
-  title: Example API
-  version: 1.0.0
-paths:
-  /items:
-    get:
-      responses:
-        200:
-          description: OK
-  /some-items:
-    delete:
-      responses:
-        200:
-          description: OK
-```
-
-**Overlay:**
-
-```yaml
-overlay: 1.2.0
-info:
-  title: Use reusable actions to insert error responses
-  version: 1.0.0
-x-components:
-  actions:
-    errorResponse:
-      description: Adds an error response to the operation
-      fields:
-        update:
-          404:
-            description: Not Found
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-actions:
-  - x-$ref: '#/components/actions/errorResponse'
-    # The target is required on each reference
-    target: "$.paths['/items'].get.responses"
-  - x-$ref: '#/components/actions/errorResponse'
-    target: "$.paths['/some-items'].delete.responses"
-```
+This library implements the following experimental features: No preview features implemented at the moment.
 
 ## Release notes
 
