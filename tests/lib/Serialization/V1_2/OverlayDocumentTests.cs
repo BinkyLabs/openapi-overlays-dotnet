@@ -467,6 +467,48 @@ public sealed class OverlayDocumentV1_2Tests
     }
 
     [Fact]
+    public async Task Deserialize_WithReusableActionContainingReference_ShouldAddDiagnosticError()
+    {
+        var json = """
+        {
+            "overlay": "1.2.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "components": {
+                "actions": {
+                    "removeDeprecatedHeader": {
+                        "fields": {
+                            "$ref": "#/components/actions/removeDeprecatedQuery"
+                        }
+                    },
+                    "removeDeprecatedQuery": {
+                        "fields": {
+                            "remove": true
+                        }
+                    }
+                }
+            },
+            "actions": [
+                {
+                    "$ref": "#/components/actions/removeDeprecatedHeader",
+                    "target": "$.paths['/pets'].get.parameters[0]"
+                }
+            ]
+        }
+        """;
+
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(json, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(diagnostic);
+        Assert.Contains(
+            diagnostic.Errors,
+            static e => e.Message.Contains("$ref is not a valid property", StringComparison.Ordinal) &&
+                        e.Message.Contains("#/components/actions/removeDeprecatedHeader/fields", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task Deserialize_WithReusableActionReference_ShouldSetHostDocument()
     {
         var json = """
