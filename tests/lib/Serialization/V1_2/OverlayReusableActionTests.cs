@@ -67,6 +67,16 @@ public class OverlayReusableActionV1_2Tests
         Assert.NotNull(fields);
         Assert.NotNull(fields.AsObject());
     }
+
+    [Fact]
+    public void Fields_ShouldOnlyAcceptConcreteActionObjects()
+    {
+        var fieldsProperty = typeof(OverlayReusableAction).GetProperty(nameof(OverlayReusableAction.Fields));
+
+        Assert.NotNull(fieldsProperty);
+        Assert.Equal(typeof(OverlayAction), fieldsProperty.PropertyType);
+    }
+
     [Fact]
     public void UsingTargetIsProhibitedForReusableActions()
     {
