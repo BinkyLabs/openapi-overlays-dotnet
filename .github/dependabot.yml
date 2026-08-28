@@ -17,7 +17,7 @@ updates:
     groups:
       codeql:
         patterns:
-          - "github/codeql-action"
+          - "github/codeql-action/*"
     cooldown:
       default-days: 7
   - package-ecosystem: dotnet-sdk
