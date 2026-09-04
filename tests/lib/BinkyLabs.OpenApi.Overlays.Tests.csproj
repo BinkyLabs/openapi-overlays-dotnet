@@ -16,6 +16,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; compile</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.4.0" />
     <PackageReference Include="Microsoft.Testing.Platform" Version="2.4.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
