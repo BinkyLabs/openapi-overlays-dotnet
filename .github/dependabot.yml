@@ -6,9 +6,12 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     groups:
-      coverlet:
+      testing:
         patterns:
           - "coverlet.*"
+          - "Microsoft.NET.Test.Sdk"
+          - "Microsoft.Testing.*"
+          - "xunit.*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
