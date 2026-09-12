@@ -11,7 +11,6 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// <summary>
 /// Represents a reusable action reference action with local overrides.
 /// </summary>
-[Experimental("BOO002")]
 public class OverlayReusableActionReference : IOverlayAction
 {
     /// <summary>
@@ -81,22 +80,19 @@ public class OverlayReusableActionReference : IOverlayAction
     /// <inheritdoc/>
     public bool? Remove
     {
-        get => Reference.Remove ?? TargetAction?.Fields?.Remove;
-        set => Reference.Remove = value;
+        get => TargetAction?.Fields?.Remove;
     }
 
     /// <inheritdoc/>
     public JsonNode? Update
     {
-        get => Reference.Update ?? TargetAction?.Fields?.Update;
-        set => Reference.Update = value;
+        get => TargetAction?.Fields?.Update;
     }
 
     /// <inheritdoc/>
     public string? Copy
     {
-        get => Reference.Copy ?? TargetAction?.Fields?.Copy;
-        set => Reference.Copy = value;
+        get => TargetAction?.Fields?.Copy;
     }
 
     /// <inheritdoc/>
@@ -143,17 +139,27 @@ public class OverlayReusableActionReference : IOverlayAction
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(
         writer,
         OverlaySpecVersion.Overlay1_0,
+        OverlayConstants.ReusableActionReferenceXReferenceFieldName,
         OverlayConstants.ActionXCopyFieldName);
 
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(
         writer,
         OverlaySpecVersion.Overlay1_1,
+        OverlayConstants.ReusableActionReferenceXReferenceFieldName,
+        OverlayConstants.ActionCopyFieldName);
+
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) => SerializeInternal(
+        writer,
+        OverlaySpecVersion.Overlay1_2,
+        OverlayConstants.ReusableActionReferenceReferenceFieldName,
         OverlayConstants.ActionCopyFieldName);
 
     private void SerializeInternal(
         IOpenApiWriter writer,
         OverlaySpecVersion version,
+        string referenceFieldName,
         string copyFieldName)
     {
         ArgumentNullException.ThrowIfNull(writer);
@@ -165,31 +171,18 @@ public class OverlayReusableActionReference : IOverlayAction
 
         writer.WriteStartObject();
 
-        writer.WriteProperty(OverlayConstants.ReusableActionReferenceXReferenceFieldName, Reference.Reference);
+        writer.WriteProperty(referenceFieldName, Reference.Reference);
 
-        if (!string.IsNullOrEmpty(Reference.Target))
+        if (string.IsNullOrEmpty(Reference.Target))
         {
-            writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Reference.Target);
+            throw new InvalidOperationException($"'{nameof(Reference.Target)}' cannot be null or empty when serializing a reusable action reference.");
         }
+
+        writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Reference.Target);
 
         if (!string.IsNullOrEmpty(Reference.Description))
         {
             writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Reference.Description);
-        }
-
-        if (Reference.Remove.HasValue)
-        {
-            writer.WriteProperty(OverlayConstants.ActionRemoveFieldName, Reference.Remove, false);
-        }
-
-        if (Reference.Update != null)
-        {
-            writer.WriteOptionalObject(OverlayConstants.ActionUpdateFieldName, Reference.Update, static (w, s) => w.WriteAny(s));
-        }
-
-        if (!string.IsNullOrEmpty(Reference.Copy))
-        {
-            writer.WriteProperty(copyFieldName, Reference.Copy);
         }
 
         writer.WriteOverlayExtensions(Reference.Extensions, version);

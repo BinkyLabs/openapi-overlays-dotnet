@@ -31,6 +31,8 @@ public class OverlayInfo : IOverlaySerializable, IOverlayExtensible
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0);
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1);
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_2);
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version)
     {
         writer.WriteStartObject();

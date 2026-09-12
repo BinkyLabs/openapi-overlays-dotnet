@@ -13,7 +13,6 @@ namespace BinkyLabs.OpenApi.Overlays.Tests;
 public sealed class OverlayDocumentTests
 {
     [Fact]
-#pragma warning disable BOO002
     public void SerializeAsV1_WithComponents_ShouldWriteCorrectJson()
     {
         // Arrange
@@ -34,7 +33,6 @@ public sealed class OverlayDocumentTests
                         {
                             Fields = new OverlayAction
                             {
-                                Target = "$.servers[0]",
                                 Update = JsonNode.Parse("""
                                 {
                                     "url": "https://api.example.com"
@@ -60,7 +58,6 @@ public sealed class OverlayDocumentTests
                 "actions": {
                     "setServerUrl": {
                         "fields": {
-                            "target": "$.servers[0]",
                             "update": {
                                 "url": "https://api.example.com"
                             }
@@ -80,10 +77,65 @@ public sealed class OverlayDocumentTests
         // Assert
         Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
     }
-#pragma warning restore BOO002
 
     [Fact]
-#pragma warning disable BOO002
+    public void SerializeAsV1_WithSelf_ShouldWriteCorrectJson()
+    {
+        // Arrange
+        var overlayDocument = new OverlayDocument
+        {
+            Self = new("https://example.com/overlays/test"),
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        var expectedJson = """
+        {
+            "overlay": "1.0.0",
+            "info": {
+                "title": "Test Overlay",
+                "version": "1.0.0"
+            },
+            "x-$self": "https://example.com/overlays/test"
+        }
+        """;
+
+        // Act
+        overlayDocument.SerializeAsV1(writer);
+        var jsonResult = textWriter.ToString();
+        var jsonResultObject = JsonNode.Parse(jsonResult);
+        var expectedJsonObject = JsonNode.Parse(expectedJson);
+
+        // Assert
+        Assert.True(JsonNode.DeepEquals(jsonResultObject, expectedJsonObject), "The serialized JSON does not match the expected JSON.");
+    }
+
+    [Fact]
+    public void ExtendsShouldNotContainFragments()
+    {
+        // Given
+        var overlayDocument = new OverlayDocument
+        {
+            Info = new OverlayInfo
+            {
+                Title = "Test Overlay",
+                Version = "1.0.0"
+            },
+            Extends = new("https://foo.bar/base.yaml#fragment", UriKind.RelativeOrAbsolute)
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Then
+        var exception = Assert.Throws<InvalidOperationException>(() => overlayDocument.SerializeAsV1(writer));
+    }
+
+    [Fact]
     public void Deserialize_WithComponents_ShouldSetPropertiesCorrectly()
     {
         // Arrange
@@ -127,7 +179,6 @@ public sealed class OverlayDocumentTests
         Assert.Equal("https://api.example.com", action.Fields.Update["url"]?.GetValue<string>());
         Assert.Equal("Sets the server URL", action.Description);
     }
-#pragma warning restore BOO002
 
     [Fact]
     public void SerializeAsV1_ShouldWriteCorrectJson()
@@ -140,7 +191,7 @@ public sealed class OverlayDocumentTests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = "x-extends",
+            Extends = new("./x-extends", UriKind.RelativeOrAbsolute),
             Actions =
             [
                 new OverlayAction
@@ -165,7 +216,7 @@ public sealed class OverlayDocumentTests
                 "title": "Test Overlay",
                 "version": "1.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -201,7 +252,7 @@ public sealed class OverlayDocumentTests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -229,7 +280,7 @@ public sealed class OverlayDocumentTests
         Assert.Equal("1.0.0", overlayDocument.Overlay);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
-        Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions!.ContainsKey("x-custom-extension"));
         var extensionNodeValue = Assert.IsType<JsonNodeExtension>(overlayDocument.Extensions["x-custom-extension"]);
@@ -279,7 +330,6 @@ public sealed class OverlayDocumentTests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public async Task Deserialize_WithReusableActionReference_ShouldSetHostDocument()
     {
         // Arrange
@@ -317,10 +367,8 @@ public sealed class OverlayDocumentTests
         var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
         Assert.Same(overlayDocument, reference.Reference.HostDocument);
     }
-#pragma warning restore BOO002
 
     [Fact]
-#pragma warning disable BOO002
     public void SerializeAsV1_WithUnresolvedReusableActionReference_ShouldThrow()
     {
         // Arrange
@@ -352,7 +400,6 @@ public sealed class OverlayDocumentTests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public void SerializeAsV1_WithReusableActionReferenceWithoutHostDocument_ShouldSetHostDocument()
     {
         // Arrange
@@ -371,7 +418,6 @@ public sealed class OverlayDocumentTests
                     {
                         Fields = new OverlayAction
                         {
-                            Target = "$.paths['/pets'].get.responses.404",
                             Remove = true
                         }
                     }
@@ -383,7 +429,8 @@ public sealed class OverlayDocumentTests
                 {
                     Reference = new OverlayReusableActionReferenceItem
                     {
-                        Id = "errorResponse"
+                        Id = "errorResponse",
+                        Target = "$.paths['/pets'].get.responses.404"
                     }
                 }
             ]
@@ -398,7 +445,6 @@ public sealed class OverlayDocumentTests
         var reference = Assert.IsType<OverlayReusableActionReference>(Assert.Single(overlayDocument.Actions));
         Assert.Same(overlayDocument, reference.Reference.HostDocument);
     }
-#pragma warning restore BOO002
 
     [Fact]
     public void SerializeAsV1_WithUpdate_ShouldWriteCorrectJson()
@@ -418,7 +464,7 @@ public sealed class OverlayDocumentTests
                 Title = "Test Overlay",
                 Version = "1.0.0"
             },
-            Extends = "x-extends",
+            Extends = new("./x-extends", UriKind.RelativeOrAbsolute),
             Actions =
             [
                 new OverlayAction
@@ -440,7 +486,7 @@ public sealed class OverlayDocumentTests
                 "title": "Test Overlay",
                 "version": "1.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -475,7 +521,7 @@ public sealed class OverlayDocumentTests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "actions": [
                 {
                     "target": "Test Target",
@@ -503,7 +549,7 @@ public sealed class OverlayDocumentTests
         Assert.Equal("1.0.0", overlayDocument.Overlay);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
-        Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
 
         // Assert the 2 actions
         Assert.NotNull(overlayDocument.Actions);
@@ -541,7 +587,7 @@ public sealed class OverlayDocumentTests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "x-custom-extension": {
                 "someProperty": "someValue"
             },
@@ -571,7 +617,7 @@ public sealed class OverlayDocumentTests
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("1.0.0", overlayDocument.Overlay);
-        Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
         var extension = overlayDocument.Extensions["x-custom-extension"];
@@ -618,7 +664,7 @@ public sealed class OverlayDocumentTests
                 "title": "Test Overlay",
                 "version": "2.0.0"
             },
-            "extends": "x-extends",
+            "extends": "./x-extends",
             "x-custom-extension": {
                 "someProperty": "someValue"
             },
@@ -650,7 +696,7 @@ public sealed class OverlayDocumentTests
         Assert.Equal("2.0.0", overlayDocument.Info?.Version);
         Assert.Equal("Test Overlay", overlayDocument.Info?.Title);
         Assert.Equal("1.0.0", overlayDocument.Overlay);
-        Assert.Equal("x-extends", overlayDocument.Extends);
+        Assert.Equal(new("./x-extends", UriKind.RelativeOrAbsolute), overlayDocument.Extends);
         Assert.NotNull(overlayDocument.Extensions);
         Assert.True(overlayDocument.Extensions.ContainsKey("x-custom-extension"));
         var extension = overlayDocument.Extensions["x-custom-extension"];
@@ -766,7 +812,7 @@ public sealed class OverlayDocumentTests
                 Title = "Overlay 1",
                 Version = "1.0.0"
             },
-            Extends = "base.yaml"
+            Extends = new("./base.yaml", UriKind.RelativeOrAbsolute)
         };
         var overlayDocument2 = new OverlayDocument
         {
@@ -775,7 +821,7 @@ public sealed class OverlayDocumentTests
                 Title = "Overlay 2",
                 Version = "1.0.1"
             },
-            Extends = "base2.yaml"
+            Extends = new("./base2.yaml", UriKind.RelativeOrAbsolute)
         };
 
         // When
@@ -784,7 +830,7 @@ public sealed class OverlayDocumentTests
         // Then
         Assert.Equal("Overlay 2", result.Info?.Title);
         Assert.Equal("1.0.1", result.Info?.Version);
-        Assert.Equal("base2.yaml", result.Extends);
+        Assert.Equal(new("./base2.yaml", UriKind.RelativeOrAbsolute), result.Extends);
         Assert.NotNull(result.Actions);
         Assert.Empty(result.Actions);
     }
@@ -826,7 +872,6 @@ public sealed class OverlayDocumentTests
     }
 
     [Fact]
-#pragma warning disable BOO002
     public void CombineWith_MergesComponents()
     {
         // Given
@@ -864,10 +909,8 @@ public sealed class OverlayDocumentTests
         Assert.Equal("2.0.0", result.Components.Actions["setVersion"].Fields?.Update?.GetValue<string>());
         Assert.Equal("$.info.description", result.Components.Actions["setDescription"].Fields?.Target);
     }
-#pragma warning restore BOO002
 
     [Fact]
-#pragma warning disable BOO002
     public void Deserialize_WithReusableActionReference_ShouldCreateReferenceAction()
     {
         // Arrange
@@ -900,5 +943,4 @@ public sealed class OverlayDocumentTests
         Assert.Equal("#/components/actions/errorResponse", reference.Reference.Reference);
         Assert.Equal("$.paths['/pets'].get.responses", reference.Target);
     }
-#pragma warning restore BOO002
 }
