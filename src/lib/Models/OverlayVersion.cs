@@ -15,5 +15,10 @@ public enum OverlaySpecVersion
     /// The OpenAPI Overlay version 1.1.0
     /// See: https://spec.openapis.org/overlay/v1.1.0.html
     /// </summary>
-    Overlay1_1 = 2
+    Overlay1_1 = 2,
+    /// <summary>
+    /// The OpenAPI Overlay version 1.2.0
+    /// See: https://spec.openapis.org/overlay/v1.2.0.html
+    /// </summary>
+    Overlay1_2 = 3
 }
