@@ -1,6 +1,5 @@
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-#pragma warning disable BOO002
 public class OverlayReusableActionReferenceItemEncodingTests
 {
     // EncodeJsonPointerToken tests
@@ -104,4 +103,3 @@ public class OverlayReusableActionReferenceItemEncodingTests
         Assert.Equal("#/components/actions/my~1action", item.Reference);
     }
 }
-#pragma warning restore BOO002

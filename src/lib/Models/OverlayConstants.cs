@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace BinkyLabs.OpenApi.Overlays;
 
 /// <summary>
@@ -15,22 +13,22 @@ public static class OverlayConstants
     /// <summary>
     /// Field: OverlayReusableAction.Fields
     /// </summary>
-    [Experimental("BOO002")]
     public const string ReusableActionFieldsFieldName = "fields";
     /// <summary>
     /// Field: OverlayReusableAction.Description
     /// </summary>
-    [Experimental("BOO002")]
     public const string ReusableActionDescriptionFieldName = "description";
     /// <summary>
-    /// Field: OverlayReusableActionReference.$ref (serialized as extension for v1/v1.1 compatibility)
+    /// Field: OverlayReusableActionReference.$ref (v1.2)
     /// </summary>
-    [Experimental("BOO002")]
+    public const string ReusableActionReferenceReferenceFieldName = "$ref";
+    /// <summary>
+    /// Field: OverlayReusableActionReference.$ref (v1/v1.1)
+    /// </summary>
     public const string ReusableActionReferenceXReferenceFieldName = "x-$ref";
     /// <summary>
     /// Prefix used to build OverlayReusableActionReference.Reference
     /// </summary>
-    [Experimental("BOO002")]
     public const string ReusableActionReferencePrefix = "#/components/actions/";
 
     /// <summary>
@@ -75,15 +73,17 @@ public static class OverlayConstants
     /// </summary>
     public const string DocumentActionsFieldName = "actions";
     /// <summary>
-    /// Field: OverlayDocument.Components (serialized as extension for v1/v1.1 compatibility)
+    /// Field: OverlayDocument.Components (v1.2)
     /// </summary>
-    [Experimental("BOO002")]
+    public const string DocumentComponentsFieldName = "components";
+    /// <summary>
+    /// Field: OverlayDocument.Components (v1/v1.1)
+    /// </summary>
     public const string DocumentXComponentsFieldName = "x-components";
 
     /// <summary>
     /// Field: OverlayComponents.Actions
     /// </summary>
-    [Experimental("BOO002")]
     public const string ComponentsActionsFieldName = "actions";
 
     /// <summary>
@@ -102,4 +102,14 @@ public static class OverlayConstants
     /// Field: OverlayInfo.Description (v1.1)
     /// </summary>
     public const string InfoDescriptionFieldName = "description";
+
+    /// <summary>
+    /// Field: OverlayDocument.Self (v1.2)
+    /// </summary>
+    public const string DocumentSelfFieldName = "$self";
+
+    /// <summary>
+    /// Field: OverlayDocument.Self (v1.2)
+    /// </summary>
+    public const string DocumentXSelfFieldName = "x-$self";
 }
