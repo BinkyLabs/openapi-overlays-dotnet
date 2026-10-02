@@ -16,9 +16,14 @@ namespace BinkyLabs.OpenApi.Overlays;
 public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 {
     /// <summary>
-    /// Gets or sets the overlay version. Default is "1.1.0".
+    /// Gets or sets the overlay version. Default is "1.2.0".
     /// </summary>
-    public string? Overlay { get; internal set; } = "1.1.0";
+    public string? Overlay { get; internal set; } = "1.2.0";
+
+    /// <summary>
+    /// Gets or sets the overlay $self reference. Default is null.
+    /// </summary>
+    public Uri? Self { get; set; }
 
     /// <summary>
     /// Gets or sets the overlay info object.
@@ -28,7 +33,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the value of the 'extends' property.
     /// </summary>
-    public string? Extends { get; set; }
+    public Uri? Extends { get; set; }
 
     /// <summary>
     /// Gets or sets the list of actions for the overlay.
@@ -37,7 +42,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <summary>
     /// Gets or sets the reusable components available to this overlay document.
     /// </summary>
-    [Experimental("BOO002")]
     public OverlayComponents? Components { get; set; }
 
     /// <inheritdoc/>
@@ -47,7 +51,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     public void SerializeAsV1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, (w, obj) => obj.SerializeAsV1(w));
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, (w, obj) => obj.SerializeAsV1_1(w));
-#pragma warning disable BOO002
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) => SerializeInternal(writer, OverlaySpecVersion.Overlay1_2, (w, obj) => obj.SerializeAsV1_2(w));
     private void SerializeInternal(IOpenApiWriter writer, OverlaySpecVersion version, Action<IOpenApiWriter, IOverlaySerializable> serializeAction)
     {
         SetUnsetReferenceHostDocuments();
@@ -58,26 +63,37 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             throw new InvalidOperationException($"Cannot serialize overlay document with unresolved reusable action references: {FormatUnresolvedReusableActionReferences(unresolvedActionReferences)}");
         }
 
+        ThrowIfDocumentUriContainsFragment(Extends, OverlayConstants.DocumentExtendsFieldName);
+        ThrowIfDocumentUriContainsFragment(Self, OverlayConstants.DocumentSelfFieldName);
+
         writer.WriteStartObject();
         writer.WriteRequiredProperty(OverlayConstants.DocumentOverlayFieldName, SpecVersionToStringMap[version]);
         if (Info != null)
         {
             writer.WriteRequiredObject(OverlayConstants.DocumentInfoFieldName, Info, serializeAction);
         }
-        writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends);
+        if (Extends != null)
+        {
+            writer.WriteProperty(OverlayConstants.DocumentExtendsFieldName, Extends.ToString());
+        }
+        if (Self != null)
+        {
+            writer.WriteProperty(version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentSelfFieldName : OverlayConstants.DocumentXSelfFieldName, Self.ToString());
+        }
         if (Actions != null)
         {
             writer.WriteRequiredCollection<IOverlayAction>(OverlayConstants.DocumentActionsFieldName, Actions, serializeAction);
         }
         if (Components != null)
         {
-            writer.WriteRequiredObject(OverlayConstants.DocumentXComponentsFieldName, Components, serializeAction);
+            writer.WriteRequiredObject(
+                version >= OverlaySpecVersion.Overlay1_2 ? OverlayConstants.DocumentComponentsFieldName : OverlayConstants.DocumentXComponentsFieldName,
+                Components,
+                serializeAction);
         }
         writer.WriteOverlayExtensions(Extensions, version);
         writer.WriteEndObject();
     }
-#pragma warning restore BOO002
-#pragma warning disable BOO002
     internal void SetUnsetReferenceHostDocuments()
     {
         if (Actions is not { Count: > 0 })
@@ -90,13 +106,15 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             reusableActionReference.Reference.HostDocument = this;
         }
     }
-#pragma warning restore BOO002
 
     private static readonly Dictionary<OverlaySpecVersion, string> SpecVersionToStringMap = new()
     {
         { OverlaySpecVersion.Overlay1_0, "1.0.0" },
         { OverlaySpecVersion.Overlay1_1, "1.1.0" },
+        { OverlaySpecVersion.Overlay1_2, "1.2.0" }
     };
+
+    internal Uri? BaseUri { get; set; }
 
     /// <summary>
     /// Parses a local file path or Url into an Open API document.
@@ -116,11 +134,13 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <param name="stream">Stream containing OpenAPI description to parse.</param>
     /// <param name="format">The OpenAPI format to use during parsing.</param>
     /// <param name="settings">The OpenApi reader settings.</param>
+    /// <param name="baseUri">The base URI to use for resolving $self and extends.</param>
     /// <param name="cancellationToken">Propagates information about operation cancelling.</param>
     /// <returns></returns>
-    public static async Task<ReadResult> LoadFromStreamAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, CancellationToken cancellationToken = default)
+    /// <exception cref="ArgumentException">Thrown if the baseUri is not absolute.</exception>
+    public static async Task<ReadResult> LoadFromStreamAsync(Stream stream, string? format = null, OverlayReaderSettings? settings = null, Uri? baseUri = null, CancellationToken cancellationToken = default)
     {
-        return await OverlayModelFactory.LoadFromStreamAsync(stream, format, settings, cancellationToken).ConfigureAwait(false);
+        return await OverlayModelFactory.LoadFromStreamAsync(stream, format, settings, baseUri, cancellationToken).ConfigureAwait(false);
     }
 
 
@@ -151,6 +171,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var i = 0;
         var result = true;
         SetUnsetReferenceHostDocuments();
+        ValidateTargetSelf(jsonNode, overlayDiagnostic);
         foreach (var action in Actions)
         {
             var overlayAction = ResolveAction(action, overlayDiagnostic, i);
@@ -165,13 +186,71 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         return result;
     }
 
+    /// <summary>
+    /// Validates that the target document's self URI matches the extends URI.
+    /// </summary>
+    /// <param name="targetDocument">The target OpenAPI document as a JsonNode.</param>
+    /// <param name="overlayDiagnostic">The diagnostic object to collect validation errors.</param>
+    /// <remarks>
+    /// The rules are:
+    /// - If the target document does not have a self URI, no validation is performed.
+    /// - If the target document self URI is absolute it must match either:
+    ///    1. the absolute extends URI.
+    ///    2. the combination of the relative extends URI and the absolute overlay self URI.
+    ///    3. the combination of the relative extends URI and the absolute base URI (program context).
+    ///    4. the combination of the relative extends URI and the relative overlay self URI and the absolute base URI (program context).
+    /// - If the target document self URI is relative, it must match either:
+    ///    1. the relative extends URI.
+    ///    2. the combination of the relative extends URI and the relative overlay self URI.
+    /// </remarks>
+    private void ValidateTargetSelf(JsonNode targetDocument, OverlayDiagnostic overlayDiagnostic)
+    {
+        if (Extends is null)
+        {
+            return; // No extends property, nothing to validate
+        }
+        if (targetDocument is not JsonObject targetObject ||
+            !targetObject.TryGetPropertyValue(OverlayConstants.DocumentSelfFieldName, out var selfJsonNode) ||
+            selfJsonNode is not JsonValue selfJsonValue ||
+            !selfJsonValue.TryGetValue<string>(out var self) ||
+            !Uri.TryCreate(self, UriKind.RelativeOrAbsolute, out var selfUri))
+        {
+            return; // Self property is missing or invalid
+        }
+
+        var selfMatchingCandidates = GetSelfMatchingCandidates();
+
+        if (selfMatchingCandidates.Contains(selfUri))
+        {
+            return; // The target document's self URI matches one of the valid candidates
+        }
+
+        overlayDiagnostic.Warnings.Add(
+            new OpenApiError(
+                OverlayConstants.DocumentSelfFieldName,
+                $"The target document's self URI '{selfUri}' does not match one of the resolved extends URIs '{string.Join(", ", GetSelfMatchingCandidates())}'."));
+
+    }
+
+    private IEnumerable<Uri> GetSelfMatchingCandidates()
+    {
+        if (Extends is not null)
+        {
+            yield return Extends; // Absolute or relative extends URI is a candidate
+        }
+
+        if (Extends is { IsAbsoluteUri: false } && GetEffectiveBaseUri() is Uri effectiveBaseUri)
+        {
+            yield return new Uri(effectiveBaseUri, Extends);
+        }
+    }
+
     private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)
     {
         if (action is OverlayAction concreteAction)
         {
             return concreteAction;
         }
-#pragma warning disable BOO002
         if (action is OverlayReusableActionReference reusableActionReference)
         {
             return reusableActionReference.GetResolvedAction(overlayDiagnostic, index);
@@ -182,7 +261,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                 OverlayAction.GetPointer(index),
                 $"Only {nameof(OverlayAction)} and {nameof(OverlayReusableActionReference)} instances are supported in {nameof(Actions)}.")
         );
-#pragma warning restore BOO002
 
         return null;
     }
@@ -198,11 +276,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfJsonNode> ApplyToExtendedDocumentAsync(string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(Extends))
+        if (Extends is null)
         {
             throw new InvalidOperationException("The 'extends' property must be set to apply the overlay to an extended document.");
         }
-        return await ApplyToDocumentAsync(Extends, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
+        return await ApplyToDocumentAsync(Extends.ToString(), format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -216,12 +294,12 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfOpenApiDocument> ApplyToExtendedDocumentAndLoadAsync(string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(Extends))
+        if (Extends is null)
         {
             throw new InvalidOperationException("The 'extends' property must be set to apply the overlay to an extended document.");
         }
         var jsonResult = await ApplyToExtendedDocumentAsync(format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-        return LoadDocument(jsonResult, new Uri(Extends), format ?? string.Empty, readerSettings);
+        return LoadDocument(jsonResult, Extends, format ?? string.Empty, readerSettings);
     }
 
     /// <summary>
@@ -236,27 +314,103 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfJsonNode> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(documentPathOrUri);
+        ArgumentNullException.ThrowIfNull(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
 
-        // Load the document from the specified path or URI
-        Stream input;
-        if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        var candidates = GetTargetCandidates(documentPathOrUri).ToArray();
+
+        Stream input = Stream.Null;
+        foreach (var candidate in candidates)
         {
-            using var response = await readerSettings.HttpClient.GetAsync(documentPathOrUri, cancellationToken).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            input = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            // Load the document from the specified path or URI
+            if (candidate.IsAbsoluteUri &&
+                (candidate.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) ||
+                candidate.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase)))
+            {
+                try
+                {
+                    using var response = await readerSettings.HttpClient.GetAsync(candidate, cancellationToken).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    using var webStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                    input = new MemoryStream();
+                    await webStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+                    input.Position = 0;
+                    break;
+                }
+                catch when (candidate != candidates.Last())
+                {
+                    continue; // Try the next candidate if this one fails
+                }
+            }
+            else if (Path.Exists(candidate.OriginalString))
+            {
+                input = new MemoryStream();
+                using var fileStream = new FileStream(candidate.OriginalString, FileMode.Open, FileAccess.Read);
+                await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+                input.Position = 0;
+                break;
+            }
+            else
+            {
+                continue;
+            }
+
         }
-        else
+        if (input == Stream.Null)
         {
-            input = new MemoryStream();
-            using var fileStream = new FileStream(documentPathOrUri, FileMode.Open, FileAccess.Read);
-            await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
+            throw new FileNotFoundException($"The OpenAPI document '{documentPathOrUri}' could not be found.");
         }
         var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
         await input.DisposeAsync().ConfigureAwait(false);
         return result;
+    }
+
+    private IEnumerable<Uri> GetTargetCandidates(string documentPathOrUri)
+    {
+        if (!Uri.TryCreate(documentPathOrUri, UriKind.RelativeOrAbsolute, out var result))
+        {
+            throw new ArgumentException($"The provided document path or URI '{documentPathOrUri}' is not a valid URI.", nameof(documentPathOrUri));
+        }
+
+        if (result.IsAbsoluteUri)
+        {
+            yield return result;
+            yield break;
+        }
+
+        if (GetEffectiveBaseUri() is Uri effectiveBaseUri)
+        {
+            yield return new Uri(effectiveBaseUri, result);
+        }
+
+        yield return result;
+    }
+
+    private Uri? GetEffectiveBaseUri()
+    {
+        if (BaseUri is { IsAbsoluteUri: false })
+        {
+            throw new ArgumentException("Base URI must be absolute.", nameof(BaseUri));
+        }
+
+        if (Self is null)
+        {
+            return BaseUri;
+        }
+
+        return Self.IsAbsoluteUri
+            ? Self
+            : BaseUri is null
+                ? null
+                : new Uri(BaseUri, Self);
+    }
+
+    private static void ThrowIfDocumentUriContainsFragment(Uri? uri, string propertyName)
+    {
+        if (uri is { OriginalString: var originalString } && originalString.Contains('#', StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"The '{propertyName}' property must not contain a fragment identifier ('#'). Found: '{uri}'");
+        }
     }
 
     /// <summary>
@@ -278,7 +432,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
-            uri = new Uri(documentPathOrUri);
+            uri = new(documentPathOrUri);
         }
         else
         {
@@ -396,21 +550,19 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         var lastDocument = documents[^1];
         // Merge actions from all documents
         var actions = new List<IOverlayAction>(documents.SelectMany(static d => d.Actions ?? Array.Empty<IOverlayAction>()));
-
-#pragma warning disable BOO002
         return new OverlayDocument
         {
             Info = lastDocument.Info,
             Extensions = lastDocument.Extensions?.ToDictionary(StringComparer.Ordinal),
-            Extends = lastDocument.Extends,
+            Extends = lastDocument.Extends ?? documents.Select(static d => d.Extends).FirstOrDefault(static e => e is not null),
+            Self = lastDocument.Self ?? documents.Select(static d => d.Self).FirstOrDefault(static s => s is not null),
             Actions = actions,
             Components = documents.Select(static x => x.Components).OfType<OverlayComponents>().ToArray() is { Length: > 0 } components ?
                             OverlayComponents.Combine(components) :
                             null
         };
     }
-#pragma warning restore BOO002
-#pragma warning disable BOO002
+
     internal Dictionary<string, string> GetUnresolvedReusableActionReferences()
     {
         var unresolvedReferences = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -437,7 +589,6 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
 
         return unresolvedReferences;
     }
-#pragma warning restore BOO002
 
     private static string FormatUnresolvedReusableActionReferences(Dictionary<string, string> unresolvedActionReferences)
     {
