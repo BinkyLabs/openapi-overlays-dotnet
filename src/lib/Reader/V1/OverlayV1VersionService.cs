@@ -3,14 +3,11 @@
 
 using System.Text.Json.Nodes;
 
-using Microsoft.OpenApi;
-
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 /// <summary>
 /// The version service for the Overlay 1.0 specification.
 /// </summary>
-#pragma warning disable BOO002
 internal class OverlayV1VersionService : BaseOverlayVersionService
 {
     private static readonly Dictionary<Type, Func<JsonNode, ParsingContext, object?>> _loaders = new()
@@ -31,4 +28,3 @@ internal class OverlayV1VersionService : BaseOverlayVersionService
         return OverlayV1Deserializer.LoadDocument(jsonNode, context);
     }
 }
-#pragma warning restore BOO002

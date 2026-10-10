@@ -1,18 +1,16 @@
 using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
-using BinkyLabs.OpenApi.Overlays.Reader.V1;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
 
 using Microsoft.OpenApi;
 
-using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
-
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-public class OverlayComponentsV1Tests
+public class OverlayComponentsV1_2Tests
 {
     [Fact]
-    public void SerializeAsV1_ShouldWriteCorrectJson()
+    public void SerializeAsV1_2_ShouldWriteCorrectJson()
     {
         // Arrange
         var components = new OverlayComponents
@@ -56,7 +54,7 @@ public class OverlayComponentsV1Tests
 """;
 
         // Act
-        components.SerializeAsV1(writer);
+        components.SerializeAsV1_2(writer);
         var jsonResult = textWriter.ToString();
         var jsonResultObject = JsonNode.Parse(jsonResult);
         var expectedJsonObject = JsonNode.Parse(expectedJson);
@@ -68,16 +66,13 @@ public class OverlayComponentsV1Tests
     [Fact]
     public void Deserialize_ShouldSetPropertiesCorrectly()
     {
-        // Arrange
         var json = """
         {
             "actions": {
                 "setServerUrl": {
                     "fields": {
                         "target": "$.servers[0]",
-                        "update": {
-                            "url": "https://api.example.com"
-                        }
+                        "copy": "$.servers[1]"
                     },
                     "description": "Sets the server URL"
                 }
@@ -87,50 +82,14 @@ public class OverlayComponentsV1Tests
         var jsonNode = JsonNode.Parse(json)!;
         var parsingContext = new ParsingContext(new());
 
-        // Act
-        var components = OverlayV1Deserializer.LoadComponents(jsonNode, parsingContext);
+        var components = OverlayV1_2Deserializer.LoadComponents(jsonNode, parsingContext);
 
-        // Assert
         Assert.NotNull(components.Actions);
         Assert.Single(components.Actions);
-        Assert.True(components.Actions.ContainsKey("setServerUrl"));
         var action = components.Actions["setServerUrl"];
+        Assert.Equal("Sets the server URL", action.Description);
         Assert.NotNull(action.Fields);
         Assert.Equal("$.servers[0]", action.Fields.Target);
-        Assert.NotNull(action.Fields.Update);
-        Assert.Equal("https://api.example.com", action.Fields.Update["url"]?.GetValue<string>());
-        Assert.Equal("Sets the server URL", action.Description);
-    }
-
-    [Fact]
-    public void CombineWith_ShouldMergeActions_AndPreferLaterOnConflicts()
-    {
-        // Arrange
-        var first = new OverlayComponents
-        {
-            Actions = new Dictionary<string, OverlayReusableAction>
-            {
-                { "setTitle", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.title", Update = JsonNode.Parse("\"A\"") } } },
-                { "setVersion", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.version", Update = JsonNode.Parse("\"1.0.0\"") } } }
-            }
-        };
-        var second = new OverlayComponents
-        {
-            Actions = new Dictionary<string, OverlayReusableAction>
-            {
-                { "setVersion", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.version", Update = JsonNode.Parse("\"2.0.0\"") } } },
-                { "setDescription", new OverlayReusableAction { Fields = new OverlayAction { Target = "$.info.description", Update = JsonNode.Parse("\"desc\"") } } }
-            }
-        };
-
-        // Act
-        var result = first.CombineWith(second);
-
-        // Assert
-        Assert.NotNull(result.Actions);
-        Assert.Equal(3, result.Actions.Count);
-        Assert.Equal("$.info.title", result.Actions["setTitle"].Fields?.Target);
-        Assert.Equal("2.0.0", result.Actions["setVersion"].Fields?.Update?.GetValue<string>());
-        Assert.Equal("$.info.description", result.Actions["setDescription"].Fields?.Target);
+        Assert.Equal("$.servers[1]", action.Fields.Copy);
     }
 }
