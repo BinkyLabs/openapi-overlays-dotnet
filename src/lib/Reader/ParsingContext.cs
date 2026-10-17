@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader.V1;
 using BinkyLabs.OpenApi.Overlays.Reader.V1_1;
+using BinkyLabs.OpenApi.Overlays.Reader.V1_2;
 
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
@@ -53,6 +54,7 @@ public class ParsingContext
     }
     private const string OverlayV1Version = "1.0.0";
     private const string OverlayV1_1Version = "1.1.0";
+    private const string OverlayV1_2Version = "1.2.0";
 
     /// <summary>
     /// Initiates the parsing process.  Not thread safe and should only be called once on a parsing context
@@ -79,6 +81,12 @@ public class ParsingContext
                 VersionService = new OverlayV1_1VersionService();
                 doc = VersionService.LoadDocument(jsonNode, this);
                 this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_1;
+                ValidateRequiredFields(doc, version);
+                break;
+            case string version when OverlayV1_2Version.Equals(version, StringComparison.OrdinalIgnoreCase):
+                VersionService = new OverlayV1_2VersionService();
+                doc = VersionService.LoadDocument(jsonNode, this);
+                this.Diagnostic.SpecificationVersion = OverlaySpecVersion.Overlay1_2;
                 ValidateRequiredFields(doc, version);
                 break;
 
@@ -111,6 +119,10 @@ public class ParsingContext
                 break;
             case OverlaySpecVersion.Overlay1_1:
                 VersionService = new OverlayV1_1VersionService();
+                element = this.VersionService.LoadElement<T>(jsonNode, this);
+                break;
+            case OverlaySpecVersion.Overlay1_2:
+                VersionService = new OverlayV1_2VersionService();
                 element = this.VersionService.LoadElement<T>(jsonNode, this);
                 break;
             default:
