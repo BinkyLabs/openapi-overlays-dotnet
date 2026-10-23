@@ -10,7 +10,6 @@ namespace BinkyLabs.OpenApi.Overlays;
 /// Represents a reusable Action Object as defined in the OpenAPI Overlay specification.
 /// See: https://spec.openapis.org/overlay/v1.2.0.html#reusable-action-object
 /// </summary>
-[Experimental("BOO002")]
 public class OverlayReusableAction : IOverlaySerializable, IOverlayExtensible
 {
     /// <summary>
@@ -36,6 +35,10 @@ public class OverlayReusableAction : IOverlaySerializable, IOverlayExtensible
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) =>
         SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, static (w, f) => f.SerializeFieldsAsV1_1(w));
+
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_2, static (w, f) => f.SerializeFieldsAsV1_2(w));
 
     private void SerializeInternal(
         IOpenApiWriter writer,

@@ -35,17 +35,24 @@ public class OverlayAction : IOverlayAction
 
     /// <inheritdoc/>
     public void SerializeAsV1(IOpenApiWriter writer) =>
-        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName, targetRequired: true);
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName, targetProhibited: false);
 
     /// <inheritdoc/>
     public void SerializeAsV1_1(IOpenApiWriter writer) =>
-        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName, targetRequired: true);
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName, targetProhibited: false);
 
     internal void SerializeFieldsAsV1(IOpenApiWriter writer) =>
-        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName, targetRequired: false);
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_0, OverlayConstants.ActionXCopyFieldName, targetProhibited: true);
 
     internal void SerializeFieldsAsV1_1(IOpenApiWriter writer) =>
-        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName, targetRequired: false);
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_1, OverlayConstants.ActionCopyFieldName, targetProhibited: true);
+
+    /// <inheritdoc/>
+    public void SerializeAsV1_2(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_2, OverlayConstants.ActionCopyFieldName, targetProhibited: false);
+
+    internal void SerializeFieldsAsV1_2(IOpenApiWriter writer) =>
+        SerializeInternal(writer, OverlaySpecVersion.Overlay1_2, OverlayConstants.ActionCopyFieldName, targetProhibited: true);
 
     internal static FixedFieldMap<OverlayAction> GetActionFixedFields(string copyFieldName)
     {
@@ -76,18 +83,18 @@ public class OverlayAction : IOverlayAction
         IOpenApiWriter writer,
         OverlaySpecVersion version,
         string copyFieldName,
-        bool targetRequired)
+        bool targetProhibited)
     {
         ArgumentNullException.ThrowIfNull(writer);
         writer.WriteStartObject();
 
-        if (targetRequired)
+        if (targetProhibited && !string.IsNullOrEmpty(Target))
+        {
+            throw new InvalidOperationException($"The 'target' field is prohibited for fields of a reusable action.");
+        }
+        else if (!targetProhibited)
         {
             writer.WriteRequiredProperty(OverlayConstants.ActionTargetFieldName, Target);
-        }
-        else
-        {
-            writer.WriteProperty(OverlayConstants.ActionTargetFieldName, Target);
         }
 
         writer.WriteProperty(OverlayConstants.ActionDescriptionFieldName, Description);
