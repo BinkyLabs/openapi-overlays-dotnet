@@ -136,4 +136,66 @@ public class OverlayReusableActionV1_2Tests
         Assert.NotNull(action.Fields);
         Assert.Equal("$.paths['/pets']", action.Fields.Copy);
     }
+
+    [Fact]
+    public async Task ParseAsync_WithReusableActionTarget_ShouldReportErrorAtFields()
+    {
+        var json = """
+            {
+              "overlay": "1.2.0",
+              "info": { "title": "Test Overlay", "version": "1.0.0" },
+              "components": {
+                "actions": {
+                  "removeDescription": {
+                    "fields": {
+                      "target": "$.info.description",
+                      "remove": true
+                    }
+                  }
+                }
+              },
+              "actions": [
+                { "target": "$.info.title", "update": "Updated title" }
+              ]
+            }
+            """;
+
+        var (document, diagnostic) = await OverlayDocument.ParseAsync(
+            json,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(document);
+        Assert.NotNull(document.Components?.Actions);
+        var fields = document.Components.Actions["removeDescription"].Fields;
+        Assert.NotNull(fields);
+        Assert.Equal("$.info.description", fields.Target);
+        Assert.True(fields.Remove);
+        Assert.NotNull(document.Actions);
+        Assert.Equal("$.info.title", Assert.Single(document.Actions).Target);
+        Assert.NotNull(diagnostic);
+        var error = Assert.Single(diagnostic.Errors);
+        Assert.Equal("#/components/actions/removeDescription/fields", error.Pointer);
+        Assert.Equal("Target is specified for reusable action: '$.info.description'", error.Message);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Deserialize_WithMissingOrEmptyReusableActionTarget_ShouldNotReportError(string? target)
+    {
+        var fields = new JsonObject { ["remove"] = true };
+        if (target is not null)
+        {
+            fields["target"] = target;
+        }
+        var jsonNode = new JsonObject { ["fields"] = fields };
+        var parsingContext = new ParsingContext(new());
+
+        var action = OverlayV1_2Deserializer.LoadReusableAction(jsonNode, parsingContext);
+
+        Assert.NotNull(action.Fields);
+        Assert.Equal(target, action.Fields.Target);
+        Assert.True(action.Fields.Remove);
+        Assert.Empty(parsingContext.Diagnostic.Errors);
+    }
 }
