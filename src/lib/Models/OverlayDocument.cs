@@ -554,8 +554,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             Info = lastDocument.Info,
             Extensions = lastDocument.Extensions?.ToDictionary(StringComparer.Ordinal),
-            Extends = lastDocument.Extends ?? documents.Select(static d => d.Extends).FirstOrDefault(static e => e is not null),
-            Self = lastDocument.Self ?? documents.Select(static d => d.Self).FirstOrDefault(static s => s is not null),
+            Extends = lastDocument.Extends ?? documents.Select(static d => d.Extends).LastOrDefault(static e => e is not null),
+            Self = lastDocument.Self ?? documents.Select(static d => d.Self).LastOrDefault(static s => s is not null),
             Actions = actions,
             Components = documents.Select(static x => x.Components).OfType<OverlayComponents>().ToArray() is { Length: > 0 } components ?
                             OverlayComponents.Combine(components) :
