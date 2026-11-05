@@ -7,8 +7,7 @@ namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 internal static partial class OverlayV1_1Deserializer
 {
     public static readonly FixedFieldMap<OverlayReusableActionReference> ReusableActionReferenceFixedFields = new(
-        OverlayV1Deserializer.ReusableActionReferenceFixedFields,
-        [OverlayConstants.ActionXCopyFieldName])
+        OverlayV1Deserializer.ReusableActionReferenceFixedFields)
     {
     };
 
