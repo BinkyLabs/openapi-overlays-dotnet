@@ -165,7 +165,8 @@ public class OverlayReusableActionV1_2Tests
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(document);
-        Assert.NotNull(document.Components?.Actions);
+        Assert.NotNull(document.Components);
+        Assert.NotNull(document.Components.Actions);
         var fields = document.Components.Actions["removeDescription"].Fields;
         Assert.NotNull(fields);
         Assert.Equal("$.info.description", fields.Target);

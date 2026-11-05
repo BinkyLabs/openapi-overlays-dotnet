@@ -1679,7 +1679,8 @@ public sealed class OverlayApplyTests : IDisposable
     private static void AssertExternalSchemaReferenceResolves(OpenApiDocument document, Uri targetUri)
     {
         Assert.Equal(targetUri, document.BaseUri);
-        Assert.NotNull(document.Components?.Schemas);
+        Assert.NotNull(document.Components);
+        Assert.NotNull(document.Components.Schemas);
         var reference = Assert.IsType<OpenApiSchemaReference>(document.Components.Schemas["Pet"]);
         var externalNode = JsonNode.Parse("""
             {
@@ -1699,7 +1700,8 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.NotNull(externalDocument);
         Assert.NotNull(diagnostic);
         Assert.Empty(diagnostic.Errors);
-        Assert.NotNull(externalDocument.Components?.Schemas);
+        Assert.NotNull(externalDocument.Components);
+        Assert.NotNull(externalDocument.Components.Schemas);
         var schema = externalDocument.Components.Schemas["Pet"];
         Assert.NotNull(document.Workspace);
         document.Workspace.RegisterComponents(externalDocument);
