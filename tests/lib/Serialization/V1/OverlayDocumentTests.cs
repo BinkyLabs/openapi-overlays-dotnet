@@ -835,6 +835,30 @@ public sealed class OverlayDocumentTests
         Assert.Empty(result.Actions);
     }
     [Fact]
+    public void Combine_ShouldUseLastNonNullExtendsAndSelf()
+    {
+        var firstDocument = new OverlayDocument
+        {
+            Extends = new Uri("first-openapi.yaml", UriKind.Relative),
+            Self = new Uri("first-overlay.yaml", UriKind.Relative)
+        };
+        var secondDocument = new OverlayDocument
+        {
+            Self = new Uri("latest-overlay.yaml", UriKind.Relative)
+        };
+        var thirdDocument = new OverlayDocument
+        {
+            Extends = new Uri("latest-openapi.yaml", UriKind.Relative)
+        };
+        var lastDocument = new OverlayDocument();
+
+        var result = OverlayDocument.Combine(firstDocument, secondDocument, thirdDocument, lastDocument);
+
+        Assert.Equal(thirdDocument.Extends, result.Extends);
+        Assert.Equal(secondDocument.Self, result.Self);
+    }
+
+    [Fact]
     public void CombinesActionsInTheRightOrder()
     {
         // Given
