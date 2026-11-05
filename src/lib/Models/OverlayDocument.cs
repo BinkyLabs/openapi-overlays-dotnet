@@ -322,6 +322,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         Stream input = Stream.Null;
         foreach (var candidate in candidates)
         {
+            var filePath = candidate.IsAbsoluteUri && candidate.IsFile ? candidate.LocalPath : candidate.OriginalString;
             // Load the document from the specified path or URI
             if (candidate.IsAbsoluteUri &&
                 (candidate.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) ||
@@ -342,10 +343,10 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                     continue; // Try the next candidate if this one fails
                 }
             }
-            else if (Path.Exists(candidate.OriginalString))
+            else if (Path.Exists(filePath))
             {
                 input = new MemoryStream();
-                using var fileStream = new FileStream(candidate.OriginalString, FileMode.Open, FileAccess.Read);
+                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
                 input.Position = 0;
                 break;

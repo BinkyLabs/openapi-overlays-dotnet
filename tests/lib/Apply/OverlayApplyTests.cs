@@ -491,6 +491,46 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Equal([targetUri], handler.RequestUris);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ApplyToDocumentAsync_WithFileUriTarget_ShouldLoadLocalFile(bool explicitFileUri)
+    {
+        var directory = Directory.CreateTempSubdirectory("overlay-target-");
+        try
+        {
+            var overlayPath = Path.Combine(directory.FullName, "overlay.json");
+            var targetPath = Path.Combine(directory.FullName, "target file.json");
+            await File.WriteAllTextAsync(
+                overlayPath,
+                CreateOverlayJson("target file.json"),
+                TestContext.Current.CancellationToken);
+            await File.WriteAllTextAsync(
+                targetPath,
+                CreateTargetDocument(null).ToJsonString(),
+                TestContext.Current.CancellationToken);
+            var readResult = await OverlayDocument.LoadFromUrlAsync(
+                overlayPath,
+                token: TestContext.Current.CancellationToken);
+            var overlayDocument = Assert.IsType<OverlayDocument>(readResult.Document);
+
+            var result = explicitFileUri
+                ? await overlayDocument.ApplyToDocumentAsync(
+                    new Uri(targetPath).AbsoluteUri,
+                    cancellationToken: TestContext.Current.CancellationToken)
+                : await overlayDocument.ApplyToExtendedDocumentAsync(
+                    cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.True(result.IsSuccessful);
+            Assert.Empty(result.Diagnostic.Errors);
+            Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     [Fact]
     public async Task ApplyToDocumentAsync_WithSelfAndBaseUri_ShouldResolveAgainstSelf()
     {
