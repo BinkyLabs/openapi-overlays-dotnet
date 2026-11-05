@@ -314,7 +314,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfJsonNode> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(documentPathOrUri);
+        ArgumentException.ThrowIfNullOrWhiteSpace(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
 
         var candidates = GetTargetCandidates(documentPathOrUri).ToArray();
