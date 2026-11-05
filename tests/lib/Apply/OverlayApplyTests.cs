@@ -3,6 +3,9 @@ using System.Text.Json.Nodes;
 
 using BinkyLabs.OpenApi.Overlays.Reader;
 
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Reader;
+
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
 public sealed class OverlayApplyTests : IDisposable
@@ -592,6 +595,108 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(result.Diagnostic.Errors);
         Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
         Assert.Equal([selfTargetUri], handler.RequestUris);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task ApplyAndLoad_WithRelativeHttpTarget_ShouldResolveExternalReferences(bool useExtends, bool useSelf)
+    {
+        var targetUri = new Uri(useSelf
+            ? "https://canonical.example.com/openapi.json"
+            : "https://example.com/openapi.json");
+        var handler = new TestHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(TargetDocumentWithExternalSchemaReference, System.Text.Encoding.UTF8, "application/json")
+        });
+        using var httpClient = new HttpClient(handler);
+        var settings = new OverlayReaderSettings { HttpClient = httpClient };
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("../openapi.json", UriKind.Relative),
+            useSelf ? new Uri("https://canonical.example.com/overlays/overlay.json") : null);
+        overlayDocument.BaseUri = new Uri("https://example.com/overlays/overlay.json");
+
+        var result = useExtends
+            ? await overlayDocument.ApplyToExtendedDocumentAndLoadAsync(
+                readerSettings: settings,
+                cancellationToken: TestContext.Current.CancellationToken)
+            : await overlayDocument.ApplyToDocumentAndLoadAsync(
+                "../openapi.json",
+                readerSettings: settings,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccessful);
+        Assert.Empty(result.Diagnostic.Errors);
+        Assert.NotNull(result.Document);
+        AssertExternalSchemaReferenceResolves(result.Document, targetUri);
+        Assert.Equal([targetUri], handler.RequestUris);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ApplyAndLoad_WithRelativeFileTarget_ShouldResolveExternalReferences(bool useExtends)
+    {
+        var directory = Directory.CreateTempSubdirectory("overlay-references-");
+        try
+        {
+            var targetPath = Path.Combine(directory.FullName, "openapi.json");
+            await File.WriteAllTextAsync(targetPath, TargetDocumentWithExternalSchemaReference, TestContext.Current.CancellationToken);
+            var overlayDocument = CreateOverlayDocument(new Uri("openapi.json", UriKind.Relative));
+            overlayDocument.BaseUri = new Uri(Path.Combine(directory.FullName, "overlay.json"));
+
+            var result = useExtends
+                ? await overlayDocument.ApplyToExtendedDocumentAndLoadAsync(cancellationToken: TestContext.Current.CancellationToken)
+                : await overlayDocument.ApplyToDocumentAndLoadAsync("openapi.json", cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.True(result.IsSuccessful);
+            Assert.Empty(result.Diagnostic.Errors);
+            Assert.NotNull(result.Document);
+            AssertExternalSchemaReferenceResolves(result.Document, new Uri(targetPath));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ApplyAndLoad_WhenHttpCandidateFails_ShouldUseLocalFallbackForExternalReferences(bool useExtends)
+    {
+        var targetPath = Path.Combine(AppContext.BaseDirectory, $"fallback-{Guid.NewGuid():N}.json");
+        var relativePath = Path.GetRelativePath(Environment.CurrentDirectory, targetPath);
+        try
+        {
+            await File.WriteAllTextAsync(targetPath, TargetDocumentWithExternalSchemaReference, TestContext.Current.CancellationToken);
+            var handler = new TestHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.NotFound));
+            using var httpClient = new HttpClient(handler);
+            var settings = new OverlayReaderSettings { HttpClient = httpClient };
+            var overlayDocument = CreateOverlayDocument(new Uri(relativePath, UriKind.Relative));
+            overlayDocument.BaseUri = new Uri("https://example.com/overlays/overlay.json");
+
+            var result = useExtends
+                ? await overlayDocument.ApplyToExtendedDocumentAndLoadAsync(
+                    readerSettings: settings,
+                    cancellationToken: TestContext.Current.CancellationToken)
+                : await overlayDocument.ApplyToDocumentAndLoadAsync(
+                    relativePath,
+                    readerSettings: settings,
+                    cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.True(result.IsSuccessful);
+            Assert.Empty(result.Diagnostic.Errors);
+            Assert.NotNull(result.Document);
+            AssertExternalSchemaReferenceResolves(result.Document, new Uri(targetPath));
+            Assert.Equal([new Uri(overlayDocument.BaseUri, relativePath)], handler.RequestUris);
+        }
+        finally
+        {
+            File.Delete(targetPath);
+        }
     }
 
     [Fact]
@@ -1556,6 +1661,53 @@ public sealed class OverlayApplyTests : IDisposable
               ]
             }
             """;
+    }
+
+    private const string TargetDocumentWithExternalSchemaReference = """
+        {
+          "openapi": "3.1.0",
+          "info": { "title": "Test API", "version": "1.0.0" },
+          "paths": {},
+          "components": {
+            "schemas": {
+              "Pet": { "$ref": "schemas/common.json#/components/schemas/Pet" }
+            }
+          }
+        }
+        """;
+
+    private static void AssertExternalSchemaReferenceResolves(OpenApiDocument document, Uri targetUri)
+    {
+        Assert.Equal(targetUri, document.BaseUri);
+        Assert.NotNull(document.Components?.Schemas);
+        var reference = Assert.IsType<OpenApiSchemaReference>(document.Components.Schemas["Pet"]);
+        var externalNode = JsonNode.Parse("""
+            {
+              "openapi": "3.1.0",
+              "info": { "title": "Shared schemas", "version": "1.0.0" },
+              "paths": {},
+              "components": {
+                "schemas": {
+                  "Pet": { "type": "object", "description": "Resolved external schema" }
+                }
+              }
+            }
+            """);
+        Assert.NotNull(externalNode);
+        var (externalDocument, diagnostic) = new OpenApiJsonReader().Read(
+            externalNode, new Uri(targetUri, "schemas/common.json"), new OpenApiReaderSettings());
+        Assert.NotNull(externalDocument);
+        Assert.NotNull(diagnostic);
+        Assert.Empty(diagnostic.Errors);
+        Assert.NotNull(externalDocument.Components?.Schemas);
+        var schema = externalDocument.Components.Schemas["Pet"];
+        Assert.NotNull(document.Workspace);
+        document.Workspace.RegisterComponents(externalDocument);
+        var externalResource = reference.Reference.ExternalResource;
+        Assert.NotNull(externalResource);
+        document.Workspace.AddDocumentId(externalResource, new Uri(document.BaseUri, externalResource));
+
+        Assert.Same(schema, reference.Target);
     }
 
     private static HttpResponseMessage CreateTargetResponse()

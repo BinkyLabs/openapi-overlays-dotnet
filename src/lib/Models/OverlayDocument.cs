@@ -344,8 +344,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             throw new InvalidOperationException("The 'extends' property must be set to apply the overlay to an extended document.");
         }
-        var jsonResult = await ApplyToExtendedDocumentAsync(format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-        return LoadDocument(jsonResult, Extends, format ?? string.Empty, readerSettings);
+        return await ApplyToDocumentAndLoadAsync(Extends.ToString(), format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -360,12 +359,20 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfJsonNode> ApplyToDocumentAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
+        var (result, _) = await ApplyToDocumentWithLocationAsync(documentPathOrUri, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
+        return result;
+    }
+
+    private async Task<(OverlayApplicationResultOfJsonNode Result, Uri Location)> ApplyToDocumentWithLocationAsync(
+        string documentPathOrUri, string? format, OverlayReaderSettings? readerSettings, bool strict, CancellationToken cancellationToken)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(documentPathOrUri);
         readerSettings ??= new OverlayReaderSettings();
 
         var candidates = GetTargetCandidates(documentPathOrUri).ToArray();
 
-        Stream input = Stream.Null;
+        await using var input = new MemoryStream();
+        Uri? location = null;
         foreach (var candidate in candidates)
         {
             var filePath = candidate.IsAbsoluteUri && candidate.IsFile ? candidate.LocalPath : candidate.OriginalString;
@@ -379,22 +386,24 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                     using var response = await readerSettings.HttpClient.GetAsync(candidate, cancellationToken).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
                     using var webStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-                    input = new MemoryStream();
                     await webStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
                     input.Position = 0;
+                    location = candidate;
                     break;
                 }
                 catch (Exception exception) when (exception is not OperationCanceledException && candidate != candidates.Last())
                 {
+                    input.SetLength(0);
+                    input.Position = 0;
                     continue; // Try the next candidate if this one fails
                 }
             }
             else if (Path.Exists(filePath))
             {
-                input = new MemoryStream();
                 using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 await fileStream.CopyToAsync(input, cancellationToken).ConfigureAwait(false);
                 input.Position = 0;
+                location = new Uri(Path.GetFullPath(filePath), UriKind.Absolute);
                 break;
             }
             else
@@ -403,13 +412,12 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             }
 
         }
-        if (input == Stream.Null)
+        if (location is null)
         {
             throw new FileNotFoundException($"The OpenAPI document '{documentPathOrUri}' could not be found.");
         }
         var result = await ApplyToDocumentStreamAsync(input, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-        await input.DisposeAsync().ConfigureAwait(false);
-        return result;
+        return (result, location);
     }
 
     private IEnumerable<Uri> GetTargetCandidates(string documentPathOrUri)
@@ -472,23 +480,8 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
     /// <returns>The OpenAPI document after applying the action.</returns>
     public async Task<OverlayApplicationResultOfOpenApiDocument> ApplyToDocumentAndLoadAsync(string documentPathOrUri, string? format = default, OverlayReaderSettings? readerSettings = default, bool strict = false, CancellationToken cancellationToken = default)
     {
-        var jsonResult = await ApplyToDocumentAsync(documentPathOrUri, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
-
-        // Convert file paths to absolute paths before creating URI to handle relative paths correctly
-        Uri uri;
-        if (documentPathOrUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            documentPathOrUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            uri = new(documentPathOrUri);
-        }
-        else
-        {
-            // Convert to absolute path and then create a file URI
-            var absolutePath = Path.GetFullPath(documentPathOrUri);
-            uri = new Uri(absolutePath, UriKind.Absolute);
-        }
-
-        return LoadDocument(jsonResult, uri, format ?? string.Empty, readerSettings);
+        var (jsonResult, location) = await ApplyToDocumentWithLocationAsync(documentPathOrUri, format, readerSettings, strict, cancellationToken).ConfigureAwait(false);
+        return LoadDocument(jsonResult, location, format ?? string.Empty, readerSettings);
     }
 
     /// <summary>
