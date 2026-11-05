@@ -92,7 +92,7 @@ public class OverlayReusableActionReferenceV1_1Tests
     }
 
     [Fact]
-    public void SerializeAsV1_2_ShouldThrowOnMissingReferenceTarget()
+    public void SerializeAsV1_1_ShouldThrowOnMissingReferenceTarget()
     {
         // Arrange
         var reference = new OverlayReusableActionReference
@@ -107,7 +107,7 @@ public class OverlayReusableActionReferenceV1_1Tests
         var writer = new OpenApiJsonWriter(textWriter);
 
         // Act + Assert
-        var exception = Assert.Throws<InvalidOperationException>(() => reference.SerializeAsV1_2(writer));
+        var exception = Assert.Throws<InvalidOperationException>(() => reference.SerializeAsV1_1(writer));
         Assert.Contains("cannot be null or empty", exception.Message);
     }
 
