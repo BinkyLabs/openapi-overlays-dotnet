@@ -554,6 +554,23 @@ public sealed class OverlayApplyTests : IDisposable
     }
 
     [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("\t\r\n")]
+    [InlineData("\u00a0")]
+    public async Task ApplyToDocumentAsync_WithEmptyOrWhitespaceTarget_ShouldRejectArgument(string documentPathOrUri)
+    {
+        var overlayDocument = CreateOverlayDocument();
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => overlayDocument.ApplyToDocumentAsync(
+                documentPathOrUri,
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("documentPathOrUri", exception.ParamName);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task ApplyToDocumentAsync_WhenHttpCandidateIsCanceled_ShouldNotTryFallback(bool taskCanceled)
