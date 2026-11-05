@@ -553,6 +553,31 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Contains(missingTarget, exception.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ApplyToDocumentAsync_WhenHttpCandidateIsCanceled_ShouldNotTryFallback(bool taskCanceled)
+    {
+        var target = $"missing-{Guid.NewGuid():N}.json";
+        var targetUri = new Uri($"https://example.com/overlays/{target}");
+        OperationCanceledException cancellation = taskCanceled
+            ? new TaskCanceledException("The target request was canceled.")
+            : new OperationCanceledException("The target request was canceled.");
+        var handler = new TestHttpMessageHandler(_ => throw cancellation);
+        using var httpClient = new HttpClient(handler);
+        var overlayDocument = CreateOverlayDocument();
+        overlayDocument.BaseUri = new Uri("https://example.com/overlays/overlay.json");
+
+        var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => overlayDocument.ApplyToDocumentAsync(
+                target,
+                readerSettings: new OverlayReaderSettings { HttpClient = httpClient },
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Same(cancellation, exception);
+        Assert.Equal([targetUri], handler.RequestUris);
+    }
+
     [Fact]
     public async Task ApplyToDocumentAsync_ContinuesToTheNextActionWhenOneFails()
     {
