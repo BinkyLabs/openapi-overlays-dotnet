@@ -109,7 +109,7 @@ public static class OverlayConstants
     public const string DocumentSelfFieldName = "$self";
 
     /// <summary>
-    /// Field: OverlayDocument.Self (v1.2)
+    /// Field: OverlayDocument.Self (v1.1-1.0)
     /// </summary>
     public const string DocumentXSelfFieldName = "x-$self";
 }
