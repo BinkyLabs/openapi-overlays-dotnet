@@ -137,6 +137,45 @@ public sealed class OverlayApplyTests : IDisposable
         Assert.Empty(overlayDiagnostic.Warnings);
     }
 
+    [Theory]
+    [InlineData("overlays/overlay.yaml", "../openapi.yaml", "openapi.yaml")]
+    [InlineData("overlays/overlay.yaml", "./nested/../openapi.yaml", "overlays/openapi.yaml")]
+    [InlineData("../specs/overlays/overlay.yaml", "../openapi.yaml", "../specs/openapi.yaml")]
+    [InlineData("overlays/overlay.yaml?version=1", "../openapi.yaml?version=2", "openapi.yaml?version=2")]
+    [InlineData("/overlays/overlay.yaml", "../openapi.yaml", "/openapi.yaml")]
+    [InlineData("overlays/overlay.yaml", "subdir/..", "overlays/")]
+    [InlineData("overlays/overlay.yaml?version=1", "?version=2", "overlays/overlay.yaml?version=2")]
+    public void ApplyToDocument_WithRelativeSelfAndExtends_ShouldAcceptNormalizedTargetSelf(
+        string self, string extends, string targetSelf)
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri(extends, UriKind.Relative),
+            new Uri(self, UriKind.Relative));
+        var jsonNode = CreateTargetDocument(targetSelf);
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Empty(overlayDiagnostic.Errors);
+        Assert.Empty(overlayDiagnostic.Warnings);
+    }
+
+    [Fact]
+    public void ApplyToDocument_WithRelativeSelfAndExtends_ShouldWarnForDifferentTargetSelf()
+    {
+        var overlayDocument = CreateOverlayDocument(
+            new Uri("../openapi.yaml", UriKind.Relative),
+            new Uri("../specs/overlays/overlay.yaml", UriKind.Relative));
+        var jsonNode = CreateTargetDocument("specs/openapi.yaml");
+        var overlayDiagnostic = new OverlayDiagnostic();
+
+        var result = overlayDocument.ApplyToDocument(jsonNode, overlayDiagnostic);
+
+        Assert.True(result);
+        Assert.Equal("$self", Assert.Single(overlayDiagnostic.Warnings).Pointer);
+    }
+
     [Fact]
     public async Task LoadFromStreamAsync_ShouldResolveRelativeExtendsAgainstBaseUri()
     {

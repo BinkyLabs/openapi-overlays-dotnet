@@ -243,6 +243,52 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
         {
             yield return new Uri(effectiveBaseUri, Extends);
         }
+
+        if (Extends is { IsAbsoluteUri: false } && Self is { IsAbsoluteUri: false })
+        {
+            yield return CombineRelativeUris(Self, Extends);
+        }
+    }
+
+    private static Uri CombineRelativeUris(Uri self, Uri target)
+    {
+        var selfPath = self.OriginalString.Split('?', '#')[0];
+        var targetReference = target.OriginalString;
+        var suffixIndex = targetReference.IndexOfAny(['?', '#']);
+        var targetPath = suffixIndex < 0 ? targetReference : targetReference[..suffixIndex];
+        var suffix = suffixIndex < 0 ? string.Empty : targetReference[suffixIndex..];
+        var path = targetPath.Length == 0 ? selfPath :
+            targetPath.StartsWith('/') ? targetPath :
+            selfPath[..(selfPath.LastIndexOf('/') + 1)] + targetPath;
+        var rooted = path.StartsWith('/');
+        var segments = new List<string>();
+
+        foreach (var segment in path.Split('/'))
+        {
+            if (segment == ".")
+            {
+                continue;
+            }
+            if (segment == "..")
+            {
+                if (segments.Count > 0 && segments[^1] != ".." && !(rooted && segments.Count == 1))
+                {
+                    segments.RemoveAt(segments.Count - 1);
+                    continue;
+                }
+                if (rooted)
+                {
+                    continue;
+                }
+            }
+            segments.Add(segment);
+        }
+
+        if (path.EndsWith("/.", StringComparison.Ordinal) || path.EndsWith("/..", StringComparison.Ordinal))
+        {
+            segments.Add(string.Empty);
+        }
+        return new Uri(string.Join('/', segments) + suffix, UriKind.Relative);
     }
 
     private OverlayAction? ResolveAction(IOverlayAction action, OverlayDiagnostic overlayDiagnostic, int index)
