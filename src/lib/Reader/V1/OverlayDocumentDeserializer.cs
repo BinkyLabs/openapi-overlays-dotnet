@@ -4,16 +4,16 @@ using Microsoft.OpenApi;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1;
 
-#pragma warning disable BOO002
 internal static partial class OverlayV1Deserializer
 {
     public static readonly FixedFieldMap<OverlayDocument> DocumentFixedFields = new()
     {
         { OverlayConstants.DocumentOverlayFieldName, (o, v, _) => o.Overlay = v.GetScalarValue() },
-        { OverlayConstants.DocumentExtendsFieldName, (o, v, _) => o.Extends = v.GetScalarValue() },
+        { OverlayConstants.DocumentExtendsFieldName, (o, v, c) => o.Extends = LoadDocumentUri(v, c, OverlayConstants.DocumentExtendsFieldName) },
         { OverlayConstants.DocumentInfoFieldName, (o, v, c) => o.Info = LoadInfo(v, c) },
         { OverlayConstants.DocumentActionsFieldName, (o, v, c) => o.Actions = v.CreateList<IOverlayAction>(LoadActionOrReference, c) },
-        { OverlayConstants.DocumentXComponentsFieldName, (o, v, c) => o.Components = LoadComponents(v, c) }
+        { OverlayConstants.DocumentXComponentsFieldName, (o, v, c) => o.Components = LoadComponents(v, c) },
+        { OverlayConstants.DocumentXSelfFieldName, (o, v, c) => o.Self = LoadDocumentUri(v, c, OverlayConstants.DocumentXSelfFieldName) }
     };
     public static PatternFieldMap<OverlayDocument> GetDocumentPatternFields(OverlaySpecVersion version) =>
     new()
@@ -31,6 +31,23 @@ internal static partial class OverlayV1Deserializer
         return document;
     }
 
+    internal static Uri? LoadDocumentUri(JsonNode node, ParsingContext context, string fieldName)
+    {
+        var rawUri = node.GetScalarValue();
+        if (rawUri is null || !Uri.TryCreate(rawUri, UriKind.RelativeOrAbsolute, out var result))
+        {
+            context.Diagnostic.Errors.Add(new OpenApiError(context.GetLocation(), $"The '{fieldName}' property must be a valid URI-reference."));
+            return null;
+        }
+
+        if (rawUri.Contains('#', StringComparison.Ordinal))
+        {
+            context.Diagnostic.Errors.Add(new OpenApiError(context.GetLocation(), $"The '{fieldName}' property must not contain a fragment identifier ('#'). Found: '{rawUri}'."));
+        }
+
+        return result;
+    }
+
     private static IOverlayAction LoadActionOrReference(JsonNode node, ParsingContext context)
     {
         var mapNode = node.CheckMapNode("Action", context);
@@ -39,4 +56,3 @@ internal static partial class OverlayV1Deserializer
             : LoadAction(mapNode, context);
     }
 }
-#pragma warning restore BOO002

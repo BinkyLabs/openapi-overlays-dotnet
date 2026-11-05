@@ -27,6 +27,60 @@ public sealed class OverlayModelFactoryTests
         actions: []
         """;
 
+    [Theory]
+    [InlineData("1.0.0", "https://example.com/overlays/test.yaml")]
+    [InlineData("1.0.0", "../overlays/test.yaml")]
+    [InlineData("1.1.0", "https://example.com/overlays/test.yaml")]
+    [InlineData("1.1.0", "../overlays/test.yaml")]
+    public async Task ParseAsync_WithLegacySelf_ShouldPopulateSelf(string version, string self)
+    {
+        var json = $$"""
+            {
+              "overlay": "{{version}}",
+              "info": { "title": "Test Overlay", "version": "1.0.0" },
+              "x-$self": "{{self}}",
+              "actions": []
+            }
+            """;
+
+        var (document, diagnostic) = await OverlayDocument.ParseAsync(
+            json,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(document);
+        Assert.Equal(new Uri(self, UriKind.RelativeOrAbsolute), document.Self);
+        Assert.False(document.Extensions?.ContainsKey("x-$self") == true);
+        Assert.NotNull(diagnostic);
+        Assert.Empty(diagnostic.Errors);
+    }
+
+    [Theory]
+    [InlineData("1.0.0", "https://[invalid", "must be a valid URI-reference")]
+    [InlineData("1.1.0", "https://[invalid", "must be a valid URI-reference")]
+    [InlineData("1.0.0", "https://example.com/overlay.yaml#fragment", "must not contain a fragment identifier")]
+    [InlineData("1.1.0", "https://example.com/overlay.yaml#fragment", "must not contain a fragment identifier")]
+    public async Task ParseAsync_WithInvalidLegacySelf_ShouldReportError(string version, string self, string expectedMessage)
+    {
+        var json = $$"""
+            {
+              "overlay": "{{version}}",
+              "info": { "title": "Test Overlay", "version": "1.0.0" },
+              "x-$self": "{{self}}",
+              "actions": []
+            }
+            """;
+
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(
+            json,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(diagnostic);
+        var error = Assert.Single(diagnostic.Errors);
+        Assert.Equal("#/x-$self", error.Pointer);
+        Assert.Contains("'x-$self'", error.Message, StringComparison.Ordinal);
+        Assert.Contains(expectedMessage, error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task CanLoadANonSeekableStreamInJsonAndDetectFormat()
     {
@@ -156,6 +210,61 @@ public sealed class OverlayModelFactoryTests
         Assert.NotNull(result.Document);
         Assert.NotNull(result.Document.Info);
         Assert.Equal("Sample Overlay", result.Document.Info.Title);
+    }
+
+    [Fact]
+    public async Task LoadFromStreamAsync_SetsBaseUri()
+    {
+        using var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(documentJson));
+        var baseUri = new Uri("https://example.com/overlays/overlay.json");
+
+        var result = await OverlayModelFactory.LoadFromStreamAsync(
+            memoryStream,
+            baseUri: baseUri,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result.Document);
+        Assert.Equal(baseUri, result.Document.BaseUri);
+    }
+
+    [Fact]
+    public async Task LoadFromStreamAsync_RejectsRelativeBaseUri()
+    {
+        using var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(documentJson));
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => OverlayModelFactory.LoadFromStreamAsync(
+                memoryStream,
+                baseUri: new Uri("overlays/overlay.json", UriKind.Relative),
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("baseUri", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task LoadFormUrlAsync_SetsAbsoluteFileBaseUri()
+    {
+        var overlayPath = Path.ChangeExtension(Path.GetTempFileName(), ".json");
+        try
+        {
+            await File.WriteAllTextAsync(
+                overlayPath,
+                documentJson,
+                TestContext.Current.CancellationToken);
+
+            var result = await OverlayModelFactory.LoadFormUrlAsync(
+                overlayPath,
+                token: TestContext.Current.CancellationToken);
+
+            Assert.NotNull(result.Document);
+            Assert.Equal(
+                new Uri(Path.GetFullPath(overlayPath), UriKind.Absolute),
+                result.Document.BaseUri);
+        }
+        finally
+        {
+            File.Delete(overlayPath);
+        }
     }
 
     public sealed class AsyncOnlyStream : Stream

@@ -4,17 +4,11 @@ using BinkyLabs.OpenApi.Overlays.Reader.V1;
 
 namespace BinkyLabs.OpenApi.Overlays.Reader.V1_1;
 
-#pragma warning disable BOO002
 internal static partial class OverlayV1_1Deserializer
 {
     public static readonly FixedFieldMap<OverlayReusableActionReference> ReusableActionReferenceFixedFields = new(
-        OverlayV1Deserializer.ReusableActionReferenceFixedFields,
-        [OverlayConstants.ActionXCopyFieldName])
+        OverlayV1Deserializer.ReusableActionReferenceFixedFields)
     {
-        {
-            OverlayConstants.ActionCopyFieldName,
-            (o, v, _) => o.Copy = v.GetScalarValue()
-        }
     };
 
     public static readonly PatternFieldMap<OverlayReusableActionReference> ReusableActionReferencePatternFields =
@@ -28,4 +22,3 @@ internal static partial class OverlayV1_1Deserializer
         return action;
     }
 }
-#pragma warning restore BOO002

@@ -9,7 +9,6 @@ using ParsingContext = BinkyLabs.OpenApi.Overlays.Reader.ParsingContext;
 
 namespace BinkyLabs.OpenApi.Overlays.Tests;
 
-#pragma warning disable BOO002
 public class OverlayReusableActionV1Tests
 {
     [Fact]
@@ -97,5 +96,21 @@ public class OverlayReusableActionV1Tests
         Assert.Equal("Test Description", action.Fields.Description);
         Assert.True(action.Fields.Remove);
     }
+    [Fact]
+    public void UsingTargetIsProhibitedForReusableActions()
+    {
+        // Given
+        var action = new OverlayReusableAction
+        {
+            Fields = new OverlayAction
+            {
+                Target = "Foo"
+            }
+        };
+        using var textWriter = new StringWriter();
+        var writer = new OpenApiJsonWriter(textWriter);
+
+        // Then
+        Assert.Throws<InvalidOperationException>(() => action.SerializeAsV1(writer));
+    }
 }
-#pragma warning restore BOO002
