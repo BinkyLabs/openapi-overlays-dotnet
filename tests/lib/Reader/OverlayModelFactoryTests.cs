@@ -27,6 +27,60 @@ public sealed class OverlayModelFactoryTests
         actions: []
         """;
 
+    [Theory]
+    [InlineData("1.0.0", "https://example.com/overlays/test.yaml")]
+    [InlineData("1.0.0", "../overlays/test.yaml")]
+    [InlineData("1.1.0", "https://example.com/overlays/test.yaml")]
+    [InlineData("1.1.0", "../overlays/test.yaml")]
+    public async Task ParseAsync_WithLegacySelf_ShouldPopulateSelf(string version, string self)
+    {
+        var json = $$"""
+            {
+              "overlay": "{{version}}",
+              "info": { "title": "Test Overlay", "version": "1.0.0" },
+              "x-$self": "{{self}}",
+              "actions": []
+            }
+            """;
+
+        var (document, diagnostic) = await OverlayDocument.ParseAsync(
+            json,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(document);
+        Assert.Equal(new Uri(self, UriKind.RelativeOrAbsolute), document.Self);
+        Assert.False(document.Extensions?.ContainsKey("x-$self") == true);
+        Assert.NotNull(diagnostic);
+        Assert.Empty(diagnostic.Errors);
+    }
+
+    [Theory]
+    [InlineData("1.0.0", "https://[invalid", "must be a valid URI-reference")]
+    [InlineData("1.1.0", "https://[invalid", "must be a valid URI-reference")]
+    [InlineData("1.0.0", "https://example.com/overlay.yaml#fragment", "must not contain a fragment identifier")]
+    [InlineData("1.1.0", "https://example.com/overlay.yaml#fragment", "must not contain a fragment identifier")]
+    public async Task ParseAsync_WithInvalidLegacySelf_ShouldReportError(string version, string self, string expectedMessage)
+    {
+        var json = $$"""
+            {
+              "overlay": "{{version}}",
+              "info": { "title": "Test Overlay", "version": "1.0.0" },
+              "x-$self": "{{self}}",
+              "actions": []
+            }
+            """;
+
+        var (_, diagnostic) = await OverlayDocument.ParseAsync(
+            json,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(diagnostic);
+        var error = Assert.Single(diagnostic.Errors);
+        Assert.Equal("#/x-$self", error.Pointer);
+        Assert.Contains("'x-$self'", error.Message, StringComparison.Ordinal);
+        Assert.Contains(expectedMessage, error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task CanLoadANonSeekableStreamInJsonAndDetectFormat()
     {

@@ -286,6 +286,35 @@ public sealed class OverlayDocumentV1_2Tests
         Assert.Empty(diagnostic.Errors);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ParseAsync_WithLegacySelf_ShouldPreserveExtensionWithoutSettingSelf(bool includeSelf)
+    {
+        var selfProperty = includeSelf ? "\"$self\": \"https://example.com/overlays/current.yaml\"," : string.Empty;
+        var json = $$"""
+            {
+              "overlay": "1.2.0",
+              "info": { "title": "Test Overlay", "version": "1.0.0" },
+              {{selfProperty}}
+              "x-$self": "https://example.com/overlays/legacy.yaml",
+              "actions": []
+            }
+            """;
+
+        var (document, diagnostic) = await OverlayDocument.ParseAsync(
+            json,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(document);
+        Assert.Equal(includeSelf ? new Uri("https://example.com/overlays/current.yaml") : null, document.Self);
+        Assert.NotNull(document.Extensions);
+        var extension = Assert.IsType<JsonNodeExtension>(document.Extensions["x-$self"]);
+        Assert.Equal("https://example.com/overlays/legacy.yaml", extension.Node.GetValue<string>());
+        Assert.NotNull(diagnostic);
+        Assert.Empty(diagnostic.Errors);
+    }
+
     [Fact]
     public void ExtendsShouldNotContainFragments()
     {
