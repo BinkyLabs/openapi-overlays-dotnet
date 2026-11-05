@@ -667,7 +667,7 @@ public sealed class OverlayApplyTests : IDisposable
     [InlineData(true)]
     public async Task ApplyAndLoad_WhenHttpCandidateFails_ShouldUseLocalFallbackForExternalReferences(bool useExtends)
     {
-        var targetPath = Path.Combine(AppContext.BaseDirectory, $"fallback-{Guid.NewGuid():N}.json");
+        var targetPath = Path.Join(AppContext.BaseDirectory, $"fallback-{Guid.NewGuid():N}.json");
         var relativePath = Path.GetRelativePath(Environment.CurrentDirectory, targetPath);
         try
         {
