@@ -337,7 +337,7 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
                     input.Position = 0;
                     break;
                 }
-                catch when (candidate != candidates.Last())
+                catch (Exception exception) when (exception is not OperationCanceledException && candidate != candidates.Last())
                 {
                     continue; // Try the next candidate if this one fails
                 }
