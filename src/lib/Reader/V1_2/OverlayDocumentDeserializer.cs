@@ -12,7 +12,8 @@ internal static partial class OverlayV1_2Deserializer
         [
             OverlayConstants.DocumentInfoFieldName,
             OverlayConstants.DocumentActionsFieldName,
-            OverlayConstants.DocumentXComponentsFieldName
+            OverlayConstants.DocumentXComponentsFieldName,
+            OverlayConstants.DocumentXSelfFieldName
         ])
     {
         { OverlayConstants.DocumentInfoFieldName, (o, v, c) => o.Info = LoadInfo(v, c) },

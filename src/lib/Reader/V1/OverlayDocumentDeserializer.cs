@@ -12,7 +12,8 @@ internal static partial class OverlayV1Deserializer
         { OverlayConstants.DocumentExtendsFieldName, (o, v, c) => o.Extends = LoadDocumentUri(v, c, OverlayConstants.DocumentExtendsFieldName) },
         { OverlayConstants.DocumentInfoFieldName, (o, v, c) => o.Info = LoadInfo(v, c) },
         { OverlayConstants.DocumentActionsFieldName, (o, v, c) => o.Actions = v.CreateList<IOverlayAction>(LoadActionOrReference, c) },
-        { OverlayConstants.DocumentXComponentsFieldName, (o, v, c) => o.Components = LoadComponents(v, c) }
+        { OverlayConstants.DocumentXComponentsFieldName, (o, v, c) => o.Components = LoadComponents(v, c) },
+        { OverlayConstants.DocumentXSelfFieldName, (o, v, c) => o.Self = LoadDocumentUri(v, c, OverlayConstants.DocumentXSelfFieldName) }
     };
     public static PatternFieldMap<OverlayDocument> GetDocumentPatternFields(OverlaySpecVersion version) =>
     new()
