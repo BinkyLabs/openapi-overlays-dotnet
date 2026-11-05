@@ -738,6 +738,57 @@ public sealed class OverlayApplyTests : IDisposable
     }
 
     [Theory]
+    [InlineData(true, false, "self")]
+    [InlineData(true, true, "self")]
+    [InlineData(false, true, "fallback")]
+    public async Task ApplyToExtendedDocumentAsync_WithRelativeSelfAndNoBaseUri_ShouldPreferSelfTarget(
+        bool selfTargetExists, bool fallbackExists, string expectedSource)
+    {
+        var directory = Directory.CreateDirectory(Path.Join(AppContext.BaseDirectory, $"relative-self-{Guid.NewGuid():N}"));
+        var targetName = $"target-{Guid.NewGuid():N}.json";
+        var fallbackPath = Path.Join(Environment.CurrentDirectory, targetName);
+        try
+        {
+            var overlayDirectory = Directory.CreateDirectory(Path.Join(directory.FullName, "overlays"));
+            var targetDocument = CreateTargetDocument(null);
+            if (selfTargetExists)
+            {
+                targetDocument["source"] = "self";
+                await File.WriteAllTextAsync(
+                    Path.Join(overlayDirectory.FullName, targetName),
+                    targetDocument.ToJsonString(),
+                    TestContext.Current.CancellationToken);
+            }
+            if (fallbackExists)
+            {
+                targetDocument["source"] = "fallback";
+                await File.WriteAllTextAsync(fallbackPath, targetDocument.ToJsonString(), TestContext.Current.CancellationToken);
+            }
+            var overlayNode = Assert.IsType<JsonObject>(JsonNode.Parse(CreateOverlayJson(targetName)));
+            overlayNode["$self"] = Path.GetRelativePath(
+                Environment.CurrentDirectory,
+                Path.Join(overlayDirectory.FullName, "overlay.json")).Replace(Path.DirectorySeparatorChar, '/');
+            var readResult = await OverlayDocument.ParseAsync(
+                overlayNode.ToJsonString(),
+                cancellationToken: TestContext.Current.CancellationToken);
+            var overlayDocument = Assert.IsType<OverlayDocument>(readResult.Document);
+            Assert.Null(overlayDocument.BaseUri);
+
+            var result = await overlayDocument.ApplyToExtendedDocumentAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.True(result.IsSuccessful);
+            Assert.Empty(result.Diagnostic.Errors);
+            Assert.Equal(expectedSource, result.Document?["source"]?.GetValue<string>());
+            Assert.Equal("Updated description", result.Document?["info"]?["description"]?.GetValue<string>());
+        }
+        finally
+        {
+            File.Delete(fallbackPath);
+            directory.Delete(true);
+        }
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("\t\r\n")]

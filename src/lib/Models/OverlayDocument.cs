@@ -438,6 +438,11 @@ public class OverlayDocument : IOverlaySerializable, IOverlayExtensible
             yield return new Uri(effectiveBaseUri, result);
         }
 
+        if (Self is { IsAbsoluteUri: false })
+        {
+            yield return CombineRelativeUris(Self, result);
+        }
+
         yield return result;
     }
 
