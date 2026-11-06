@@ -1,5 +1,53 @@
 # Changelog
 
+## [3.0.0](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.8...v3.0.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* adds base url as an input value for the target self validation
+* extends is now a uri
+
+### Features
+
+* adds 1.2 serialization infrastructure ([86044df](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/86044dfc05b11c5d8c329c6bcdaca4d190dc9396))
+* adds base url as an input value for the target self validation ([ab9bafe](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/ab9bafe827044d1bfef8ddc56dd959efa3950b2a))
+* adds overlay 1.2 deserialization ([f605b3e](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f605b3e1b5a01de4b0b44ae699545bc5999f7fc0))
+* adds resolution of relative OpenAPI self values ([8206208](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/8206208f69d9a730b90bbeb761cdc8d00884556c))
+* adds self field on documents ([13a142a](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/13a142a9585034b12ac3d5f39d4bcd7c197ba10e))
+* adds target loading based on self or base uri ([6af2349](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6af2349decbfcdb4d8adc227535bb242785e4485))
+* adds target OpenAPI self validation ([6ee59f5](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6ee59f5ab637a09016a71a2aff8839fe734b332e))
+* extends is now a uri ([d686eea](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d686eea1f04f0c432c777a83a8c5e82cad8da8cd))
+* extends should not contain fragment in URIs ([0e90dc7](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0e90dc79f8c38390973a7be438835463a5869d68))
+* switches self to a Uri field ([f5f0b9d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/f5f0b9d9b1ab261e515bd221205364c340311058))
+* target is required for references ([7b51a93](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/7b51a93925284a9c53eb2492500a271dc17ffdd8))
+
+
+### Bug Fixes
+
+* adds x self loading for older versions of the document ([d2198d9](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d2198d9fe96e718a5d4f79f3a96e9479c97fa050))
+* **apply:** load file URI targets using local paths ([6774b84](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6774b84a45da812305d7e58ea429f82b8515ba09))
+* **apply:** normalize relative self matching candidates ([6786b4d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6786b4d9473aac4f06c9f44b07408b1ee0385280))
+* **apply:** preserve successful target locations when loading ([a586749](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/a586749f4a89fb4657f8b5d6e1ccac232ad7a1d9))
+* **apply:** resolve relative targets against relative overlay self ([2e910f3](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/2e910f3d6836c0ecd2b0479b28c4f2b8fb352347))
+* corrects base uri determination ([3c2033f](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3c2033fb7b4f9cc710254816f58e2fc345872b58))
+* do not continue on cancellations ([1771629](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/1771629a6a8841b1541d2b0cefd34cdfdc5d25ea))
+* do not use extensions for new fields serialization in 1.2 ([857b47c](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/857b47cec8c53cb93f36e103cf6c24bb72b56f30))
+* fragments validation ([88dbedc](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/88dbedc3f49d67812393681266c8c00e61f6eea4))
+* **lib:** add [BOO002] prefix to Components API declarations for analyzer 5.6.0 ([d306f71](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/d306f71b319af47b64275dd55817e09016d3cda9))
+* prohibit target field on reusable action ([3622c8d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/3622c8dfd4cb0010bc3d4af5965575f696add911))
+* relative self resolution ([ba24230](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/ba2423075c0c2522300c43f8fba585e15268b23e))
+* **release:** graduate preview releases to stable ([a0cf409](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/a0cf409bf4819e28bb79032c6b6f07e1d729e954))
+* removes copy/update/remove properties from the reference item since they are now forbidden ([21f3291](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/21f3291a5ecc37adac679dc6b16d5d966d2c66d8))
+* switches to the last entry ([4746b5d](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/4746b5d310947f824eed26f34c7609478ad9a03e))
+* use original string for fragments validation of extends ([271e050](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/271e05014e5881cb7395b18b65f29dda51d5712b))
+* validate empty and whitespace values as well ([0b3df43](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/0b3df4363cad19bd01174af40563d03bccb5fbab))
+
+
+### Performance Improvements
+
+* update benchmark results for Microsoft.OpenApi 3.9.0 ([6110aaa](https://github.com/BinkyLabs/openapi-overlays-dotnet/commit/6110aaaa9e963fec9bc284df687a665dca95d6bf))
+
 ## [3.0.0-preview.8](https://github.com/BinkyLabs/openapi-overlays-dotnet/compare/v3.0.0-preview.7...v3.0.0-preview.8) (2026-06-25)
 
 
