@@ -1,4 +1,10 @@
 #nullable enable
+BinkyLabs.OpenApi.Overlays.IOverlayAction
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Copy.get -> string?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Remove.get -> bool?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Target.get -> string?
+BinkyLabs.OpenApi.Overlays.IOverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
 BinkyLabs.OpenApi.Overlays.IOverlayExtensible
 BinkyLabs.OpenApi.Overlays.IOverlayExtensible.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 BinkyLabs.OpenApi.Overlays.IOverlayExtensible.Extensions.set -> void
@@ -10,6 +16,7 @@ BinkyLabs.OpenApi.Overlays.IOverlayReader.ReadAsync(System.IO.Stream! input, Bin
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.IOverlaySerializable.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.JsonNodeExtension(System.Text.Json.Nodes.JsonNode! jsonNode) -> void
 BinkyLabs.OpenApi.Overlays.JsonNodeExtension.Node.get -> System.Text.Json.Nodes.JsonNode!
@@ -26,6 +33,7 @@ BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.get -> bool?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Remove.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayAction.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayAction.Target.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
@@ -48,8 +56,17 @@ BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfJsonNode
 BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfJsonNode.OverlayApplicationResultOfJsonNode() -> void
 BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument
 BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument.OverlayApplicationResultOfOpenApiDocument() -> void
+BinkyLabs.OpenApi.Overlays.OverlayComponents
+BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.OverlayReusableAction!>?
+BinkyLabs.OpenApi.Overlays.OverlayComponents.Actions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayComponents.CombineWith(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! others) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
+BinkyLabs.OpenApi.Overlays.OverlayComponents.OverlayComponents() -> void
+BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayComponents.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayConstants
 BinkyLabs.OpenApi.Overlays.OverlayDocument
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.IOverlayAction!>?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToDocumentAndLoadAsync(string! documentPathOrUri, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? readerSettings = null, bool strict = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument!>!
 BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToDocumentAsync(string! documentPathOrUri, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? readerSettings = null, bool strict = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfJsonNode!>!
@@ -58,6 +75,9 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToDocumentStreamAsync(System.IO.
 BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToExtendedDocumentAndLoadAsync(string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? readerSettings = null, bool strict = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfOpenApiDocument!>!
 BinkyLabs.OpenApi.Overlays.OverlayDocument.ApplyToExtendedDocumentAsync(string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? readerSettings = null, bool strict = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.OverlayApplicationResultOfJsonNode!>!
 BinkyLabs.OpenApi.Overlays.OverlayDocument.CombineWith(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! others) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.get -> BinkyLabs.OpenApi.Overlays.OverlayComponents?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Components.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Extends.get -> System.Uri?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Extends.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Extensions.set -> void
@@ -65,8 +85,11 @@ BinkyLabs.OpenApi.Overlays.OverlayDocument.Info.get -> BinkyLabs.OpenApi.Overlay
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Info.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.Overlay.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayDocument.OverlayDocument() -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.get -> System.Uri?
+BinkyLabs.OpenApi.Overlays.OverlayDocument.Self.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayDocument.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayException
 BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayException.OverlayException(string! message) -> void
@@ -82,6 +105,7 @@ BinkyLabs.OpenApi.Overlays.OverlayInfo.Extensions.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.OverlayInfo() -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayInfo.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.get -> string?
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Title.set -> void
 BinkyLabs.OpenApi.Overlays.OverlayInfo.Version.get -> string?
@@ -90,6 +114,7 @@ BinkyLabs.OpenApi.Overlays.OverlayJsonReader
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.OverlayJsonReader() -> void
 BinkyLabs.OpenApi.Overlays.OverlayJsonReader.ReadAsync(System.IO.Stream! input, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+BinkyLabs.OpenApi.Overlays.OverlayModelFactory
 BinkyLabs.OpenApi.Overlays.OverlayReaderException
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException() -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderException.OverlayReaderException(string! message) -> void
@@ -106,13 +131,62 @@ BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.OverlayReaderSettings() -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.Readers.get -> System.Collections.Generic.Dictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayReader!>!
 BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.Readers.init -> void
 BinkyLabs.OpenApi.Overlays.OverlayReaderSettings.TryAddReader(string! format, BinkyLabs.OpenApi.Overlays.IOverlayReader! reader) -> bool
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Description.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.get -> BinkyLabs.OpenApi.Overlays.OverlayAction?
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.Fields.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.OverlayReusableAction() -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableAction.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Copy.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Description.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.OverlayReusableActionReference() -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.OverlayReusableActionReference(string! referenceId, BinkyLabs.OpenApi.Overlays.OverlayDocument! hostDocument) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.get -> BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem!
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Reference.init -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Remove.get -> bool?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.SerializeAsV1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.SerializeAsV1_1(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.SerializeAsV1_2(Microsoft.OpenApi.IOpenApiWriter! writer) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Target.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Target.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.TargetAction.get -> BinkyLabs.OpenApi.Overlays.OverlayReusableAction?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReference.Update.get -> System.Text.Json.Nodes.JsonNode?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Description.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Description.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Extensions.get -> System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Extensions.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Id.set -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.OverlayReusableActionReferenceItem(string! reusableActionIdentifier, BinkyLabs.OpenApi.Overlays.OverlayDocument? overlayDocument = null) -> void
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Reference.get -> string!
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Target.get -> string?
+BinkyLabs.OpenApi.Overlays.OverlayReusableActionReferenceItem.Target.set -> void
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_0 = 1 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_1 = 2 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
+BinkyLabs.OpenApi.Overlays.OverlaySpecVersion.Overlay1_2 = 3 -> BinkyLabs.OpenApi.Overlays.OverlaySpecVersion
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.GetJsonNodeFromStreamAsync(System.IO.Stream! input, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.Nodes.JsonNode?>!
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.OverlayYamlReader() -> void
 BinkyLabs.OpenApi.Overlays.OverlayYamlReader.ReadAsync(System.IO.Stream! input, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings! settings, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+BinkyLabs.OpenApi.Overlays.ReadResult
+BinkyLabs.OpenApi.Overlays.ReadResult.Deconstruct(out BinkyLabs.OpenApi.Overlays.OverlayDocument? document) -> void
+BinkyLabs.OpenApi.Overlays.ReadResult.Deconstruct(out BinkyLabs.OpenApi.Overlays.OverlayDocument? document, out BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic? diagnostic) -> void
+BinkyLabs.OpenApi.Overlays.ReadResult.Diagnostic.get -> BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic?
+BinkyLabs.OpenApi.Overlays.ReadResult.Diagnostic.set -> void
+BinkyLabs.OpenApi.Overlays.ReadResult.Document.get -> BinkyLabs.OpenApi.Overlays.OverlayDocument?
+BinkyLabs.OpenApi.Overlays.ReadResult.Document.set -> void
+BinkyLabs.OpenApi.Overlays.ReadResult.ReadResult() -> void
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.get -> System.Collections.Generic.IList<Microsoft.OpenApi.OpenApiError!>!
 BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic.Errors.set -> void
@@ -139,42 +213,39 @@ BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.PopLoop(string! loopid) -> void
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.PushLoop(string! loopId, string! key) -> bool
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.SetTempStorage(string! key, object? value, object? scope = null) -> void
 BinkyLabs.OpenApi.Overlays.Reader.ParsingContext.StartObject(string! objectName) -> void
-BinkyLabs.OpenApi.Overlays.ReadResult
-BinkyLabs.OpenApi.Overlays.ReadResult.Deconstruct(out BinkyLabs.OpenApi.Overlays.OverlayDocument? document) -> void
-BinkyLabs.OpenApi.Overlays.ReadResult.Deconstruct(out BinkyLabs.OpenApi.Overlays.OverlayDocument? document, out BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic? diagnostic) -> void
-BinkyLabs.OpenApi.Overlays.ReadResult.Diagnostic.get -> BinkyLabs.OpenApi.Overlays.Reader.OverlayDiagnostic?
-BinkyLabs.OpenApi.Overlays.ReadResult.Diagnostic.set -> void
-BinkyLabs.OpenApi.Overlays.ReadResult.Document.get -> BinkyLabs.OpenApi.Overlays.OverlayDocument?
-BinkyLabs.OpenApi.Overlays.ReadResult.Document.set -> void
-BinkyLabs.OpenApi.Overlays.ReadResult.ReadResult() -> void
 BinkyLabs.OpenApi.Overlays.Writers.OpenApiWriterAnyExtensions
-BinkyLabs.OpenApi.Overlays.OverlayModelFactory
-const BinkyLabs.OpenApi.Overlays.OverlayConstants.ExtensionFieldNamePrefix = "x-" -> string!
-static BinkyLabs.OpenApi.Overlays.OverlayDocument.LoadFromUrlAsync(string! url, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Threading.CancellationToken token = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
-static BinkyLabs.OpenApi.Overlays.OverlayExtensibleExtensions.AddExtension<T>(this T element, string! name, BinkyLabs.OpenApi.Overlays.IOverlayExtension! any) -> void
-static BinkyLabs.OpenApi.Overlays.Writers.OpenApiWriterAnyExtensions.WriteOverlayExtensions(this Microsoft.OpenApi.IOpenApiWriter! writer, System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>? extensions, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
-static BinkyLabs.OpenApi.Overlays.OverlayModelFactory.LoadFormUrlAsync(string! url, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Threading.CancellationToken token = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionCopyFieldName = "copy" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionDescriptionFieldName = "description" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionRemoveFieldName = "remove" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionTargetFieldName = "target" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionUpdateFieldName = "update" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.ActionXCopyFieldName = "x-copy" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ComponentsActionsFieldName = "actions" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentActionsFieldName = "actions" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentComponentsFieldName = "components" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentExtendsFieldName = "extends" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentInfoFieldName = "info" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentOverlayFieldName = "overlay" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentSelfFieldName = "$self" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXComponentsFieldName = "x-components" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.DocumentXSelfFieldName = "x-$self" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ExtensionFieldNamePrefix = "x-" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoDescriptionFieldName = "description" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoTitleFieldName = "title" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoVersionFieldName = "version" -> string!
 const BinkyLabs.OpenApi.Overlays.OverlayConstants.InfoXDescriptionFieldName = "x-description" -> string!
-BinkyLabs.OpenApi.Overlays.IOverlayAction
-BinkyLabs.OpenApi.Overlays.IOverlayAction.Copy.get -> string?
-BinkyLabs.OpenApi.Overlays.IOverlayAction.Description.get -> string?
-BinkyLabs.OpenApi.Overlays.IOverlayAction.Remove.get -> bool?
-BinkyLabs.OpenApi.Overlays.IOverlayAction.Target.get -> string?
-BinkyLabs.OpenApi.Overlays.IOverlayAction.Update.get -> System.Text.Json.Nodes.JsonNode?
-BinkyLabs.OpenApi.Overlays.OverlayDocument.Actions.get -> System.Collections.Generic.IList<BinkyLabs.OpenApi.Overlays.IOverlayAction!>?
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionDescriptionFieldName = "description" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionFieldsFieldName = "fields" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferencePrefix = "#/components/actions/" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceReferenceFieldName = "$ref" -> string!
+const BinkyLabs.OpenApi.Overlays.OverlayConstants.ReusableActionReferenceXReferenceFieldName = "x-$ref" -> string!
+static BinkyLabs.OpenApi.Overlays.OverlayComponents.Combine(params BinkyLabs.OpenApi.Overlays.OverlayComponents![]! componentsArray) -> BinkyLabs.OpenApi.Overlays.OverlayComponents!
 static BinkyLabs.OpenApi.Overlays.OverlayDocument.Combine(params BinkyLabs.OpenApi.Overlays.OverlayDocument![]! documents) -> BinkyLabs.OpenApi.Overlays.OverlayDocument!
+static BinkyLabs.OpenApi.Overlays.OverlayDocument.LoadFromStreamAsync(System.IO.Stream! stream, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Uri? baseUri = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+static BinkyLabs.OpenApi.Overlays.OverlayDocument.LoadFromUrlAsync(string! url, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Threading.CancellationToken token = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 static BinkyLabs.OpenApi.Overlays.OverlayDocument.ParseAsync(string! input, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+static BinkyLabs.OpenApi.Overlays.OverlayExtensibleExtensions.AddExtension<T>(this T element, string! name, BinkyLabs.OpenApi.Overlays.IOverlayExtension! any) -> void
+static BinkyLabs.OpenApi.Overlays.OverlayModelFactory.LoadFormUrlAsync(string! url, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Threading.CancellationToken token = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+static BinkyLabs.OpenApi.Overlays.OverlayModelFactory.LoadFromStreamAsync(System.IO.Stream! input, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Uri? baseUri = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
 static BinkyLabs.OpenApi.Overlays.OverlayModelFactory.ParseAsync(string! input, string? format = null, BinkyLabs.OpenApi.Overlays.OverlayReaderSettings? settings = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<BinkyLabs.OpenApi.Overlays.ReadResult!>!
+static BinkyLabs.OpenApi.Overlays.Writers.OpenApiWriterAnyExtensions.WriteOverlayExtensions(this Microsoft.OpenApi.IOpenApiWriter! writer, System.Collections.Generic.IDictionary<string!, BinkyLabs.OpenApi.Overlays.IOverlayExtension!>? extensions, BinkyLabs.OpenApi.Overlays.OverlaySpecVersion specVersion) -> void
