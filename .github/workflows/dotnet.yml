@@ -74,7 +74,7 @@ jobs:
           mkdir -p ./performanceResults
           cp ./performance/benchmark/BenchmarkDotNet.Artifacts/results/*-report.json ./performanceResults
       - name: Run performance tests
-        run: dotnet run -c Release --framework net11.0
+        run: dotnet run -c Release
         working-directory: ./performance/benchmark
       - name: Publish benchmark results
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -83,13 +83,13 @@ jobs:
           name: benchmark-results
           path: ${{ github.workspace }}/performance/benchmark/BenchmarkDotNet.Artifacts/results
       - name: Compare overlay loading benchmark results
-        run: dotnet run -c Release --framework net11.0 --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
+        run: dotnet run -c Release --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
         shell: bash
         env:
           NEW_REPORT: ${{ github.workspace }}/performance/benchmark/BenchmarkDotNet.Artifacts/results/performance.OverlayLoading-report.json
           OLD_REPORT: ${{ github.workspace }}/performanceResults/performance.OverlayLoading-report.json
       - name: Compare overlay application benchmark results
-        run: dotnet run -c Release --framework net11.0 --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
+        run: dotnet run -c Release --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
         shell: bash
         env:
           NEW_REPORT: ${{ github.workspace }}/performance/benchmark/BenchmarkDotNet.Artifacts/results/performance.OverlayApplication-report.json
