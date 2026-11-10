@@ -222,9 +222,9 @@ The container sets the following environment variables:
 
 ## Image Details
 
-- Base SDK Image: `mcr.microsoft.com/dotnet/sdk:10.0`
-- Runtime Image: `mcr.microsoft.com/dotnet/runtime:10.0-noble-chiseled-extra`
-- Target Framework: .NET 10.0
+- Base SDK Image: `mcr.microsoft.com/dotnet/sdk:11.0`
+- Runtime Image: `mcr.microsoft.com/dotnet/runtime:11.0-resolute-chiseled-extra`
+- Target Framework: .NET 11.0
 - Platform: Multi-platform support (linux/amd64, linux/arm64)
 
 ## Troubleshooting

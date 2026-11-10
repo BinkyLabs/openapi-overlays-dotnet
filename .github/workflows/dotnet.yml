@@ -16,18 +16,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
-        with:
-          dotnet-version: 8.x
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
-        with:
-          dotnet-version: 9.x
       - name: Setup .NET 10
         uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: 10.x
+      - name: Setup .NET 11
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
       - name: Restore dependencies
         run: dotnet restore
       - name: Check formatting
@@ -69,16 +65,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Setup .NET 10
+      - name: Setup .NET 11
         uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
-          dotnet-version: 10.x
+          global-json-file: global.json
       - name: Copy committed results
         run: |
           mkdir -p ./performanceResults
           cp ./performance/benchmark/BenchmarkDotNet.Artifacts/results/*-report.json ./performanceResults
       - name: Run performance tests
-        run: dotnet run -c Release
+        run: dotnet run -c Release --framework net11.0
         working-directory: ./performance/benchmark
       - name: Publish benchmark results
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -87,13 +83,13 @@ jobs:
           name: benchmark-results
           path: ${{ github.workspace }}/performance/benchmark/BenchmarkDotNet.Artifacts/results
       - name: Compare overlay loading benchmark results
-        run: dotnet run -c Release --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
+        run: dotnet run -c Release --framework net11.0 --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
         shell: bash
         env:
           NEW_REPORT: ${{ github.workspace }}/performance/benchmark/BenchmarkDotNet.Artifacts/results/performance.OverlayLoading-report.json
           OLD_REPORT: ${{ github.workspace }}/performanceResults/performance.OverlayLoading-report.json
       - name: Compare overlay application benchmark results
-        run: dotnet run -c Release --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
+        run: dotnet run -c Release --framework net11.0 --project ./performance/resultsComparer/ResultsComparer.csproj -- compare $OLD_REPORT $NEW_REPORT -p OnePercentDifferenceMemoryUsage
         shell: bash
         env:
           NEW_REPORT: ${{ github.workspace }}/performance/benchmark/BenchmarkDotNet.Artifacts/results/performance.OverlayApplication-report.json
@@ -107,18 +103,10 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - name: Setup .NET 8
+      - name: Setup .NET 11
         uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
-          dotnet-version: 8.x
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
-        with:
-          dotnet-version: 9.x
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
-        with:
-          dotnet-version: 10.x
+          dotnet-version: 11.x
       - name: Download packages
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
