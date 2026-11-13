@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Apply OpenAPI Overlay
-        uses: BinkyLabs/openapi-overlays-dotnet@1263c8d8e7be7292aeee5281c6f239bee55b57cf # v2.6.0
+        uses: BinkyLabs/openapi-overlays-dotnet@45362e020a61b62595f2680923832dae2e1a1f6a # v3.0.0
         with:
           input: 'openapi.yaml'
           overlays: 'overlay.yaml'
@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Apply Multiple OpenAPI Overlays
-        uses: BinkyLabs/openapi-overlays-dotnet@1263c8d8e7be7292aeee5281c6f239bee55b57cf # v2.6.0
+        uses: BinkyLabs/openapi-overlays-dotnet@45362e020a61b62595f2680923832dae2e1a1f6a # v3.0.0
         with:
           input: 'openapi.yaml'
           overlays: |
