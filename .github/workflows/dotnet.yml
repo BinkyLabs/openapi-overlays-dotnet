@@ -2,6 +2,10 @@ name: Build, test and publish dotnet
 on:
   workflow_dispatch:
   push:
+    branches: ['**']
+    tags:
+      # Match the release tag rulesets without triggering on floating tags.
+      - 'v[0-9]*.[0-9]*.[0-9]*'
   pull_request:
 
 jobs:
