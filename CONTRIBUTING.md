@@ -6,7 +6,7 @@ Thanks for your interest in contributing to BinkyLabs.OpenAPI.Overlay! We welcom
 
 To get started, you'll need to have the following tools installed:
 
-- [.NET SDK 10.0](https://get.dot.net/)
+- [.NET SDK 11.0](https://get.dot.net/)
 
 ## Recommended tools
 
@@ -75,7 +75,7 @@ This means that:
 - All new APIs being added need to be __Unshipped__ document before the pull request can be merged, otherwise build will fail with a message like the example below.
 
 ```txt
-Error: /home/runner/work/OpenAPI.NET/OpenAPI.NET/src/Microsoft.OpenApi/Models/OpenApiSecurityScheme.cs(39,46): error RS0016: Symbol 'OAuth2MetadataUrl.set' is not part of the declared public API (https://github.com/dotnet/roslyn-analyzers/blob/main/src/PublicApiAnalyzers/PublicApiAnalyzers.Help.md) [/home/runner/work/OpenAPI.NET/OpenAPI.NET/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj::TargetFramework=net8.0]
+Error: /home/runner/work/OpenAPI.NET/OpenAPI.NET/src/Microsoft.OpenApi/Models/OpenApiSecurityScheme.cs(39,46): error RS0016: Symbol 'OAuth2MetadataUrl.set' is not part of the declared public API (https://github.com/dotnet/roslyn-analyzers/blob/main/src/PublicApiAnalyzers/PublicApiAnalyzers.Help.md) [/home/runner/work/OpenAPI.NET/OpenAPI.NET/src/Microsoft.OpenApi/Microsoft.OpenApi.csproj::TargetFramework=net11.0]
 ```
 
 ### Update the unshipped document

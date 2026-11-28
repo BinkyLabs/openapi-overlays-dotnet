@@ -9,7 +9,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "dotnet: build",
-      "program": "${workspaceFolder}/src/tool/bin/Debug/net8.0/BinkyLabs.OpenApi.Overlays.Cli.dll",
+      "program": "${workspaceFolder}/src/tool/bin/Debug/net11.0/BinkyLabs.OpenApi.Overlays.Cli.dll",
       "args": [
         "apply",
         "${workspaceFolder}/debug-samples/description.yaml",
